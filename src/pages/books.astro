@@ -1,0 +1,83 @@
+---
+import Layout from '../layouts/Layout.astro';
+import BookCard from '../components/BookCard.astro';
+
+// This would typically come from Firebase
+const books = [
+  {
+    title: "The Midnight Garden",
+    author: "Sarah Winters",
+    coverUrl: "https://source.unsplash.com/random/400x600?book,1",
+    description: "A magical tale of a garden that comes alive at midnight, where flowers dance and trees whisper secrets.",
+    genre: "Fantasy"
+  },
+  {
+    title: "Echoes of Yesterday",
+    author: "Michael Chen",
+    coverUrl: "https://source.unsplash.com/random/400x600?book,2",
+    description: "A heartwarming story about family, memories, and the power of love that transcends time.",
+    genre: "Contemporary"
+  },
+  {
+    title: "The Last Spell",
+    author: "Emma Blackwood",
+    coverUrl: "https://source.unsplash.com/random/400x600?book,3",
+    description: "In a world where magic is fading, one young witch must find a way to restore the balance.",
+    genre: "Fantasy"
+  },
+  {
+    title: "Whispers in the Dark",
+    author: "James Night",
+    coverUrl: "https://source.unsplash.com/random/400x600?book,4",
+    description: "A psychological thriller that will keep you guessing until the very last page.",
+    genre: "Thriller"
+  },
+  {
+    title: "The Art of Forgetting",
+    author: "Luna Rivers",
+    coverUrl: "https://source.unsplash.com/random/400x600?book,5",
+    description: "A beautiful exploration of memory, loss, and the healing power of art.",
+    genre: "Literary Fiction"
+  },
+  {
+    title: "Beyond the Stars",
+    author: "Alex Nova",
+    coverUrl: "https://source.unsplash.com/random/400x600?book,6",
+    description: "An epic space adventure that takes readers on a journey through the cosmos.",
+    genre: "Science Fiction"
+  }
+];
+---
+<Layout title="Books">
+  <div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+      <h1 class="text-4xl font-bold text-rosewood">Discover Books</h1>
+      <div class="flex gap-4">
+        <select class="bg-white border border-gold rounded-lg px-4 py-2 text-taupe focus:outline-none focus:ring-2 focus:ring-rosewood">
+          <option value="">All Genres</option>
+          <option value="fantasy">Fantasy</option>
+          <option value="contemporary">Contemporary</option>
+          <option value="thriller">Thriller</option>
+          <option value="scifi">Science Fiction</option>
+        </select>
+        <input
+          type="text"
+          placeholder="Search books..."
+          class="bg-white border border-gold rounded-lg px-4 py-2 text-taupe focus:outline-none focus:ring-2 focus:ring-rosewood"
+        />
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {books.map((book) => (
+        <BookCard
+          title={book.title}
+          author={book.author}
+          coverUrl={book.coverUrl}
+          description={book.description}
+          genre={book.genre}
+        />
+      ))}
+    </div>
+  </div>
+</Layout> 
