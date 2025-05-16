@@ -1,5 +1,5 @@
 {
-  "name": "scriptora",
+  "name": "livre",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
@@ -11,11 +11,30 @@
   "dependencies": {
     "@astrojs/react": "^4.2.7",
     "@astrojs/tailwind": "^6.0.2",
+    "@nanostores/react": "^1.0.0",
+    "@tiptap/extension-code-block": "^2.12.0",
+    "@tiptap/extension-code-block-lowlight": "^2.12.0",
+    "@tiptap/extension-color": "^2.12.0",
+    "@tiptap/extension-highlight": "^2.12.0",
+    "@tiptap/extension-image": "^2.12.0",
+    "@tiptap/extension-link": "^2.12.0",
+    "@tiptap/extension-placeholder": "^2.12.0",
+    "@tiptap/extension-task-item": "^2.12.0",
+    "@tiptap/extension-task-list": "^2.12.0",
+    "@tiptap/extension-text-align": "^2.12.0",
+    "@tiptap/extension-underline": "^2.12.0",
+    "@tiptap/pm": "^2.12.0",
+    "@tiptap/react": "^2.12.0",
+    "@tiptap/starter-kit": "^2.12.0",
     "astro": "^5.7.12",
     "firebase": "^11.7.1",
     "framer-motion": "^12.10.5",
+    "lowlight": "^3.3.0",
+    "nanostores": "^1.0.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "tailwindcss": "^3.4.17"
+    "react-router-dom": "^7.6.0",
+    "tailwindcss": "^3.4.17",
+    "zustand": "^5.0.4"
   }
 }
