@@ -1,0 +1,10 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import BookView from "../../components/BookView";
+
+const { id } = Astro.params;
+---
+
+<Layout title="Book Details">
+  {id && <BookView bookId={id} client:only="react" />}
+</Layout> 

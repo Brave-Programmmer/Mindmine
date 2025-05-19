@@ -1,9 +1,10 @@
 ---
-// filepath: d:\projects\scriptora\CURSORAI\scriptora\src\pages\write.astro
 import Layout from "../layouts/Layout.astro";
-import WriteContent from "../components/WriteContent.tsx"; // Import a React component for the content
+import Admin from "../components/admin/admin";
+import Books from "../components/admin/Books";
 ---
 
 <Layout title="Write">
-  <WriteContent client:only="react" />
+  <Books client:only="react" />
+  <Admin client:only="react" />
 </Layout>

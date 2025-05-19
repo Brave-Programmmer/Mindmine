@@ -1,26 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import BooksPage from "../components/BooksPage";
 ---
 
 <Layout title="Books">
-  <main class="container mx-auto px-4 py-12">
-    <h1 class="text-4xl font-bold text-rosewood mb-8 text-center">Books</h1>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      <div class="bg-white rounded-lg shadow-lg p-6">
-        <h2 class="text-2xl font-bold text-rosewood mb-2">The Lost Kingdom</h2>
-        <p class="text-taupe mb-1">by Jane Doe</p>
-        <p class="text-taupe">An epic fantasy adventure through forgotten lands and ancient secrets.</p>
-      </div>
-      <div class="bg-white rounded-lg shadow-lg p-6">
-        <h2 class="text-2xl font-bold text-rosewood mb-2">Hearts Entwined</h2>
-        <p class="text-taupe mb-1">by John Smith</p>
-        <p class="text-taupe">A moving romance about love, loss, and finding hope again.</p>
-      </div>
-      <div class="bg-white rounded-lg shadow-lg p-6">
-        <h2 class="text-2xl font-bold text-rosewood mb-2">Mystery at Dawn</h2>
-        <p class="text-taupe mb-1">by Emily Clark</p>
-        <p class="text-taupe">A gripping mystery that will keep you guessing until the very end.</p>
-      </div>
-    </div>
-  </main>
+  <BooksPage client:load />
 </Layout> 
