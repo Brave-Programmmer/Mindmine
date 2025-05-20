@@ -1,0 +1,55 @@
+---
+import React from "react";
+import BookDetail from "../../components/BookDetail";
+import ChapterList from "../../components/ChapterList";
+import BookReader from "../../components/BookReader";
+import { doc, getDoc, collection, getDocs } from "firebase/firestore";
+import { db } from "../../firebase";
+import Layout from "../../layouts/Layout.astro";
+
+type Book = {
+  id: string;
+  title: string;
+  author: string;
+  genre: string;
+  synopsis: string;
+  coverImage: string;
+  totalChapters: number;
+  createdAt: any;
+};
+
+type Chapter = {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: any;
+};
+
+const { id } = Astro.params;
+
+// 1. Get the main book document
+const docRef = doc(db, "books", id as string);
+const docSnap = await getDoc(docRef);
+
+if (!docSnap.exists()) {
+  // throw new Error("Book not found");
+}
+
+const bookData = docSnap.data();
+const book: Book = { id, ...bookData } as Book;
+
+// 2. Get the chapters subcollection
+const chaptersSnapshot = await getDocs(
+  collection(db, "books", id as string, "chapters")
+);
+
+const chapters: Chapter[] = chaptersSnapshot.docs.map((doc) => ({
+  id: doc.id,
+  ...doc.data(),
+})) as Chapter[];
+---
+<Layout title={book.title}>
+  <BookReader bookId={id as string} client:load />
+  <!-- <BookDetail book={book} client:load />
+  <ChapterList chapters={chapters} client:load /> -->
+</Layout>

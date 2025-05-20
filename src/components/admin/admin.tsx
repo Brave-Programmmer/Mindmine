@@ -134,22 +134,35 @@ const Admin = () => {
                 className="w-full border border-gray-300 rounded px-3 py-2"
                 rows={4}
               />
-
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-2">
                   Choose Cover Style
                 </p>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {coverStyles.map((style) => (
                     <div
                       key={style.label}
-                      className={`h-32 rounded shadow-md cursor-pointer border-2 transition-transform ${
+                      className={`relative h-36 w-28 cursor-pointer transform transition-transform ${
                         newBook.coverImage === style.className
-                          ? "border-rosewood scale-105"
-                          : "border-transparent"
-                      } ${style.className}`}
+                          ? "scale-105 ring-2 ring-rosewood"
+                          : "hover:scale-105"
+                      }`}
                       onClick={() => handleCoverImageChange(style.className)}
-                    ></div>
+                    >
+                      {/* Spine */}
+                      <div className="absolute left-0 top-0 h-full w-4 bg-neutral-800 rounded-l-md shadow-inner z-10"></div>
+
+                      {/* Cover */}
+                      <div
+                        className={`h-full w-full pl-4 rounded-r-md ${style.className} shadow-md border border-black/10 overflow-hidden flex flex-col justify-end`}
+                      >
+                        <div className="bg-black/40 text-white text-xs p-2">
+                          <p className="font-semibold line-clamp-2">
+                            {style.label}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>

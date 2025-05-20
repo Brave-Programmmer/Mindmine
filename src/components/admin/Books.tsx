@@ -98,12 +98,32 @@ const Books = () => {
     setChapters(chaptersData);
   };
 
+  const deleteCollection = async (collectionRef: any) => {
+    const querySnapshot = await getDocs(collectionRef);
+    if (querySnapshot.empty) return;
+
+    const deletePromises = querySnapshot.docs.map((docSnap) =>
+      deleteDoc(docSnap.ref)
+    );
+    await Promise.all(deletePromises);
+  };
+
   const handleDelete = async (bookId: string) => {
     const confirmed = confirm("Are you sure you want to delete this book?");
     if (!confirmed) return;
 
     try {
-      await deleteDoc(doc(db, "books", bookId));
+      const bookDocRef = doc(db, "books", bookId);
+
+      // Delete all documents inside the 'chapters' subcollection
+      const chaptersCollectionRef = collection(bookDocRef, "chapters");
+      await deleteCollection(chaptersCollectionRef);
+
+      // If you have other subcollections, delete them similarly here
+
+      // Now delete the book document itself
+      await deleteDoc(bookDocRef);
+
       setBooks((prev) => prev.filter((book) => book.id !== bookId));
     } catch (err) {
       console.error("Failed to delete book:", err);
@@ -207,12 +227,25 @@ const Books = () => {
                 key={book.id}
                 className="w-full md:w-4/5 bg-white rounded-xl shadow-lg hover:shadow-xl transition p-4 md:p-6"
               >
-                <div className="flex flex-col md:flex-row gap-4 items-center md:items-start">
-                  <div
-                    className={`w-24 md:w-40 aspect-[2/3] rounded-lg bg-center bg-cover shadow-inner ${book.coverImage}`}
-                    role="img"
-                  ></div>
+                <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
+                  {/* Book Cover with Spine */}
+                  <div className="relative w-24 md:w-36 aspect-[2/3] flex-shrink-0 group">
+                    {/* Spine */}
+                    <div className="absolute left-0 top-0 h-full w-4 bg-neutral-800 rounded-l-md shadow-inner z-10"></div>
 
+                    {/* Front Cover */}
+                    <div
+                      className={`h-full w-full pl-4 rounded-r-md ${book.coverImage} shadow-inner border border-black/10`}
+                      role="img"
+                    ></div>
+
+                    {/* Optional title overlay on cover (for style) */}
+                    <div className="absolute bottom-0 left-4 right-0 bg-black/40 text-white text-xs px-2 py-1 rounded-tr-md">
+                      {book.title}
+                    </div>
+                  </div>
+
+                  {/* Book Info */}
                   <div className="flex-1 text-center md:text-left">
                     <h2 className="text-2xl font-bold text-rosewood mb-1">
                       {book.title}
@@ -225,6 +258,7 @@ const Books = () => {
                     <p className="text-sm text-taupe border-t border-gold/20 pt-2">
                       {new Date(book.createdAt).toLocaleDateString()}
                     </p>
+
                     <div className="flex justify-center md:justify-end gap-2 mt-4">
                       <button
                         onClick={() => openModal(book)}
@@ -258,18 +292,14 @@ const Books = () => {
               ✕
             </button>
 
-            <div
-              className={`w-full aspect-[4/5] md:aspect-[3/4] bg-center bg-cover rounded mb-4 ${selectedBook.coverImage}`}
-              role="img"
-            ></div>
-
-            <h2 className="text-2xl font-bold mb-2 text-rosewood">
-              {selectedBook.title}
-            </h2>
-            <p className="text-taupe mb-1">Author: {selectedBook.author}</p>
-            <p className="text-taupe mb-1">Genre: {selectedBook.genre}</p>
-            <p className="text-taupe mb-3">{selectedBook.synopsis}</p>
-
+            <div>
+              <h2 className="text-2xl font-bold mb-2 text-rosewood">
+                {selectedBook.title}
+              </h2>
+              <p className="text-taupe mb-1">Author: {selectedBook.author}</p>
+              <p className="text-taupe mb-1">Genre: {selectedBook.genre}</p>
+              <p className="text-taupe mb-3">{selectedBook.synopsis}</p>
+            </div>
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-rosewood mb-2">
                 Create New Chapter

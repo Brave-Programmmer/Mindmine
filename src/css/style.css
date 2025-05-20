@@ -6,3 +6,11 @@
     color:rgb(78 59 54 / var(--tw-text-opacity, 1));
 
 }
+.page {
+    border-radius: 8px;
+    
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    font-family: 'Georgia', serif;
+    background: url(../assets/aged-paper.png);
+  }

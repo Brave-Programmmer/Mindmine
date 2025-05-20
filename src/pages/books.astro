@@ -1,8 +1,8 @@
 ---
+import AllBooksGrid from "../components/AllBooksGrid";
 import Layout from "../layouts/Layout.astro";
-import BooksPage from "../components/BooksPage";
 ---
 
 <Layout title="Books">
-  <BooksPage client:load />
+  <AllBooksGrid client:only="react" />
 </Layout> 
