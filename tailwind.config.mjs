@@ -12,6 +12,7 @@ export default {
         sienna: '#A35641',
         gold: '#D9BFA3',
         mauve: '#EECFC5',
+
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',

@@ -130,7 +130,6 @@ const Books = () => {
       alert("Failed to delete the book.");
     }
   };
-
   const openModal = async (book: Book) => {
     setSelectedBook(book);
     setIsModalOpen(true);
@@ -258,7 +257,6 @@ const Books = () => {
                     <p className="text-sm text-taupe border-t border-gold/20 pt-2">
                       {new Date(book.createdAt).toLocaleDateString()}
                     </p>
-
                     <div className="flex justify-center md:justify-end gap-2 mt-4">
                       <button
                         onClick={() => openModal(book)}

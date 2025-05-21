@@ -2,15 +2,55 @@
     transform: rotate(90deg);
     transition: transform 0.3s ease-in-out;
 }
-.admin-navbar a:hover{
-    color:rgb(78 59 54 / var(--tw-text-opacity, 1));
+
+.admin-navbar a:hover {
+    color: rgb(78 59 54 / var(--tw-text-opacity, 1));
 
 }
+
+/* 
 .page {
     border-radius: 8px;
-    
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     overflow: hidden;
     font-family: 'Georgia', serif;
     background: url(../assets/aged-paper.png);
-  }
+}
+
+.book-reader .page {
+    transition: all 0.3s ease;
+    overflow: hidden;
+    border-radius: 8px;
+    backdrop-filter: brightness(0.97);
+}
+
+.book-reader .page-shadow {
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2);
+} */
+
+
+.aged-paper {
+    background-color: #d5c5aa;
+    background-image:
+        radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px),
+        radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+    background-position: 0 0, 25px 25px;
+    background-size: 50px 50px;
+    position: relative;
+    box-shadow: inset 0 0 30px #cbb78a;
+    overflow: hidden;
+}
+
+/* Folded corner effect */
+.fold-corner::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-top: 40px solid #f3eadd;
+    /* page color */
+    border-left: 40px solid transparent;
+    z-index: 20;
+}
+
