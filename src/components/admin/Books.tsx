@@ -37,10 +37,9 @@ const Books = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [content, setContent] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleSave = async (text: string) => {
+  const handleSave = async () => {
     setIsSaving(true);
     try {
       // simulate async save, replace with your Firebase save logic
