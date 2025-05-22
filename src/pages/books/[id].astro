@@ -1,7 +1,4 @@
 ---
-import React from "react";
-import BookDetail from "../../components/BookDetail";
-import ChapterList from "../../components/ChapterList";
 import BookReader from "../../components/BookReader";
 import { doc, getDoc, collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
@@ -25,31 +22,62 @@ type Chapter = {
   createdAt: any;
 };
 
-const { id } = Astro.params;
-
-// 1. Get the main book document
-const docRef = doc(db, "books", id as string);
-const docSnap = await getDoc(docRef);
-
-if (!docSnap.exists()) {
-  // throw new Error("Book not found");
+// Static generation of all book paths
+export async function getStaticPaths() {
+  const booksSnapshot = await getDocs(collection(db, "books"));
+  return booksSnapshot.docs.map((doc) => ({
+    params: { id: doc.id },
+  }));
 }
 
-const bookData = docSnap.data();
-const book: Book = { id, ...bookData } as Book;
+// Load book and chapters
+const { id } = Astro.params;
+let book: Book | null = null;
+let chapters: Chapter[] = [];
 
-// 2. Get the chapters subcollection
-const chaptersSnapshot = await getDocs(
-  collection(db, "books", id as string, "chapters")
-);
+try {
+  const docRef = doc(db, "books", id as string);
+  const docSnap = await getDoc(docRef);
 
-const chapters: Chapter[] = chaptersSnapshot.docs.map((doc) => ({
-  id: doc.id,
-  ...doc.data(),
-})) as Chapter[];
+  if (docSnap.exists()) {
+    const bookData = docSnap.data();
+    book = { id, ...bookData } as Book;
+
+    const chaptersSnapshot = await getDocs(
+      collection(db, "books", id as string, "chapters")
+    );
+    chapters = chaptersSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Chapter[];
+  }
+} catch (err) {
+  console.error("Error loading book:", err);
+}
 ---
-<Layout title={book.title}>
-  <BookReader bookId={id as string} client:load />
-  <!-- <BookDetail book={book} client:load />
-  <ChapterList chapters={chapters} client:load /> -->
-</Layout>
+
+{
+  book ? (
+    <Layout title={book.title}>
+      <head>
+        <title>
+          {book.title} — {book.author}
+        </title>
+        <meta name="description" content={book.synopsis} />
+        <meta property="og:title" content={book.title} />
+        <meta property="og:description" content={book.synopsis} />
+        <meta property="og:image" content={book.coverImage} />
+        <meta property="og:type" content="book" />
+      </head>
+
+      <BookReader bookId={id as string} client:load />
+    </Layout>
+  ) : (
+    <Layout title="Book Not Found">
+      <section class="text-center py-20 text-gray-600">
+        <h1 class="text-4xl font-bold mb-4">📚 Book Not Found</h1>
+        <p>The requested book does not exist or has been deleted.</p>
+      </section>
+    </Layout>
+  )
+}

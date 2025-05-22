@@ -12,7 +12,6 @@ import {
 } from "firebase/firestore";
 import { db } from "../../firebase";
 import { TextCrafter } from "../TextCrafter"; // Adjust this import based on your actual path
-import { BookChaptersList } from "./BookChaptersList";
 
 type Book = {
   id: string;

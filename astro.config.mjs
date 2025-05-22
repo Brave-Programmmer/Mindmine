@@ -7,7 +7,6 @@ import tailwind from '@astrojs/tailwind';
 export default defineConfig({
   integrations: [react(), tailwind()],
   site: 'https://livre.com',
-  output: 'server',
   server: {
     port: 3000,
     host: true
