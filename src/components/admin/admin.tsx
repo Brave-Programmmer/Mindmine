@@ -1,7 +1,9 @@
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "../../firebase";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { Bounce, ToastContainer, toast } from "react-toastify";
+import { useAuthStore } from "../../store/authStore";
 
 // Cover styles with gradients and particle-like effects
 const coverStyles: { label: string; className: string }[] = [
@@ -28,6 +30,7 @@ const coverStyles: { label: string; className: string }[] = [
 ];
 
 const Admin = () => {
+  const email = useAuthStore((state) => state.email); // Zustand email
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [newBook, setNewBook] = useState({
     title: "",
@@ -36,7 +39,22 @@ const Admin = () => {
     synopsis: "",
     coverImage: coverStyles[0].className,
     totalChapters: 0,
+    email: "",
   });
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user && user.displayName) {
+        setNewBook((prev) => ({
+          ...prev,
+          author: user.displayName || "",
+          email: user.email || "",
+        }));
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -49,9 +67,19 @@ const Admin = () => {
   };
 
   const handleCreateBook = async () => {
+    if (!email) {
+      toast.error("You must be logged in to create a book.", {
+        position: "top-right",
+        autoClose: 5000,
+        theme: "light",
+        transition: Bounce,
+      });
+      return;
+    }
+
     try {
       const createdAt = new Date().toISOString();
-      const bookToCreate = { ...newBook, createdAt };
+      const bookToCreate = { ...newBook, createdAt, email };
       await addDoc(collection(db, "books"), bookToCreate);
       setNewBook({
         title: "",
@@ -60,14 +88,11 @@ const Admin = () => {
         synopsis: "",
         coverImage: coverStyles[0].className,
         totalChapters: 0,
+        email: "",
       });
       toast.success("New Book Added!", {
         position: "top-right",
         autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
         theme: "light",
         transition: Bounce,
       });
@@ -80,15 +105,27 @@ const Admin = () => {
 
   return (
     <div>
+      {/* FAB to trigger modal */}
       <button
-        onClick={() => setIsCreateModalOpen(true)}
-        className="fixed bottom-6 right-6 bg-rosewood/80 hover:bg-sienna text-white p-4 rounded-full shadow-lg transition-transform hover:scale-105 z-50"
+        onClick={() => {
+          if (!email) {
+            toast.warn("Please log in to create a book.");
+            return;
+          }
+          setIsCreateModalOpen(true);
+        }}
+        className={`fixed bottom-6 right-6 p-4 rounded-full shadow-lg z-50 ${
+          email
+            ? "bg-rosewood/80 hover:bg-sienna text-white"
+            : "bg-gray-400 cursor-not-allowed text-white"
+        }`}
         aria-label="Add New Book"
+        disabled={!email}
       >
         ✚ Create New Book
       </button>
 
-      {isCreateModalOpen && (
+      {isCreateModalOpen && email && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg relative max-h-[90vh] overflow-y-auto">
             <button
@@ -112,10 +149,10 @@ const Admin = () => {
               />
               <input
                 type="text"
+                disabled
                 name="author"
                 placeholder="Author"
                 value={newBook.author}
-                onChange={handleInputChange}
                 className="w-full border border-gray-300 rounded px-3 py-2"
               />
               <input
@@ -149,10 +186,7 @@ const Admin = () => {
                       }`}
                       onClick={() => handleCoverImageChange(style.className)}
                     >
-                      {/* Spine */}
                       <div className="absolute left-0 top-0 h-full w-4 bg-neutral-800 rounded-l-md shadow-inner z-10"></div>
-
-                      {/* Cover */}
                       <div
                         className={`h-full w-full pl-4 rounded-r-md ${style.className} shadow-md border border-black/10 overflow-hidden flex flex-col justify-end`}
                       >

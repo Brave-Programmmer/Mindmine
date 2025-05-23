@@ -11,7 +11,8 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { db } from "../../firebase";
-import { TextCrafter } from "../TextCrafter"; // Adjust this import based on your actual path
+import { TextCrafter } from "../TextCrafter";
+import { useAuthStore } from "../../store/authStore"; // adjust the path if different
 
 type Book = {
   id: string;
@@ -22,6 +23,7 @@ type Book = {
   coverImage: string;
   totalChapters: number;
   createdAt: string;
+  email: string;
 };
 
 type Chapter = {
@@ -39,20 +41,9 @@ const Books = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      // simulate async save, replace with your Firebase save logic
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      alert("Saved successfully!");
-    } catch (err) {
-      alert("Save failed.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
+  const userEmail = useAuthStore((state) => state.email);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-  // New chapter creation
   const [newChapterTitle, setNewChapterTitle] = useState("");
   const [newChapterContent, setNewChapterContent] = useState("");
   const [isCreatingChapter, setIsCreatingChapter] = useState(false);
@@ -65,6 +56,12 @@ const Books = () => {
   const [editingContent, setEditingContent] = useState("");
 
   useEffect(() => {
+    if (!isAuthenticated || !userEmail) {
+      setBooks([]);
+      setIsLoading(false);
+      return;
+    }
+
     const q = query(collection(db, "books"));
     const unsubscribe = onSnapshot(
       q,
@@ -73,7 +70,8 @@ const Books = () => {
           id: doc.id,
           ...doc.data(),
         })) as Book[];
-        setBooks(booksData);
+        const userBooks = booksData.filter((book) => book.email === userEmail);
+        setBooks(userBooks);
         setIsLoading(false);
       },
       (error) => {
@@ -82,8 +80,21 @@ const Books = () => {
         setIsLoading(false);
       }
     );
+
     return () => unsubscribe();
-  }, []);
+  }, [userEmail, isAuthenticated]);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      alert("Saved successfully!");
+    } catch (err) {
+      alert("Save failed.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const loadChapters = async (bookId: string) => {
     const chapterSnapshot = await getDocs(
@@ -99,7 +110,6 @@ const Books = () => {
   const deleteCollection = async (collectionRef: any) => {
     const querySnapshot = await getDocs(collectionRef);
     if (querySnapshot.empty) return;
-
     const deletePromises = querySnapshot.docs.map((docSnap) =>
       deleteDoc(docSnap.ref)
     );
@@ -109,25 +119,18 @@ const Books = () => {
   const handleDelete = async (bookId: string) => {
     const confirmed = confirm("Are you sure you want to delete this book?");
     if (!confirmed) return;
-
     try {
       const bookDocRef = doc(db, "books", bookId);
-
-      // Delete all documents inside the 'chapters' subcollection
       const chaptersCollectionRef = collection(bookDocRef, "chapters");
       await deleteCollection(chaptersCollectionRef);
-
-      // If you have other subcollections, delete them similarly here
-
-      // Now delete the book document itself
       await deleteDoc(bookDocRef);
-
       setBooks((prev) => prev.filter((book) => book.id !== bookId));
     } catch (err) {
       console.error("Failed to delete book:", err);
       alert("Failed to delete the book.");
     }
   };
+
   const openModal = async (book: Book) => {
     setSelectedBook(book);
     setIsModalOpen(true);
@@ -191,9 +194,7 @@ const Books = () => {
         "chapters",
         chapterId
       );
-      await updateDoc(chapterRef, {
-        content: editingContent,
-      });
+      await updateDoc(chapterRef, { content: editingContent });
       setEditingChapterId(null);
       setEditingContent("");
       await loadChapters(selectedBook.id);
@@ -207,7 +208,7 @@ const Books = () => {
     <div>
       <main className="container mx-auto px-4 py-12">
         <h1 className="text-4xl font-bold text-rosewood mb-8 text-center">
-          Books
+          My Books
         </h1>
 
         {isLoading ? (
@@ -215,7 +216,7 @@ const Books = () => {
         ) : books.length === 0 ? (
           <div className="text-center text-taupe">
             <p className="text-xl">No books available yet.</p>
-            <p className="mt-2">Be the first to create a book!</p>
+            <p className="mt-2">Start by creating your first book!</p>
           </div>
         ) : (
           <div className="flex flex-col gap-6 items-center justify-center">
