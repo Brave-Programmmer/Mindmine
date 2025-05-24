@@ -1,8 +1,8 @@
 ---
-import BookReader from "../../components/BookReader";
-import { doc, getDoc, collection, getDocs } from "firebase/firestore";
-import { db } from "../../firebase";
 import Layout from "../../layouts/Layout.astro";
+import { collection, doc, getDoc, getDocs } from "firebase/firestore";
+import { db } from "../../firebase";
+import CustomBook from "../../components/CustomBook";
 
 type Book = {
   id: string;
@@ -10,6 +10,7 @@ type Book = {
   author: string;
   genre: string;
   synopsis: string;
+  email: string;
   coverImage: string;
   totalChapters: number;
   createdAt: any;
@@ -38,39 +39,32 @@ let chapters: Chapter[] = [];
 try {
   const docRef = doc(db, "books", id as string);
   const docSnap = await getDoc(docRef);
-
   if (docSnap.exists()) {
     const bookData = docSnap.data();
     book = { id, ...bookData } as Book;
-
     const chaptersSnapshot = await getDocs(
       collection(db, "books", id as string, "chapters")
     );
-    chapters = chaptersSnapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Chapter[];
+    chapters = chaptersSnapshot.docs
+      .map((doc) => {
+        const data = doc.data() as Omit<Chapter, "id">; // assert known fields
+        return {
+          id: doc.id,
+          ...data,
+        };
+      })
+      .sort((a, b) => a.createdAt.seconds - b.createdAt.seconds);
   }
 } catch (err) {
   console.error("Error loading book:", err);
 }
+console.log(book);
 ---
 
 {
   book ? (
     <Layout title={book.title}>
-      <head>
-        <title>
-          {book.title} — {book.author}
-        </title>
-        <meta name="description" content={book.synopsis} />
-        <meta property="og:title" content={book.title} />
-        <meta property="og:description" content={book.synopsis} />
-        <meta property="og:image" content={book.coverImage} />
-        <meta property="og:type" content="book" />
-      </head>
-
-      <BookReader bookId={id as string} client:load />
+      <CustomBook chapters={chapters} book={book} client:load />
     </Layout>
   ) : (
     <Layout title="Book Not Found">

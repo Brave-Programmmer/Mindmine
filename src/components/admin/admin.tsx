@@ -37,6 +37,7 @@ const Admin = () => {
     author: "",
     genre: "",
     synopsis: "",
+
     coverImage: coverStyles[0].className,
     totalChapters: 0,
     email: "",
@@ -79,7 +80,12 @@ const Admin = () => {
 
     try {
       const createdAt = new Date().toISOString();
-      const bookToCreate = { ...newBook, createdAt, email };
+      const bookToCreate = {
+        ...newBook,
+        createdAt,
+        email,
+        views: 0, // ✅ Add this line
+      };
       await addDoc(collection(db, "books"), bookToCreate);
       setNewBook({
         title: "",

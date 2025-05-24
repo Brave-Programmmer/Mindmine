@@ -38,10 +38,6 @@ const AllBooksGrid = () => {
 
   return (
     <div className="p-6">
-      <h2 className="text-3xl font-bold mb-8 text-center text-rosewood">
-        📚 All Books from All Authors
-      </h2>
-
       {isLoading ? (
         <div className="text-center text-gray-500">Loading books...</div>
       ) : books.length === 0 ? (
