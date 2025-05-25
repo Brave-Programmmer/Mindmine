@@ -1,0 +1,297 @@
+---
+import FlippingPageBook from "../components/Flipling";
+import Layout from "../layouts/Layout.astro";
+import ParticleBackground from "../components/ParticleBackground";
+import AllBooksGrid from "../components/AllBooksGrid";
+
+// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
+// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+---
+
+<Layout title="Welcome">
+  <section
+    class="relative overflow-hidden py-20 animate-fade-in min-h-[90vh] flex items-center"
+  >
+    <ParticleBackground client:load />
+    <div
+      class="absolute inset-0 bg-gradient-to-br from-blush/30 to-peach/30 backdrop-blur-sm"
+    >
+    </div>
+    <div class="container mx-auto px-4 relative z-10">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div class="text-left">
+          <h1
+            class="text-6xl font-bold text-rosewood mb-6 leading-tight animate-slide-up"
+          >
+            Your Story
+            <span class="block text-taupe">Begins Here</span>
+          </h1>
+          <p
+            class="text-xl text-taupe mb-8 max-w-lg animate-slide-up"
+            style="animation-delay: 0.2s"
+          >
+            Discover captivating stories, share your own tales, and connect with
+            fellow book lovers in our vibrant community.
+          </p>
+          <div
+            class="flex gap-4 animate-slide-up"
+            style="animation-delay: 0.4s"
+          >
+            <a
+              href="/books"
+              class="bg-rosewood text-white px-8 py-3 rounded-full hover:bg-sienna transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+            >
+              Explore Books
+            </a>
+            <a
+              href="/write"
+              class="border-2 border-rosewood text-rosewood px-8 py-3 rounded-full hover:bg-rosewood hover:text-white transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+            >
+              Start Writing
+            </a>
+          </div>
+        </div>
+
+        <div
+          class="relative h-[400px] block scale-75 sm:scale-90 md:scale-100 animate-slide-up"
+          style="animation-delay: 0.6s"
+        >
+          <div
+            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+          >
+            <FlippingPageBook />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid grid-cols-1 md:grid-cols-2 gap-8 py-12">
+    <div class="bg-white p-8 rounded-lg shadow-lg animate-slide-up">
+      <h2 class="text-3xl font-bold text-rosewood mb-4">For Readers</h2>
+      <p class="text-taupe mb-6">
+        Discover new stories, follow your favorite authors, and build your
+        reading list.
+      </p>
+      <a
+        href="/books"
+        class="inline-block bg-rosewood text-white px-6 py-3 rounded-full hover:bg-sienna transition-colors"
+      >
+        Explore Books
+      </a>
+    </div>
+
+    <div
+      class="bg-white p-8 rounded-lg shadow-lg animate-slide-up"
+      style="animation-delay: 0.2s"
+    >
+      <h2 class="text-3xl font-bold text-rosewood mb-4">For Authors</h2>
+      <p class="text-taupe mb-6">
+        Share your stories with the world, connect with readers, and grow your
+        audience.
+      </p>
+      <a
+        href="/write"
+        class="inline-block bg-rosewood text-white px-6 py-3 rounded-full hover:bg-sienna transition-colors"
+      >
+        Start Writing
+      </a>
+    </div>
+  </section>
+
+  <section class="bg-peach py-16 mt-12 rounded-lg">
+    <div class="container mx-auto px-4">
+      <h2 class="text-3xl font-bold text-rosewood text-center mb-8">
+        Popular Genres
+      </h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        {
+          ["Romance", "Fantasy", "Mystery", "Science Fiction"].map(
+            (genre, index) => (
+              <div
+                class="text-center animate-slide-up"
+                style={`animation-delay: ${index * 0.1}s`}
+              >
+                <div class="w-20 h-20 bg-mauve rounded-full mx-auto mb-4 flex items-center justify-center">
+                  <span class="text-rosewood text-xl font-bold">
+                    {genre[0]}
+                  </span>
+                </div>
+                <h3 class="text-taupe font-semibold">{genre}</h3>
+              </div>
+            )
+          )
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold text-rosewood mb-4">Featured Books</h2>
+      <p class="text-taupe">
+        Discover our handpicked selection of amazing stories
+      </p>
+    </div>
+    <div>
+      <AllBooksGrid client:only="react" />
+      <!-- {
+        [1, 2, 3].map((_, index) => (
+          <div
+            class="bg-white p-6 rounded-lg shadow-lg animate-slide-up"
+            style={`animation-delay: ${index * 0.2}s`}
+          >
+            <div class="w-full h-48 bg-gold rounded-lg mb-4" />
+            <h3 class="text-xl font-bold text-rosewood mb-2">
+              Book Title {index + 1}
+            </h3>
+            <p class="text-taupe mb-4">
+              A captivating story that will keep you hooked from start to
+              finish.
+            </p>
+            <a
+              href="#"
+              class="text-rosewood hover:text-sienna transition-colors"
+            >
+              Read More →
+            </a>
+          </div>
+        ))
+      } -->
+    </div>
+  </section>
+
+  
+
+  <!-- Reading Stats Section -->
+  <section class="py-20">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div class="p-6">
+          <div class="text-4xl font-bold text-rosewood mb-2">10K+</div>
+          <p class="text-taupe">Active Readers</p>
+        </div>
+        <div class="p-6">
+          <div class="text-4xl font-bold text-rosewood mb-2">5K+</div>
+          <p class="text-taupe">Published Stories</p>
+        </div>
+        <div class="p-6">
+          <div class="text-4xl font-bold text-rosewood mb-2">2K+</div>
+          <p class="text-taupe">Active Writers</p>
+        </div>
+        <div class="p-6">
+          <div class="text-4xl font-bold text-rosewood mb-2">50+</div>
+          <p class="text-taupe">Genres</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter Section -->
+  <section class="py-20 bg-rosewood/5">
+    <div class="container mx-auto px-4">
+      <div class="max-w-2xl mx-auto text-center">
+        <h2 class="text-4xl font-bold text-rosewood mb-4">Stay Updated</h2>
+        <p class="text-taupe mb-8">
+          Subscribe to our newsletter for the latest stories, writing tips, and
+          community updates.
+        </p>
+        <form class="flex flex-col sm:flex-row gap-4 justify-center">
+          <input
+            type="email"
+            placeholder="Enter your email"
+            class="px-6 py-3 rounded-full border-2 border-rosewood/20 focus:border-rosewood outline-none flex-grow max-w-md"
+          />
+          <button
+            type="submit"
+            class="bg-rosewood text-white px-8 py-3 rounded-full hover:bg-sienna transition-colors"
+          >
+            Subscribe
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Community Section -->
+  <section class="py-20">
+    <div class="container mx-auto px-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="text-4xl font-bold text-rosewood mb-6">
+            Join Our Community
+          </h2>
+          <p class="text-taupe mb-8">
+            Connect with fellow writers and readers. Share your stories, get
+            feedback, and grow together in our supportive community.
+          </p>
+          <div class="flex gap-4">
+            <a
+              href="/community"
+              class="bg-rosewood text-white px-8 py-3 rounded-full hover:bg-sienna transition-colors"
+            >
+              Join Now
+            </a>
+            <a
+              href="/discussions"
+              class="border-2 border-rosewood text-rosewood px-8 py-3 rounded-full hover:bg-rosewood hover:text-white transition-colors"
+            >
+              View Discussions
+            </a>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          {
+            [1, 2, 3, 4].map((_, index) => (
+              <div class="bg-white p-4 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
+                <div class="w-12 h-12 bg-mauve rounded-full mb-3 flex items-center justify-center">
+                  <span class="text-rosewood font-bold">U{index + 1}</span>
+                </div>
+                <h3 class="font-semibold text-rosewood">User {index + 1}</h3>
+                <p class="text-sm text-taupe">Active Member</p>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-float-slow {
+    animation: float 8s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0% {
+      transform: translateY(0px) rotate(var(--rotation));
+    }
+    50% {
+      transform: translateY(-20px) rotate(var(--rotation));
+    }
+    100% {
+      transform: translateY(0px) rotate(var(--rotation));
+    }
+  }
+
+  .animate-slide-up {
+    opacity: 0;
+    animation: slideUp 0.5s ease-out forwards;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

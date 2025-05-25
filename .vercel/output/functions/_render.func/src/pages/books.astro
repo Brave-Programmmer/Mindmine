@@ -1,0 +1,11 @@
+---
+import AllBooksGrid from "../components/AllBooksGrid";
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="Books">
+  <h2 class="mt-6 text-3xl font-bold mb-8 text-center text-rosewood">
+    📚 All Books from All Authors
+  </h2>
+  <AllBooksGrid client:only="react" />
+</Layout>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { collection, getDocs, query } from "firebase/firestore";
-import { db } from "../firebase";
+import { db } from "../firebase"; // Assuming `db` is already initialized and exported from '../firebase'
 
 type Book = {
   id: string;
@@ -8,7 +8,7 @@ type Book = {
   author: string;
   genre: string;
   synopsis: string;
-  coverImage: string; // Tailwind background classes
+  coverImage: string; // Tailwind background classes like 'bg-red-500' or 'bg-[url(...)]'
   totalChapters: number;
   createdAt: string;
   views?: number;
@@ -24,6 +24,60 @@ const AllBooksGrid = () => {
   );
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 20;
+
+  /**
+   * BookCard Component
+   * Renders a single book card with a visually appealing design inspired by CodePen.
+   * Includes spine details, cover image, and book information.
+   * @param book The book object to display.
+   */
+  const BookCard = ({ book }: { book: Book }) => {
+    return (
+      <a
+        href={`/books/${book.id}`}
+        className="relative group w-full aspect-[2/3] rounded-xl shadow-lg overflow-hidden bg-white border border-gray-200 hover:shadow-2xl transition-transform hover:scale-[1.05]"
+        aria-label={`View details of ${book.title}`}
+      >
+        {/* Book Binding / Spine */}
+        <div className="absolute left-0 top-0 h-full w-8 rounded-l-xl bg-gradient-to-b from-neutral-900 via-neutral-800 to-neutral-900 border-r border-black/50 shadow-inner flex flex-col items-center justify-center z-30">
+          {/* Curved vertical strips for texture (visual detail) */}
+          <div className="w-1 h-full bg-black/10 rounded-l-full absolute left-1/2 top-0 -translate-x-1/2"></div>
+          <div className="w-0.5 h-full bg-black/20 rounded-l-full absolute left-3 top-0"></div>
+          <div className="w-0.5 h-full bg-black/20 rounded-l-full absolute left-5 top-0"></div>
+          {/* Vertical stitches spaced evenly (visual detail) */}
+          <div className="flex flex-col justify-between h-4/5">
+            {[...Array(8)].map((_, i) => (
+              <span
+                key={i}
+                className="block w-2 h-2 rounded-full bg-neutral-700 shadow-md"
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Book Cover */}
+        {/* The cover takes up the remaining width after the spine and has rounded right corners */}
+        <div
+          className={`${book.coverImage} h-full w-[calc(100%-2rem)] absolute left-8 top-0 rounded-r-xl bg-cover bg-center relative z-20 flex flex-col justify-end shadow-inner`}
+        >
+          {/* Overlay for text content on the cover */}
+          <div className="absolute inset-0 bg-black/40 text-white duration-300 rounded-r-xl p-4 flex flex-col justify-center items-center text-center select-none text-xs md:text-sm">
+            <h3 className="font-bold text-base md:text-lg mb-2 leading-tight truncate w-full">
+              {book.title}
+            </h3>
+            <p className="text-sm mb-1 truncate w-full">By {book.author}</p>
+            <p className="text-xs italic text-gray-300 line-clamp-3 mb-2 px-1 w-full">
+              {book.synopsis || "No synopsis available."}
+            </p>
+            <div className="flex justify-center gap-6 text-sm font-semibold mt-auto w-full px-4">
+              <span>📖 {book.totalChapters} chapters</span>
+              <span>👁 {book.views || 0} views</span>
+            </div>
+          </div>
+        </div>
+      </a>
+    );
+  };
 
   useEffect(() => {
     const loadBooks = async () => {
@@ -87,7 +141,9 @@ const AllBooksGrid = () => {
   };
 
   return (
-    <div className="p-6 max-w-screen-xl mx-auto">
+    <div className="p-6 max-w-screen-xl mx-auto font-inter">
+      {" "}
+      {/* Added font-inter */}
       {/* Search & Sort controls */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <input
@@ -113,7 +169,6 @@ const AllBooksGrid = () => {
           <option value="views">Sort by Views (desc)</option>
         </select>
       </div>
-
       {/* Genre multi-select buttons (show first 4, rest hidden behind "More" dropdown) */}
       <div className="mb-6 flex flex-wrap gap-2 items-center">
         {allGenres.length === 0 && (
@@ -164,7 +219,6 @@ const AllBooksGrid = () => {
           </div>
         )}
       </div>
-
       {/* Books grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
         {isLoading ? (
@@ -177,61 +231,60 @@ const AllBooksGrid = () => {
           </p>
         ) : (
           paginatedBooks.map((book) => (
-            <a
-              key={book.id}
-              href={`/books/${book.id}`}
-              className="relative group w-full aspect-[2/3] rounded-xl shadow-lg overflow-hidden bg-white border border-gray-200 hover:shadow-2xl transition-transform hover:scale-[1.05]"
-              aria-label={`View details of ${book.title}`}
-            >
-              {/* Book Binding / Spine */}
-              <div className="absolute left-0 top-0 h-full w-8 rounded-l-xl bg-gradient-to-b from-neutral-900 via-neutral-800 to-neutral-900 border-r border-black/50 shadow-inner flex flex-col items-center justify-center z-30">
-                {/* Curved vertical strips for texture */}
-                <div className="w-1 h-full bg-black/10 rounded-l-full absolute left-1/2 top-0 -translate-x-1/2"></div>
-                <div className="w-0.5 h-full bg-black/20 rounded-l-full absolute left-3 top-0"></div>
-                <div className="w-0.5 h-full bg-black/20 rounded-l-full absolute left-5 top-0"></div>
-                {/* Vertical stitches spaced evenly */}
-                <div className="flex flex-col justify-between h-4/5">
-                  {[...Array(8)].map((_, i) => (
-                    <span
-                      key={i}
-                      className="block w-2 h-2 rounded-full bg-neutral-700 shadow-md"
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Book Cover */}
-              <div
-                className={`${book.coverImage} h-full w-full rounded-r-3xl bg-cover bg-center relative z-20 flex flex-col justify-end shadow-inner`}
-                style={{ alignItems: "center", justifyContent: "center" }}
+            <div>
+              <a
+                href={`/books/${book.id}`}
+                className="block relative w-full aspect-[2/3] rounded-lg overflow-hidden shadow-lg transform transition-all duration-300
+                 hover:scale-[1.03] hover:shadow-2xl group cursor-pointer border border-gray-200 bg-white"
+                aria-label={`View details of ${book.title} by ${book.author}`}
               >
-                {/* Title bar on cover
-                <div className="bg-black/70 backdrop-blur-sm text-white px-4 py-2 font-bold text-sm md:text-base select-none rounded-tl-xl truncate max-w-full whitespace-nowrap overflow-hidden">
-                  {book.title}
-                </div> */}
+                {/* Book Cover Image */}
+                <div
+                  className={`${book.coverImage} absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105`}
+                  // Example if coverImage is a URL: style={{ backgroundImage: `url(${book.coverImage})` }}
+                ></div>
 
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-black/40 text-white duration-300 rounded-r-3xl p-4 flex flex-col justify-center items-center text-center select-none text-xs md:text-sm">
-                  <h3 className="font-bold text-base md:text-lg mb-2 leading-tight truncate w-full">
+                {/* Overlay for details - hidden by default, visible on hover/focus */}
+                <div
+                  className="absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300
+                  flex flex-col justify-end p-4 text-white text-center"
+                >
+                  <h3 className="text-lg md:text-xl font-bold mb-1 leading-tight line-clamp-2">
                     {book.title}
                   </h3>
-                  <p className="text-sm mb-1 truncate w-full">
+                  <p className="text-sm md:text-base font-medium text-gray-200 mb-2 line-clamp-1">
                     By {book.author}
                   </p>
-                  <p className="text-xs italic text-gray-300 line-clamp-3 mb-2 px-1 w-full">
-                    {book.synopsis || "No synopsis available."}
+                  <p className="text-xs md:text-sm italic text-gray-300 line-clamp-3 mb-3">
+                    {book.synopsis || "No synopsis available for this book."}
                   </p>
-                  <div className="flex justify-center gap-6 text-sm font-semibold mt-auto w-full px-4">
-                    <span>📖 {book.totalChapters} chapters</span>
-                    <span>👁 {book.views || 0} views</span>
+                  <div className="flex justify-center gap-4 text-xs md:text-sm font-semibold mt-auto">
+                    <span className="flex items-center gap-1">
+                      <i className="fa-solid fa-book"></i> {book.totalChapters}{" "}
+                      chapters
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <i className="fa-solid fa-eye"></i> {book.views || 0}{" "}
+                      views
+                    </span>
                   </div>
                 </div>
-              </div>
-            </a>
+
+                {/* Always visible title/author at the bottom (for quick scan) */}
+                <div
+                  className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 text-white
+                      transition-opacity duration-300 group-hover:opacity-0"
+                >
+                  <p className="text-sm font-bold truncate">{book.title}</p>
+                  <p className="text-xs truncate text-gray-300">
+                    {book.author}
+                  </p>
+                </div>
+              </a>
+            </div>
           ))
         )}
       </div>
-
       {/* Pagination */}
       {totalPages > 1 && (
         <nav

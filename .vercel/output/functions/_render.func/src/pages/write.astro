@@ -1,0 +1,10 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Admin from "../components/admin/admin";
+import Books from "../components/admin/Books";
+---
+
+<Layout title="Write">
+  <Books client:only="react" />
+  <Admin client:only="react" />
+</Layout>
