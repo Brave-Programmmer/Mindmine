@@ -13,7 +13,5 @@ export default defineConfig({
     port: 3000,
     host: true
   },
-  adapter: cloudflare({
-    imageService: 'cloudflare'
-  }),
+  adapter: cloudflare(),
 });
