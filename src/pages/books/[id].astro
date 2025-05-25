@@ -65,7 +65,7 @@ console.log(book);
   book ? (
     <Layout title={book.title}>
       <CustomBook chapters={chapters} book={book} client:load />
-    </Layout>
+     </Layout>
   ) : (
     <Layout title="Book Not Found">
       <section class="text-center py-20 text-gray-600">

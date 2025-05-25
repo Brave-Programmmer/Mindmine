@@ -62,7 +62,13 @@ const Admin = () => {
   ) => {
     setNewBook({ ...newBook, [e.target.name]: e.target.value });
   };
-
+  const handleGenreChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    setNewBook({ ...newBook, [e.target.name]: e.target.value });
+  };
   const handleCoverImageChange = (className: string) => {
     setNewBook({ ...newBook, coverImage: className });
   };
@@ -161,14 +167,33 @@ const Admin = () => {
                 value={newBook.author}
                 className="w-full border border-gray-300 rounded px-3 py-2"
               />
-              <input
-                type="text"
+              <select
                 name="genre"
-                placeholder="Genre"
                 value={newBook.genre}
-                onChange={handleInputChange}
+                onChange={handleGenreChange}
                 className="w-full border border-gray-300 rounded px-3 py-2"
-              />
+              >
+                <option value="">Select Genre</option>
+                <option value="Romance">Romance</option>
+                <option value="Fantasy">Fantasy</option>
+                <option value="Mystery">Mystery</option>
+                <option value="Science Fiction">Science Fiction</option>
+                <option value="Historical Fiction">Historical Fiction</option>
+                <option value="Thriller">Thriller</option>
+                <option value="Horror">Horror</option>
+                <option value="Adventure">Adventure</option>
+                <option value="Biography">Biography</option>
+                <option value="Self-Help">Self-Help</option>
+                <option value="Poetry">Poetry</option>
+                <option value="Young Adult">Young Adult</option>
+                <option value="Children">Children</option>
+                <option value="Non-Fiction">Non-Fiction</option>
+                <option value="Dystopian">Dystopian</option>
+                <option value="Graphic Novel">Graphic Novel</option>
+                <option value="Classic">Classic</option>
+                <option value="Humor">Humor</option>
+              </select>
+
               <textarea
                 name="synopsis"
                 placeholder="Synopsis"

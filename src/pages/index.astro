@@ -133,7 +133,7 @@ import AllBooksGrid from "../components/AllBooksGrid";
         Discover our handpicked selection of amazing stories
       </p>
     </div>
-    <div >
+    <div>
       <AllBooksGrid client:only="react" />
       <!-- {
         [1, 2, 3].map((_, index) => (
@@ -161,41 +161,7 @@ import AllBooksGrid from "../components/AllBooksGrid";
     </div>
   </section>
 
-  <!-- Featured Authors Section -->
-  <section class="py-20 bg-peach/30">
-    <div class="container mx-auto px-4">
-      <h2 class="text-4xl font-bold text-rosewood text-center mb-12">
-        Featured Authors
-      </h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {
-          [1, 2, 3].map((_, index) => (
-            <div class="bg-white p-6 rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-300">
-              <div class="w-24 h-24 bg-mauve rounded-full mx-auto mb-4 flex items-center justify-center">
-                <span class="text-rosewood text-2xl font-bold">
-                  A{index + 1}
-                </span>
-              </div>
-              <h3 class="text-xl font-bold text-rosewood text-center mb-2">
-                Author Name {index + 1}
-              </h3>
-              <p class="text-taupe text-center mb-4">
-                Bestselling author with multiple published works
-              </p>
-              <div class="flex justify-center gap-2">
-                <span class="bg-rosewood/10 text-rosewood px-3 py-1 rounded-full text-sm">
-                  Fiction
-                </span>
-                <span class="bg-rosewood/10 text-rosewood px-3 py-1 rounded-full text-sm">
-                  Fantasy
-                </span>
-              </div>
-            </div>
-          ))
-        }
-      </div>
-    </div>
-  </section>
+  
 
   <!-- Reading Stats Section -->
   <section class="py-20">

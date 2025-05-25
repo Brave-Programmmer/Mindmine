@@ -1,3 +1,8 @@
+.page {
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    transform-style: preserve-3d;
+    will-change: transform;
+}
 
 
 #mobile-menu-button.active svg {
