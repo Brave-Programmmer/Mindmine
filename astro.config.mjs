@@ -2,12 +2,10 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import tailwind from '@astrojs/tailwind';
-
-import vercel from '@astrojs/vercel';
-
+import cloudflare from '@astrojs/cloudflare';
 // https://astro.build/config
 export default defineConfig({
-  output:"server",
+  output: "server",
   integrations: [react(), tailwind()],
   site: 'https://livre.com',
 
@@ -15,6 +13,7 @@ export default defineConfig({
     port: 3000,
     host: true
   },
-
-  adapter: vercel()
+  adapter: cloudflare({
+    imageService: 'cloudflare'
+  }),
 });
