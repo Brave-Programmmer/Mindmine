@@ -1,6 +1,5 @@
 import { db } from "../firebase";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
-
 export async function GET() {
   const booksRef = collection(db, "books");
   const booksSnapshot = await getDocs(
@@ -21,7 +20,7 @@ export async function GET() {
     const pubDate = book.createdAt?.seconds
       ? new Date(book.createdAt.seconds * 1000).toUTCString()
       : new Date().toUTCString();
-    const bookUrl = `https://yourdomain.com/books/${bookId}`;
+    const bookUrl = `https://mindmine.netlify.app/books/${bookId}`;
 
     return `
       <item>

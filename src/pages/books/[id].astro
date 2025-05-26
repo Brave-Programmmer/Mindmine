@@ -31,38 +31,40 @@ const id = params.id as string;
 let book: Book | null = null;
 let chapters: Chapter[] = [];
 
-try {
-  const docRef = doc(db, "books", id);
-  const docSnap = await getDoc(docRef);
-  if (docSnap.exists()) {
-    const bookData = docSnap.data();
-    book = { id, ...bookData } as Book;
+await (async () => {
+  try {
+    const docRef = doc(db, "books", id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const bookData = docSnap.data();
+      book = { id, ...bookData } as Book;
 
-    const chaptersSnapshot = await getDocs(
-      collection(db, "books", id, "chapters")
-    );
-    chapters = chaptersSnapshot.docs
-      .map((doc) => {
-        const data = doc.data() as Omit<Chapter, "id">;
-        return {
-          id: doc.id,
-          ...data,
-        };
-      })
-      .sort(
-        (a, b) => (a.createdAt?.seconds ?? 0) - (b.createdAt?.seconds ?? 0)
+      const chaptersSnapshot = await getDocs(
+        collection(db, "books", id, "chapters")
       );
+      chapters = chaptersSnapshot.docs
+        .map((doc) => {
+          const data = doc.data() as Omit<Chapter, "id">;
+          return {
+            id: doc.id,
+            ...data,
+          };
+        })
+        .sort(
+          (a, b) => (a.createdAt?.seconds ?? 0) - (b.createdAt?.seconds ?? 0)
+        );
+    }
+  } catch (err) {
+    console.error(
+      "Error loading book:",
+      err instanceof Error ? err.message : err
+    );
   }
-} catch (err) {
-  console.error(
-    "Error loading book:",
-    err instanceof Error ? err.message : err
-  );
-}
+})();
 ---
 
 {
-  book ? (
+  book !== null ? (
     <Layout title={book.title}>
       <CustomBook chapters={chapters} book={book} client:load />
     </Layout>
