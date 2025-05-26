@@ -3,7 +3,7 @@ export const prerender = false;
 
 import Layout from "../../layouts/Layout.astro";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
-import { db } from "../../firebase";
+import { db } from "../../firebase"; // Ensure this path is correct for your project
 import CustomBook from "../../components/CustomBook";
 
 type Book = {
@@ -15,14 +15,14 @@ type Book = {
   email: string;
   coverImage: string;
   totalChapters: number;
-  createdAt: any;
+  createdAt: any; // Firestore Timestamp
 };
 
 type Chapter = {
   id: string;
   title: string;
   content: string;
-  createdAt: any;
+  createdAt: any; // Firestore Timestamp
 };
 
 const { params } = Astro;
@@ -30,17 +30,29 @@ const id = params.id as string;
 
 let book: Book | null = null;
 let chapters: Chapter[] = [];
+let errorMessage: string | null = null; // To store any error messages
+
+// Access the global __app_id provided by the Canvas environment
+// This ID is crucial for constructing the correct Firestore path for public data.
+// const appId =
+//   typeof "1:477285884404:web:2f88ad7334a6f10d4699a1" !== "undefined"
+//     ? "1:477285884404:web:2f88ad7334a6f10d4699a1"
+//     : "default-app-id";
 
 await (async () => {
   try {
-    const docRef = doc(db, "books", id);
+    // Construct the Firestore document reference using the Canvas-specific path
+    // Public data is stored under /artifacts/{appId}/public/data/{collectionName}
+    const docRef = doc(db, `books`, id);
     const docSnap = await getDoc(docRef);
+
     if (docSnap.exists()) {
       const bookData = docSnap.data();
       book = { id, ...bookData } as Book;
 
+      // Construct the Firestore collection reference for chapters using the Canvas-specific path
       const chaptersSnapshot = await getDocs(
-        collection(db, "books", id, "chapters")
+        collection(db, `books`, id, "chapters")
       );
       chapters = chaptersSnapshot.docs
         .map((doc) => {
@@ -53,12 +65,15 @@ await (async () => {
         .sort(
           (a, b) => (a.createdAt?.seconds ?? 0) - (b.createdAt?.seconds ?? 0)
         );
+    } else {
+      errorMessage = "The requested book does not exist or has been deleted.";
     }
   } catch (err) {
     console.error(
       "Error loading book:",
       err instanceof Error ? err.message : err
     );
+    errorMessage = `Failed to load book: ${err instanceof Error ? err.message : String(err)}`;
   }
 })();
 ---
@@ -72,7 +87,10 @@ await (async () => {
     <Layout title="Book Not Found">
       <section class="text-center py-20 text-gray-600">
         <h1 class="text-4xl font-bold mb-4">📚 Book Not Found</h1>
-        <p>The requested book does not exist or has been deleted.</p>
+        <p>
+          {errorMessage ||
+            "The requested book does not exist or has been deleted."}
+        </p>
       </section>
     </Layout>
   )
