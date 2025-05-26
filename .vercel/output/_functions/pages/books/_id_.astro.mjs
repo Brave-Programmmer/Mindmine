@@ -219,16 +219,11 @@ const CustomBook = ({ chapters, book }) => {
 };
 
 const $$Astro = createAstro("https://livre.com");
-async function getStaticPaths() {
-  const booksSnapshot = await getDocs(collection(db, "books"));
-  return booksSnapshot.docs.map((doc2) => ({
-    params: { id: doc2.id }
-  }));
-}
 const $$id = createComponent(async ($$result, $$props, $$slots) => {
   const Astro2 = $$result.createAstro($$Astro, $$props, $$slots);
   Astro2.self = $$id;
-  const { id } = Astro2.params;
+  const { params } = Astro2;
+  const id = params.id;
   let book = null;
   let chapters = [];
   try {
@@ -251,7 +246,6 @@ const $$id = createComponent(async ($$result, $$props, $$slots) => {
   } catch (err) {
     console.error("Error loading book:", err);
   }
-  console.log(book);
   return renderTemplate`${book ? renderTemplate`${renderComponent($$result, "Layout", $$Layout, { "title": book.title }, { "default": async ($$result2) => renderTemplate`${renderComponent($$result2, "CustomBook", CustomBook, { "chapters": chapters, "book": book, "client:load": true, "client:component-hydration": "load", "client:component-path": "D:/projects/scriptora/CURSORAI/scriptora/src/components/CustomBook", "client:component-export": "default" })}` })}` : renderTemplate`${renderComponent($$result, "Layout", $$Layout, { "title": "Book Not Found" }, { "default": async ($$result2) => renderTemplate`${maybeRenderHead()}<section class="text-center py-20 text-gray-600"><h1 class="text-4xl font-bold mb-4">📚 Book Not Found</h1><p>The requested book does not exist or has been deleted.</p></section>` })}`}`;
 }, "D:/projects/scriptora/CURSORAI/scriptora/src/pages/books/[id].astro", void 0);
 
@@ -262,7 +256,6 @@ const _page = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: $$id,
   file: $$file,
-  getStaticPaths,
   url: $$url
 }, Symbol.toStringTag, { value: 'Module' }));
 

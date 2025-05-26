@@ -2,7 +2,7 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import tailwind from '@astrojs/tailwind';
-import cloudflare from '@astrojs/cloudflare';
+import vercelServerless from '@astrojs/vercel';
 // https://astro.build/config
 export default defineConfig({
   output: "server",
@@ -13,5 +13,5 @@ export default defineConfig({
     port: 3000,
     host: true
   },
-  adapter: cloudflare(),
+  adapter: vercelServerless({}),
 });

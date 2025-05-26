@@ -1,4 +1,5 @@
 ---
+// src/pages/books/[id].astro
 import Layout from "../../layouts/Layout.astro";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
@@ -23,31 +24,25 @@ type Chapter = {
   createdAt: any;
 };
 
-// Static generation of all book paths
-export async function getStaticPaths() {
-  const booksSnapshot = await getDocs(collection(db, "books"));
-  return booksSnapshot.docs.map((doc) => ({
-    params: { id: doc.id },
-  }));
-}
+const { params } = Astro;
+const id = params.id as string;
 
-// Load book and chapters
-const { id } = Astro.params;
 let book: Book | null = null;
 let chapters: Chapter[] = [];
 
 try {
-  const docRef = doc(db, "books", id as string);
+  const docRef = doc(db, "books", id);
   const docSnap = await getDoc(docRef);
   if (docSnap.exists()) {
     const bookData = docSnap.data();
     book = { id, ...bookData } as Book;
+
     const chaptersSnapshot = await getDocs(
-      collection(db, "books", id as string, "chapters")
+      collection(db, "books", id, "chapters")
     );
     chapters = chaptersSnapshot.docs
       .map((doc) => {
-        const data = doc.data() as Omit<Chapter, "id">; // assert known fields
+        const data = doc.data() as Omit<Chapter, "id">;
         return {
           id: doc.id,
           ...data,
@@ -58,14 +53,13 @@ try {
 } catch (err) {
   console.error("Error loading book:", err);
 }
-console.log(book);
 ---
 
 {
   book ? (
     <Layout title={book.title}>
       <CustomBook chapters={chapters} book={book} client:load />
-     </Layout>
+    </Layout>
   ) : (
     <Layout title="Book Not Found">
       <section class="text-center py-20 text-gray-600">
