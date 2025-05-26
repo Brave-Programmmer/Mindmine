@@ -1,17 +1,10 @@
-// @ts-check
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import tailwind from '@astrojs/tailwind';
-import vercelAdapter from '@astrojs/vercel';
-// https://astro.build/config
-export default defineConfig({
-  output: "server",
-  integrations: [react(), tailwind()],
-  site: 'https://scriptora-rho.vercel.app/',
+import vercel from '@astrojs/vercel';
 
-  server: {
-    port: 3000,
-    host: true
-  },
-  adapter: vercelAdapter(),
+export default defineConfig({
+  integrations: [react(), tailwind()],
+  site: 'https://livre.com',
+  adapter: vercel({ edge: false })  // <-- CRUCIAL
 });

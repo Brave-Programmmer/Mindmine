@@ -48,10 +48,15 @@ try {
           ...data,
         };
       })
-      .sort((a, b) => a.createdAt.seconds - b.createdAt.seconds);
+      .sort(
+        (a, b) => (a.createdAt?.seconds ?? 0) - (b.createdAt?.seconds ?? 0)
+      );
   }
 } catch (err) {
-  console.error("Error loading book:", err);
+  console.error(
+    "Error loading book:",
+    err instanceof Error ? err.message : err
+  );
 }
 ---
 
