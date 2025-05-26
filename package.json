@@ -9,11 +9,11 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/vercel":"8.1.4",
-    "@astrojs/react": "^4.2.7",
+    "@astrojs/react": "^4.3.0",
     "@astrojs/tailwind": "^6.0.2",
+    "@astrojs/vercel": "8.1.4",
     "@fontsource-variable/rubik": "^5.2.5",
-    "astro": "^5.7.12",
+    "astro": "^5.8.0",
     "dotenv": "^16.5.0",
     "firebase": "^11.7.1",
     "framer-motion": "^12.12.1",

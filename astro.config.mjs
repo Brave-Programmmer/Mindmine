@@ -5,6 +5,6 @@ import vercel from '@astrojs/vercel';
 
 export default defineConfig({
   integrations: [react(), tailwind()],
-  site: 'https://livre.com',
+  site: 'https://scriptora-rho.vercel.app/',
   adapter: vercel({ edge: false })  // <-- CRUCIAL
 });

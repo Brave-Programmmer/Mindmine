@@ -1,5 +1,6 @@
 ---
-// src/pages/books/[id].astro
+export const prerender = false;
+
 import Layout from "../../layouts/Layout.astro";
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { db } from "../../firebase";
