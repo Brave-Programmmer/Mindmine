@@ -2,16 +2,16 @@
 import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import tailwind from '@astrojs/tailwind';
-import vercelServerless from '@astrojs/vercel';
+import vercelAdapter from '@astrojs/vercel';
 // https://astro.build/config
 export default defineConfig({
   output: "server",
   integrations: [react(), tailwind()],
-  site: 'https://livre.com',
+  site: 'https://scriptora-rho.vercel.app/',
 
   server: {
     port: 3000,
     host: true
   },
-  adapter: vercelServerless({}),
+  adapter: vercelAdapter(),
 });
