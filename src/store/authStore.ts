@@ -25,7 +25,7 @@ export const useAuthStore = create<AuthState>()(
         set({ email: "", displayName: "", isAuthenticated: false }),
     }),
     {
-      name: "livre-auth-storage",
+      name: "mindmine-auth-storage",
     }
   )
 );

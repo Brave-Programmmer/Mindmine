@@ -1,4 +1,4 @@
-# Livre
+# mindmine
 
 A beautiful and modern platform for readers and authors to share their stories.
 

@@ -40,7 +40,7 @@ export const Navbar = () => {
               href="/"
               className="text-2xl font-extrabold text-rosewood hover:text-sienna transition-colors"
             >
-              Livre
+              mindmine
             </a>
 
             <button
@@ -186,7 +186,7 @@ export const Navbar = () => {
             className="text-xl font-bold text-rosewood hover:text-sienna transition-colors"
             onClick={closeMenu}
           >
-            Livre
+            mindMine
           </a>
           <button
             onClick={closeMenu}
