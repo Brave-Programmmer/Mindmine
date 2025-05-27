@@ -18,6 +18,7 @@ const Auth: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [name, setName] = useState<string>("");
   const [isLogin, setIsLogin] = useState<boolean>(true);
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -82,12 +83,15 @@ const Auth: React.FC = () => {
         );
 
         const currentUser = auth.currentUser; // <-- get currentUser here after signup
+        setUser(currentUser.email || "", currentUser.displayName || "", true);
 
         if (currentUser && name.trim()) {
           await updateProfile(currentUser, { displayName: name.trim() });
           await currentUser.reload();
 
           // Now get the updated user from auth.currentUser
+
+
           const updatedUser = auth.currentUser;
 
           setUser(
@@ -106,7 +110,7 @@ const Auth: React.FC = () => {
 
       // Delay redirect slightly so store and UI can update first
       setTimeout(() => {
-        window.location.href = "/write";
+        window.location.replace("/write");
       }, 1000);
     } catch (err: any) {
       const errorMessage = err?.message || "An error occurred";
@@ -197,7 +201,7 @@ const Auth: React.FC = () => {
             Password
           </label>
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -206,6 +210,14 @@ const Auth: React.FC = () => {
             required
             autoComplete={isLogin ? "current-password" : "new-password"}
           />
+
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="text-sm text-rosewood mt-1 hover:underline"
+          >
+            {showPassword ? "Hide" : "Show"} Password
+          </button>
         </div>
 
         <button

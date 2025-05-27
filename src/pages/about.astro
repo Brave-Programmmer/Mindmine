@@ -1,0 +1,104 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="About Us">
+  <section class="bg-peach text-taupe py-12 px-6 md:px-20">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-4xl md:text-5xl font-bold text-rosewood mb-4">
+        About Me
+      </h2>
+      <p class="text-lg mb-6 leading-relaxed">
+        Hi, I'm <span class="font-semibold text-sienna">Mohit Pujari</span>,
+        also known online as <span class="text-rosewood font-semibold"
+          >Brave Programmer</span
+        >. I was born in 2009, which makes me <span
+          id="my-age"
+          class="font-bold text-gold">...</span
+        > years old.
+      </p>
+      <p class="text-lg mb-4 leading-relaxed">
+        I began my programming journey at just 12 years old. 🚀 Since then, I've
+        completed over <span class="font-semibold text-sienna"
+          >100 projects</span
+        >
+        by the start of 2025! I work across both frontend and backend, bringing creativity
+        and clean code together to create powerful, user-friendly applications.
+      </p>
+      <p class="text-lg mb-4 leading-relaxed">
+        With deep experience in APIs, AI integration, and scalable systems, my
+        work reflects a passion for innovation and meaningful impact. Every
+        project is a chance to learn, grow, and bring ideas to life. 🌍✨
+      </p>
+
+      <h3 class="text-2xl mt-10 mb-3 text-rosewood font-semibold">
+        Connect with Brave Programmer
+      </h3>
+      <ul class="space-y-2 text-lg">
+        <li>
+          <a
+            href="https://mohit-pujari.itch.io/"
+            class="text-sienna hover:text-gold transition">🎮 Itch.io</a
+          > – Explore and download my games & creative work
+        </li>
+        <li>
+          <a
+            href="https://github.com/Brave-Programmmer"
+            class="text-sienna hover:text-gold transition">💻 GitHub</a
+          > – My open-source code & projects
+        </li>
+        <li>
+          <a
+            href="https://mumma-says.vercel.app/"
+            class="text-sienna hover:text-gold transition">🌐 Website 1</a
+          > and <a
+            href="https://braveprogrammer.vercel.app/"
+            class="text-sienna hover:text-gold transition">Website 2</a
+          > – Portfolio and updates
+        </li>
+        <li>
+          <a
+            href="https://www.youtube.com/braveprogrammer"
+            class="text-sienna hover:text-gold transition">📺 YouTube</a
+          > – Tutorials, devlogs, and tech videos
+        </li>
+      </ul>
+
+      <div class="mt-10">
+        <h3 class="text-2xl mb-2 text-rosewood font-semibold">👨‍💻 About Us</h3>
+        <p class="text-lg leading-relaxed">
+          We’re a passionate duo building creative projects, sharing knowledge,
+          and solving real-world problems through code—from freelance work to
+          open-source contributions.
+        </p>
+      </div>
+
+      <div class="mt-6">
+        <h3 class="text-2xl mb-2 text-rosewood font-semibold">👥 Our Team</h3>
+        <ul class="space-y-1 text-lg">
+          <li>
+            <span class="font-semibold text-sienna">@BraveProgrammer</span> – Developer,
+            YouTuber, freelancer – <a
+              href="https://github.com/Brave-Programmmer"
+              class="hover:text-gold text-sienna">GitHub</a
+            >
+          </li>
+          <li>
+            <span class="font-semibold text-sienna">@CodeAndSketch</span> – Design
+            & writing collaborator – <a
+              href="https://github.com/ChaosAndCode-sketch"
+              class="hover:text-gold text-sienna">GitHub</a
+            >
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</Layout>
+<script>
+  // Dynamic age calculation
+  const birthYear = 2009;
+  const thisYear = new Date().getFullYear();
+  const age = thisYear - birthYear;
+  document.getElementById("my-age").textContent = age.toString();
+</script>

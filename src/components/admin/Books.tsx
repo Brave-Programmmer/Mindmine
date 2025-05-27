@@ -57,8 +57,11 @@ const Books = () => {
 
   useEffect(() => {
     if (!isAuthenticated || !userEmail) {
+
       setBooks([]);
       setIsLoading(false);
+      window.location.href = '/login'
+
       return;
     }
 

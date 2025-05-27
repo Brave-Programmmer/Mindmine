@@ -83,10 +83,10 @@ export const Navbar = () => {
               Books
             </a>
             <a
-              href="/authors"
+              href="/about"
               className="text-rosewood font-medium hover:text-sienna transition-colors"
             >
-              Authors
+              About
             </a>
 
             {isAuthenticated ? (

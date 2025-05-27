@@ -8,8 +8,8 @@ export const Footer = () => {
         <a href="/books" className="hover:text-sienna transition-colors">
           Books
         </a>
-        <a href="/authors" className="hover:text-sienna transition-colors">
-          Authors
+        <a href="/about" className="hover:text-sienna transition-colors">
+          About
         </a>
         <a href="/write" className="hover:text-sienna transition-colors">
           Write
