@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import useSound from "use-sound";
 import { TypeAnimation } from "react-type-animation";
-import flipSound from "../assets/page-flip.mp3";
+import flipSound from "/assets/page-flip.mp3";
 
 type Chapter = {
   id: string;

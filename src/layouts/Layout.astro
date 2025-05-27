@@ -12,7 +12,57 @@ const { title } = Astro.props;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://mindmine.netlify.app/" />
     <title>{title}</title>
+
+    <!-- SEO Meta -->
+    <meta
+      name="description"
+      content="MindMine is a creative platform where authors write interactive books and readers explore immersive stories. Unleash your imagination as a writer or dive into a world of stories as a reader."
+    />
+    <meta
+      name="keywords"
+      content="MindMine, write books, read stories, storytelling platform, authors, interactive books, digital publishing, creative writing, reading platform, online books"
+    />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={title} />
+    <meta
+      property="og:description"
+      content="Join MindMine – where authors publish books and readers experience immersive storytelling."
+    />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:url" content="https://mindmine.netlify.app/" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta
+      name="twitter:description"
+      content="MindMine is a creative platform where authors and readers connect through stories."
+    />
+    <meta name="twitter:image" content="/og-image.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "MindMine",
+        "url": "https://mindmine.netlify.app/",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://mindmine.netlify.app/search?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        },
+        "description": "MindMine is a platform where authors can write interactive books and readers can explore immersive storytelling experiences."
+      }
+    </script>
   </head>
   <body class="pt-navbar">
     <Navbar client:only="react" />
@@ -41,9 +91,11 @@ const { title } = Astro.props;
     background-color: var(--blush);
     color: var(--taupe);
   }
+
   .animate-fade-in {
     animation: fadeIn 0.3s ease-in;
   }
+
   @keyframes fadeIn {
     from {
       opacity: 0;
@@ -52,13 +104,13 @@ const { title } = Astro.props;
       opacity: 1;
     }
   }
-  /* Optional: Rotate hamburger icon */
+
   #mobile-menu-button.active svg {
     transform: rotate(90deg);
     transition: transform 0.3s ease-in-out;
   }
 
   .pt-navbar {
-    padding-top: 4.5rem; /* Adjust to match the Navbar height */
+    padding-top: 4.5rem;
   }
 </style>

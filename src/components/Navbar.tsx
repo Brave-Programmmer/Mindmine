@@ -40,7 +40,7 @@ export const Navbar = () => {
               href="/"
               className="text-2xl font-extrabold text-rosewood hover:text-sienna transition-colors"
             >
-              mindmine
+              mindMine
             </a>
 
             <button
