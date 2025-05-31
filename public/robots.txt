@@ -1,6 +1,4 @@
 User-agent: *
 Allow: /
-Allow: /sitemap-index.xml
-Allow: /sitemap-0.xml
 
-Sitemap: /sitemap-index.xml
+Sitemap: https://mindmine.netlify.app/sitemap-index.xml
