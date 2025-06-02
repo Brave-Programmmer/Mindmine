@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { collection, getDocs, query } from "firebase/firestore";
 import { db } from "../firebase"; // Assuming `db` is already initialized and exported from '../firebase'
-
 type Book = {
   id: string;
   title: string;
@@ -84,11 +83,21 @@ const AllBooksGrid = () => {
       try {
         const q = query(collection(db, "books"));
         const querySnapshot = await getDocs(q);
-        const books = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setBooks(books as Book[]);
+
+        const booksWithChapters = await Promise.all(
+          querySnapshot.docs.map(async (doc) => {
+            const chaptersRef = collection(db, "books", doc.id, "chapters");
+            const chaptersSnapshot = await getDocs(chaptersRef);
+            const totalChapters = chaptersSnapshot.size; // Get the count
+            return {
+              id: doc.id,
+              ...doc.data(),
+              totalChapters,
+            };
+          })
+        );
+
+        setBooks(booksWithChapters as Book[]);
       } catch (err) {
         console.error("Error loading books:", err);
       } finally {
@@ -97,6 +106,8 @@ const AllBooksGrid = () => {
     };
     loadBooks();
   }, []);
+
+
 
   // Filtering by search (title or author) and selected genres
   const filteredBooks = books
@@ -139,7 +150,6 @@ const AllBooksGrid = () => {
       prev.includes(genre) ? prev.filter((g) => g !== genre) : [...prev, genre]
     );
   };
-
   return (
     <div className="p-6 max-w-screen-xl mx-auto font-inter">
       {" "}
@@ -179,10 +189,9 @@ const AllBooksGrid = () => {
             key={genre}
             onClick={() => toggleGenre(genre)}
             className={`px-3 py-1 rounded-full text-sm font-medium transition
-              ${
-                selectedGenres.includes(genre)
-                  ? "bg-rose-600 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              ${selectedGenres.includes(genre)
+                ? "bg-rose-600 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
               }`}
             aria-pressed={selectedGenres.includes(genre)}
           >
@@ -205,10 +214,9 @@ const AllBooksGrid = () => {
                   key={genre}
                   onClick={() => toggleGenre(genre)}
                   className={`block w-full text-left px-2 py-1 rounded-md text-sm transition
-                    ${
-                      selectedGenres.includes(genre)
-                        ? "bg-rose-600 text-white"
-                        : "hover:bg-gray-100"
+                    ${selectedGenres.includes(genre)
+                      ? "bg-rose-600 text-white"
+                      : "hover:bg-gray-100"
                     }`}
                   aria-pressed={selectedGenres.includes(genre)}
                 >
@@ -241,7 +249,7 @@ const AllBooksGrid = () => {
                 {/* Book Cover Image */}
                 <div
                   className={`${book.coverImage} absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105`}
-                  // Example if coverImage is a URL: style={{ backgroundImage: `url(${book.coverImage})` }}
+                // Example if coverImage is a URL: style={{ backgroundImage: `url(${book.coverImage})` }}
                 ></div>
 
                 {/* Overlay for details - hidden by default, visible on hover/focus */}
