@@ -3,8 +3,6 @@ import React, { useState, useRef, useEffect } from "react";
 interface TextCrafterProps {
   value: string;
   onChange: (value: string) => void;
-  onSave: (content: string) => void;
-  isSaving?: boolean;
 }
 
 const fontSizes = ["12px", "14px", "16px", "18px", "20px", "24px", "28px"];
@@ -15,7 +13,7 @@ const markdownToHtml = (markdown: string) => {
   let html = markdown
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>") // bold
     .replace(/\*(.+?)\*/g, "<em>$1</em>"); // italic
-  // Also convert line breaks to <br/>
+  // Convert line breaks to <br/>
   html = html.replace(/\n/g, "<br/>");
   return html;
 };
@@ -23,8 +21,6 @@ const markdownToHtml = (markdown: string) => {
 export const TextCrafter: React.FC<TextCrafterProps> = ({
   value,
   onChange,
-  onSave,
-  isSaving = false,
 }) => {
   const [fontSize, setFontSize] = useState("16px");
   const [isBoldActive, setIsBoldActive] = useState(false);
@@ -37,7 +33,6 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
     if (!textarea) return;
 
     const { selectionStart, selectionEnd } = textarea;
-    const selectedText = value.substring(selectionStart, selectionEnd);
 
     // Check if selection is wrapped with **
     const before = value.substring(selectionStart - 2, selectionStart);
@@ -119,10 +114,7 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
       }
     }
     onChange(newText);
-    // Focus and update cursor after update
-    setTimeout(() => {
-      textarea.focus();
-    }, 0);
+    setTimeout(() => textarea.focus(), 0);
   };
 
   const handleFontSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -141,9 +133,8 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
           type="button"
           aria-pressed={isBoldActive}
           onClick={() => toggleFormat("**")}
-          className={`px-3 py-1 rounded border ${
-            isBoldActive ? "bg-rose-500 text-white border-rose-600" : "border-gray-300"
-          }`}
+          className={`px-3 py-1 rounded border ${isBoldActive ? "bg-rose-500 text-white border-rose-600" : "border-gray-300"
+            }`}
           title="Bold (Wrap selected text with **)"
         >
           <b>B</b>
@@ -152,9 +143,8 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
           type="button"
           aria-pressed={isItalicActive}
           onClick={() => toggleFormat("*")}
-          className={`px-3 py-1 rounded border ${
-            isItalicActive ? "bg-rose-500 text-white border-rose-600" : "border-gray-300"
-          }`}
+          className={`px-3 py-1 rounded border ${isItalicActive ? "bg-rose-500 text-white border-rose-600" : "border-gray-300"
+            }`}
           title="Italic (Wrap selected text with *)"
         >
           <em>I</em>
@@ -174,15 +164,6 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
             ))}
           </select>
         </label>
-
-        <button
-          type="button"
-          onClick={() => onSave(value)}
-          disabled={isSaving}
-          className="ml-auto bg-rose-600 text-white px-4 py-1 rounded hover:bg-rose-700 disabled:opacity-50"
-        >
-          {isSaving ? "Saving..." : "Save"}
-        </button>
       </div>
 
       {/* Textarea */}

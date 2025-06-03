@@ -1,16 +1,63 @@
 import React, { useEffect, useState } from "react";
 import { collection, getDocs, query } from "firebase/firestore";
-import { db } from "../firebase"; // Assuming `db` is already initialized and exported from '../firebase'
+import { db } from "../firebase"; // Assuming `db` is already initialized and exported
+
 type Book = {
   id: string;
   title: string;
   author: string;
   genre: string;
   synopsis: string;
-  coverImage: string; // Tailwind background classes like 'bg-red-500' or 'bg-[url(...)]'
+  coverImage: string;
   totalChapters: number;
   createdAt: string;
   views?: number;
+};
+
+const BookCard = ({ book }: { book: Book }) => {
+  return (
+    <a
+      href={`/books/${book.id}`}
+      className="block relative w-full aspect-[2/3] rounded-lg overflow-hidden shadow-lg transform transition-all duration-300
+       hover:scale-[1.03] hover:shadow-2xl group cursor-pointer border border-gray-200 bg-white"
+      aria-label={`View details of ${book.title} by ${book.author}`}
+    >
+      <div
+        className={`${book.coverImage} absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105`}
+      ></div>
+
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300
+        flex flex-col justify-end p-4 text-white text-center"
+      >
+        <h3 className="text-lg md:text-xl font-bold mb-1 leading-tight line-clamp-2">
+          {book.title}
+        </h3>
+        <p className="text-sm md:text-base font-medium text-gray-200 mb-2 line-clamp-1">
+          By {book.author}
+        </p>
+        <p className="text-xs md:text-sm italic text-gray-300 line-clamp-3 mb-3">
+          {book.synopsis || "No synopsis available for this book."}
+        </p>
+        <div className="flex justify-center gap-4 text-xs md:text-sm font-semibold mt-auto">
+          <span className="flex items-center gap-1">
+            📖 {book.totalChapters} chapters
+          </span>
+          <span className="flex items-center gap-1">
+            👁 {book.views || 0} views
+          </span>
+        </div>
+      </div>
+
+      <div
+        className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 text-white
+        transition-opacity duration-300 group-hover:opacity-0"
+      >
+        <p className="text-sm font-bold truncate">{book.title}</p>
+        <p className="text-xs truncate text-gray-300">{book.author}</p>
+      </div>
+    </a>
+  );
 };
 
 const AllBooksGrid = () => {
@@ -22,61 +69,8 @@ const AllBooksGrid = () => {
     "title"
   );
   const [currentPage, setCurrentPage] = useState(1);
+
   const pageSize = 20;
-
-  /**
-   * BookCard Component
-   * Renders a single book card with a visually appealing design inspired by CodePen.
-   * Includes spine details, cover image, and book information.
-   * @param book The book object to display.
-   */
-  const BookCard = ({ book }: { book: Book }) => {
-    return (
-      <a
-        href={`/books/${book.id}`}
-        className="relative group w-full aspect-[2/3] rounded-xl shadow-lg overflow-hidden bg-white border border-gray-200 hover:shadow-2xl transition-transform hover:scale-[1.05]"
-        aria-label={`View details of ${book.title}`}
-      >
-        {/* Book Binding / Spine */}
-        <div className="absolute left-0 top-0 h-full w-8 rounded-l-xl bg-gradient-to-b from-neutral-900 via-neutral-800 to-neutral-900 border-r border-black/50 shadow-inner flex flex-col items-center justify-center z-30">
-          {/* Curved vertical strips for texture (visual detail) */}
-          <div className="w-1 h-full bg-black/10 rounded-l-full absolute left-1/2 top-0 -translate-x-1/2"></div>
-          <div className="w-0.5 h-full bg-black/20 rounded-l-full absolute left-3 top-0"></div>
-          <div className="w-0.5 h-full bg-black/20 rounded-l-full absolute left-5 top-0"></div>
-          {/* Vertical stitches spaced evenly (visual detail) */}
-          <div className="flex flex-col justify-between h-4/5">
-            {[...Array(8)].map((_, i) => (
-              <span
-                key={i}
-                className="block w-2 h-2 rounded-full bg-neutral-700 shadow-md"
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Book Cover */}
-        {/* The cover takes up the remaining width after the spine and has rounded right corners */}
-        <div
-          className={`${book.coverImage} h-full w-[calc(100%-2rem)] absolute left-8 top-0 rounded-r-xl bg-cover bg-center relative z-20 flex flex-col justify-end shadow-inner`}
-        >
-          {/* Overlay for text content on the cover */}
-          <div className="absolute inset-0 bg-black/40 text-white duration-300 rounded-r-xl p-4 flex flex-col justify-center items-center text-center select-none text-xs md:text-sm">
-            <h3 className="font-bold text-base md:text-lg mb-2 leading-tight truncate w-full">
-              {book.title}
-            </h3>
-            <p className="text-sm mb-1 truncate w-full">By {book.author}</p>
-            <p className="text-xs italic text-gray-300 line-clamp-3 mb-2 px-1 w-full">
-              {book.synopsis || "No synopsis available."}
-            </p>
-            <div className="flex justify-center gap-6 text-sm font-semibold mt-auto w-full px-4">
-              <span>📖 {book.totalChapters} chapters</span>
-              <span>👁 {book.views || 0} views</span>
-            </div>
-          </div>
-        </div>
-      </a>
-    );
-  };
 
   useEffect(() => {
     const loadBooks = async () => {
@@ -88,16 +82,15 @@ const AllBooksGrid = () => {
           querySnapshot.docs.map(async (doc) => {
             const chaptersRef = collection(db, "books", doc.id, "chapters");
             const chaptersSnapshot = await getDocs(chaptersRef);
-            const totalChapters = chaptersSnapshot.size; // Get the count
             return {
               id: doc.id,
               ...doc.data(),
-              totalChapters,
-            };
+              totalChapters: chaptersSnapshot.size,
+            } as Book;
           })
         );
 
-        setBooks(booksWithChapters as Book[]);
+        setBooks(booksWithChapters);
       } catch (err) {
         console.error("Error loading books:", err);
       } finally {
@@ -107,28 +100,20 @@ const AllBooksGrid = () => {
     loadBooks();
   }, []);
 
-
-
-  // Filtering by search (title or author) and selected genres
   const filteredBooks = books
     .filter((book) => {
+      const term = searchTerm.toLowerCase();
       const matchesSearch =
-        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchTerm.toLowerCase());
+        book.title.toLowerCase().includes(term) ||
+        book.author.toLowerCase().includes(term);
       const matchesGenre =
         selectedGenres.length === 0 || selectedGenres.includes(book.genre);
       return matchesSearch && matchesGenre;
     })
     .sort((a, b) => {
-      if (sortKey === "title") {
-        return a.title.localeCompare(b.title);
-      }
-      if (sortKey === "totalChapters") {
-        return b.totalChapters - a.totalChapters;
-      }
-      if (sortKey === "views") {
-        return (b.views || 0) - (a.views || 0);
-      }
+      if (sortKey === "title") return a.title.localeCompare(b.title);
+      if (sortKey === "totalChapters") return b.totalChapters - a.totalChapters;
+      if (sortKey === "views") return (b.views || 0) - (a.views || 0);
       return 0;
     });
 
@@ -138,23 +123,20 @@ const AllBooksGrid = () => {
     currentPage * pageSize
   );
 
-  // Genre list (sorted)
   const allGenres = Array.from(
     new Set(books.map((book) => book.genre).filter(Boolean))
   ).sort();
 
-  // Handler for multi-select genres toggle
   const toggleGenre = (genre: string) => {
     setCurrentPage(1);
     setSelectedGenres((prev) =>
       prev.includes(genre) ? prev.filter((g) => g !== genre) : [...prev, genre]
     );
   };
+
   return (
     <div className="p-6 max-w-screen-xl mx-auto font-inter">
-      {" "}
-      {/* Added font-inter */}
-      {/* Search & Sort controls */}
+      {/* Search & Sort */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <input
           type="text"
@@ -179,7 +161,8 @@ const AllBooksGrid = () => {
           <option value="views">Sort by Views (desc)</option>
         </select>
       </div>
-      {/* Genre multi-select buttons (show first 4, rest hidden behind "More" dropdown) */}
+
+      {/* Genre Filters */}
       <div className="mb-6 flex flex-wrap gap-2 items-center">
         {allGenres.length === 0 && (
           <p className="text-gray-500">No genres available.</p>
@@ -204,7 +187,6 @@ const AllBooksGrid = () => {
             <button
               className="px-3 py-1 rounded-full bg-gray-200 text-gray-700 hover:bg-gray-300 text-sm font-medium"
               aria-haspopup="true"
-              aria-expanded="false"
             >
               More ▾
             </button>
@@ -227,7 +209,8 @@ const AllBooksGrid = () => {
           </div>
         )}
       </div>
-      {/* Books grid */}
+
+      {/* Books Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
         {isLoading ? (
           <p className="col-span-full text-center text-gray-500">
@@ -238,61 +221,10 @@ const AllBooksGrid = () => {
             No books found.
           </p>
         ) : (
-          paginatedBooks.map((book) => (
-            <div>
-              <a
-                href={`/books/${book.id}`}
-                className="block relative w-full aspect-[2/3] rounded-lg overflow-hidden shadow-lg transform transition-all duration-300
-                 hover:scale-[1.03] hover:shadow-2xl group cursor-pointer border border-gray-200 bg-white"
-                aria-label={`View details of ${book.title} by ${book.author}`}
-              >
-                {/* Book Cover Image */}
-                <div
-                  className={`${book.coverImage} absolute inset-0 bg-cover bg-center transition-transform duration-300 group-hover:scale-105`}
-                // Example if coverImage is a URL: style={{ backgroundImage: `url(${book.coverImage})` }}
-                ></div>
-
-                {/* Overlay for details - hidden by default, visible on hover/focus */}
-                <div
-                  className="absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300
-                  flex flex-col justify-end p-4 text-white text-center"
-                >
-                  <h3 className="text-lg md:text-xl font-bold mb-1 leading-tight line-clamp-2">
-                    {book.title}
-                  </h3>
-                  <p className="text-sm md:text-base font-medium text-gray-200 mb-2 line-clamp-1">
-                    By {book.author}
-                  </p>
-                  <p className="text-xs md:text-sm italic text-gray-300 line-clamp-3 mb-3">
-                    {book.synopsis || "No synopsis available for this book."}
-                  </p>
-                  <div className="flex justify-center gap-4 text-xs md:text-sm font-semibold mt-auto">
-                    <span className="flex items-center gap-1">
-                      <i className="fa-solid fa-book"></i> {book.totalChapters}{" "}
-                      chapters
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <i className="fa-solid fa-eye"></i> {book.views || 0}{" "}
-                      views
-                    </span>
-                  </div>
-                </div>
-
-                {/* Always visible title/author at the bottom (for quick scan) */}
-                <div
-                  className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 text-white
-                      transition-opacity duration-300 group-hover:opacity-0"
-                >
-                  <p className="text-sm font-bold truncate">{book.title}</p>
-                  <p className="text-xs truncate text-gray-300">
-                    {book.author}
-                  </p>
-                </div>
-              </a>
-            </div>
-          ))
+          paginatedBooks.map((book) => <BookCard key={book.id} book={book} />)
         )}
       </div>
+
       {/* Pagination */}
       {totalPages > 1 && (
         <nav

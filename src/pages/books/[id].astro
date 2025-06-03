@@ -6,6 +6,6 @@ const { params } = Astro;
 const id = params.id;
 ---
 
-<Layout title={`Book: ${id}`}>
+<Layout title={`Reading Book`}>
   <FetchBook id={id} client:only="react" />
 </Layout>

@@ -113,7 +113,11 @@ const CustomBook: React.FC<Props> = ({ chapters, book }) => {
   // Show cover
   if (showCover) {
     return (
+
       <div className="min-h-screen flex flex-col items-center justify-center bg-[#f3eadd] px-4 py-10">
+        <head>
+      <title>Reading: {book.title}</title>
+        </head>
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}

@@ -1,7 +1,15 @@
 import { useEffect, useState } from "react";
-import { doc, getDoc, collection, getDocs } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  collection,
+  getDocs,
+  updateDoc,
+  increment,
+} from "firebase/firestore";
 import { db } from "../firebase";
 import CustomBook from "./CustomBook";
+
 type Book = {
   id: string;
   title: string;
@@ -27,40 +35,56 @@ export default function FetchBook({ id }: { id: string }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchData() {
+    let isMounted = true;
+
+    const fetchData = async () => {
       try {
         const docRef = doc(db, "books", id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const bookData = docSnap.data() as Omit<Book, "id">;
-          setBook({ id, ...bookData });
+        const docSnapPromise = getDoc(docRef);
+        const chaptersSnapshotPromise = getDocs(collection(db, "books", id, "chapters"));
 
-          const chaptersSnapshot = await getDocs(
-            collection(db, "books", id, "chapters")
-          );
-          const chaptersData = chaptersSnapshot.docs
-            .map((doc) => {
-              const data = doc.data() as Omit<Chapter, "id">;
-              return {
-                id: doc.id,
-                ...data,
-              };
-            })
-            .sort(
-              (a, b) =>
-                (a.createdAt?.seconds ?? 0) - (b.createdAt?.seconds ?? 0)
-            );
-          setChapters(chaptersData);
-        } else {
-          setError("Book not found.");
+        // Await both promises concurrently
+        const [docSnap, chaptersSnapshot] = await Promise.all([
+          docSnapPromise,
+          chaptersSnapshotPromise,
+        ]);
+
+        if (!docSnap.exists()) {
+          if (isMounted) setError("Book not found.");
+          return;
         }
+
+        // Set book
+        const bookData = docSnap.data() as Omit<Book, "id">;
+        if (isMounted) setBook({ id, ...bookData });
+
+        // Set chapters
+        const chaptersData = chaptersSnapshot.docs
+          .map((doc) => {
+            const data = doc.data() as Omit<Chapter, "id">;
+            return { id: doc.id, ...data };
+          })
+          .sort(
+            (a, b) =>
+              (a.createdAt?.seconds ?? 0) - (b.createdAt?.seconds ?? 0)
+          );
+
+        if (isMounted) setChapters(chaptersData);
+
+        // Increment view count
+        await updateDoc(docRef, { views: increment(1) });
       } catch (err) {
         console.error(err);
-        setError("Failed to load book.");
+        if (isMounted) setError("Failed to load book.");
       }
-    }
+    };
 
     fetchData();
+
+    // Cleanup to avoid memory leaks
+    return () => {
+      isMounted = false;
+    };
   }, [id]);
 
   if (error) {
@@ -79,8 +103,6 @@ export default function FetchBook({ id }: { id: string }) {
       </section>
     );
   }
-
-
 
   return <CustomBook book={book} chapters={chapters} />;
 }

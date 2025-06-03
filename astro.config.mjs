@@ -10,4 +10,5 @@ export default defineConfig({
   site: 'https://mindmine.netlify.app/',
   // adapter: vercel({ edge: false })  // <-- CRUCIAL
   adapter: netlify(),
+  trailingSlash: 'never'
 });

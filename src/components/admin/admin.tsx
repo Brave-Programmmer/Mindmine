@@ -5,8 +5,8 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { Bounce, ToastContainer, toast } from "react-toastify";
 import { useAuthStore } from "../../store/authStore";
 
-// Cover styles with gradients and particle-like effects
-const coverStyles: { label: string; className: string }[] = [
+// Cover styles
+const coverStyles = [
   {
     label: "Sunset Horizon",
     className: "bg-gradient-to-br from-yellow-200 via-orange-300 to-red-400",
@@ -30,14 +30,13 @@ const coverStyles: { label: string; className: string }[] = [
 ];
 
 const Admin = () => {
-  const email = useAuthStore((state) => state.email); // Zustand email
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const email = useAuthStore((state) => state.email);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [newBook, setNewBook] = useState({
     title: "",
     author: "",
     genre: "",
     synopsis: "",
-
     coverImage: coverStyles[0].className,
     totalChapters: 0,
     email: "",
@@ -46,7 +45,7 @@ const Admin = () => {
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && user.displayName) {
+      if (user) {
         setNewBook((prev) => ({
           ...prev,
           author: user.displayName || "",
@@ -54,23 +53,23 @@ const Admin = () => {
         }));
       }
     });
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setNewBook({ ...newBook, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setNewBook((prev) => ({ ...prev, [name]: value }));
   };
-  const handleGenreChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    setNewBook({ ...newBook, [e.target.name]: e.target.value });
+
+  const handleGenreChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setNewBook((prev) => ({ ...prev, [name]: value }));
   };
+
   const handleCoverImageChange = (className: string) => {
-    setNewBook({ ...newBook, coverImage: className });
+    setNewBook((prev) => ({ ...prev, coverImage: className }));
   };
 
   const handleCreateBook = async () => {
@@ -85,14 +84,15 @@ const Admin = () => {
     }
 
     try {
-      const createdAt = new Date().toISOString();
       const bookToCreate = {
         ...newBook,
-        createdAt,
+        createdAt: new Date().toISOString(),
+        views: 0,
         email,
-        views: 0, // ✅ Add this line
       };
+
       await addDoc(collection(db, "books"), bookToCreate);
+
       setNewBook({
         title: "",
         author: "",
@@ -102,13 +102,14 @@ const Admin = () => {
         totalChapters: 0,
         email: "",
       });
+
       toast.success("New Book Added!", {
         position: "top-right",
         autoClose: 5000,
         theme: "light",
         transition: Bounce,
       });
-      setIsCreateModalOpen(false);
+      setIsModalOpen(false);
     } catch (err) {
       console.error("Failed to create book:", err);
       alert("Something went wrong while creating the book.");
@@ -117,31 +118,31 @@ const Admin = () => {
 
   return (
     <div>
-      {/* FAB to trigger modal */}
+      {/* Create New Book Button */}
       <button
         onClick={() => {
           if (!email) {
             toast.warn("Please log in to create a book.");
             return;
           }
-          setIsCreateModalOpen(true);
+          setIsModalOpen(true);
         }}
-        className={`fixed bottom-6 right-6 p-4 rounded-full shadow-lg z-50 ${
-          email
+        className={`fixed bottom-6 right-6 p-4 rounded-full shadow-lg z-50 transition ${email
             ? "bg-rosewood/80 hover:bg-sienna text-white"
             : "bg-gray-400 cursor-not-allowed text-white"
-        }`}
+          }`}
         aria-label="Add New Book"
         disabled={!email}
       >
         ✚ Create New Book
       </button>
 
-      {isCreateModalOpen && email && (
+      {/* Modal */}
+      {isModalOpen && email && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg relative max-h-[90vh] overflow-y-auto">
             <button
-              onClick={() => setIsCreateModalOpen(false)}
+              onClick={() => setIsModalOpen(false)}
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
             >
               ✕
@@ -161,10 +162,10 @@ const Admin = () => {
               />
               <input
                 type="text"
-                disabled
                 name="author"
                 placeholder="Author"
                 value={newBook.author}
+                disabled
                 className="w-full border border-gray-300 rounded px-3 py-2"
               />
               <select
@@ -174,24 +175,30 @@ const Admin = () => {
                 className="w-full border border-gray-300 rounded px-3 py-2"
               >
                 <option value="">Select Genre</option>
-                <option value="Romance">Romance</option>
-                <option value="Fantasy">Fantasy</option>
-                <option value="Mystery">Mystery</option>
-                <option value="Science Fiction">Science Fiction</option>
-                <option value="Historical Fiction">Historical Fiction</option>
-                <option value="Thriller">Thriller</option>
-                <option value="Horror">Horror</option>
-                <option value="Adventure">Adventure</option>
-                <option value="Biography">Biography</option>
-                <option value="Self-Help">Self-Help</option>
-                <option value="Poetry">Poetry</option>
-                <option value="Young Adult">Young Adult</option>
-                <option value="Children">Children</option>
-                <option value="Non-Fiction">Non-Fiction</option>
-                <option value="Dystopian">Dystopian</option>
-                <option value="Graphic Novel">Graphic Novel</option>
-                <option value="Classic">Classic</option>
-                <option value="Humor">Humor</option>
+                {[
+                  "Romance",
+                  "Fantasy",
+                  "Mystery",
+                  "Science Fiction",
+                  "Historical Fiction",
+                  "Thriller",
+                  "Horror",
+                  "Adventure",
+                  "Biography",
+                  "Self-Help",
+                  "Poetry",
+                  "Young Adult",
+                  "Children",
+                  "Non-Fiction",
+                  "Dystopian",
+                  "Graphic Novel",
+                  "Classic",
+                  "Humor",
+                ].map((genre) => (
+                  <option key={genre} value={genre}>
+                    {genre}
+                  </option>
+                ))}
               </select>
 
               <textarea
@@ -199,9 +206,11 @@ const Admin = () => {
                 placeholder="Synopsis"
                 value={newBook.synopsis}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded px-3 py-2"
                 rows={4}
+                className="w-full border border-gray-300 rounded px-3 py-2"
               />
+
+              {/* Cover Styles */}
               <div>
                 <p className="text-sm font-medium text-gray-600 mb-2">
                   Choose Cover Style
@@ -210,12 +219,11 @@ const Admin = () => {
                   {coverStyles.map((style) => (
                     <div
                       key={style.label}
-                      className={`relative h-36 w-28 cursor-pointer transform transition-transform ${
-                        newBook.coverImage === style.className
+                      onClick={() => handleCoverImageChange(style.className)}
+                      className={`relative h-36 w-28 cursor-pointer transform transition ${newBook.coverImage === style.className
                           ? "scale-105 ring-2 ring-rosewood"
                           : "hover:scale-105"
-                      }`}
-                      onClick={() => handleCoverImageChange(style.className)}
+                        }`}
                     >
                       <div className="absolute left-0 top-0 h-full w-4 bg-neutral-800 rounded-l-md shadow-inner z-10"></div>
                       <div
@@ -242,6 +250,7 @@ const Admin = () => {
           </div>
         </div>
       )}
+
       <ToastContainer />
     </div>
   );
