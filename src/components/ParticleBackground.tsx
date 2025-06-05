@@ -1,128 +1,224 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback, useMemo } from "react";
 
-const ParticleBackground = () => {
+const CONFIG = {
+  PARTICLE_COUNT: 40,
+  CONNECTION_DISTANCE: 180,
+  CONNECTION_OPACITY_FACTOR: 0.15,
+  BASE_FONT_SIZE: 12,
+  MAX_FONT_SIZE_VARIATION: 10,
+  PARTICLE_SPEED_RANGE: 0.7,
+  GLOW_BLUR: 15,
+  ANIMATION_SPEED: 0.0005,
+  RESIZE_DEBOUNCE: 200,
+  MAX_FPS: 60,
+} as const;
+
+const COLORS = {
+  ROSEWOOD: [188, 143, 143] as const,
+  GLOW: [188, 143, 143] as const,
+} as const;
+
+interface ParticleBackgroundProps {
+  className?: string;
+}
+
+class Particle {
+  x: number;
+  y: number;
+  text: string;
+  fontSize: number;
+  baseFontSize: number;
+  speedX: number;
+  speedY: number;
+  opacity: number;
+  initialOpacity: number;
+  phase: number;
+  color: string;
+  textMetrics: TextMetrics | null = null;
+
+  constructor(
+    private canvasWidth: number,
+    private canvasHeight: number,
+    private wordPool: readonly string[]
+  ) {
+    this.x = Math.random() * canvasWidth;
+    this.y = Math.random() * canvasHeight;
+
+    this.text = wordPool[Math.floor(Math.random() * wordPool.length)];
+    this.baseFontSize = Math.random() * CONFIG.MAX_FONT_SIZE_VARIATION + CONFIG.BASE_FONT_SIZE;
+    this.fontSize = this.baseFontSize;
+    this.speedX = (Math.random() - 0.5) * CONFIG.PARTICLE_SPEED_RANGE;
+    this.speedY = (Math.random() - 0.5) * CONFIG.PARTICLE_SPEED_RANGE;
+    this.initialOpacity = Math.random() * 0.3 + 0.5;
+    this.opacity = this.initialOpacity;
+    this.phase = Math.random() * Math.PI * 2;
+    this.color = this.getColorString();
+  }
+
+  private getColorString(): string {
+    return `rgba(${COLORS.ROSEWOOD.join(", ")}, ${this.opacity})`;
+  }
+
+  update(canvasWidth: number, canvasHeight: number, deltaTime: number): void {
+    this.canvasWidth = canvasWidth;
+    this.canvasHeight = canvasHeight;
+    this.x += this.speedX * deltaTime;
+    this.y += this.speedY * deltaTime;
+
+    const currentTime = performance.now() * CONFIG.ANIMATION_SPEED;
+    const timeFactor = currentTime + this.phase;
+    this.fontSize = this.baseFontSize + Math.sin(timeFactor) * 1.5;
+    this.opacity = Math.max(0.1, this.initialOpacity + Math.sin(timeFactor * 0.7) * 0.15);
+    this.color = this.getColorString();
+
+    const textWidth = this.textMetrics ? this.textMetrics.width : this.fontSize;
+    const textHeight = this.fontSize;
+
+    if (this.x > canvasWidth + textWidth / 2) this.x = -textWidth / 2;
+    else if (this.x < -textWidth / 2) this.x = canvasWidth + textWidth / 2;
+
+    if (this.y > canvasHeight + textHeight / 2) this.y = -textHeight / 2;
+    else if (this.y < -textHeight / 2) this.y = canvasHeight + textHeight / 2;
+  }
+
+  draw(ctx: CanvasRenderingContext2D): void {
+    ctx.fillStyle = this.color;
+    ctx.font = `${this.fontSize}px Inter, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    if (!this.textMetrics) {
+      this.textMetrics = ctx.measureText(this.text);
+    }
+
+    ctx.shadowBlur = CONFIG.GLOW_BLUR;
+    ctx.shadowColor = `rgba(${COLORS.GLOW.join(", ")}, 0.3)`;
+    ctx.fillText(this.text, this.x, this.y);
+    ctx.shadowBlur = 0;
+    ctx.shadowColor = "transparent";
+  }
+}
+
+const ParticleBackground: React.FC<ParticleBackgroundProps> = ({
+  className = "absolute inset-0 w-full h-full pointer-events-none",
+}) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const animationFrameId = useRef<number | null>(null);
+  const lastFrameTime = useRef<number>(0);
+  const particlesRef = useRef<Particle[]>([]);
+
+  const WORD_POOL = useMemo(
+    () => [
+      "Story", "Idea", "Dream", "Mind", "Create", "Imagine", "Write",
+      "Read", "Learn", "Share", "Connect", "Wisdom", "Insight",
+      "Explore", "Journey", "Verse", "Chapter", "Narrate",
+      "Enlighten", "Inspire", "Discovery",
+    ],
+    []
+  );
+
+  const resizeCanvas = useCallback((canvas: HTMLCanvasElement) => {
+    const { innerWidth, innerHeight, devicePixelRatio = 1 } = window;
+    const scale = Math.min(devicePixelRatio, 2);
+
+    canvas.width = innerWidth * scale;
+    canvas.height = innerHeight * scale;
+    canvas.style.width = `${innerWidth}px`;
+    canvas.style.height = `${innerHeight}px`;
+
+    const ctx = canvas.getContext("2d");
+    if (ctx) ctx.setTransform(scale, 0, 0, scale, 0, 0);
+  }, []);
+
+  const initParticles = useCallback((width: number, height: number) => {
+    particlesRef.current = Array.from(
+      { length: CONFIG.PARTICLE_COUNT },
+      () => new Particle(width, height, WORD_POOL)
+    );
+  }, [WORD_POOL]);
+
+  const drawConnections = useCallback((ctx: CanvasRenderingContext2D) => {
+    const particles = particlesRef.current;
+    const maxDistSq = CONFIG.CONNECTION_DISTANCE ** 2;
+
+    ctx.lineWidth = 0.8;
+
+    for (let i = 0; i < particles.length - 1; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const p1 = particles[i];
+        const p2 = particles[j];
+        const dx = p1.x - p2.x;
+        const dy = p1.y - p2.y;
+        const distSq = dx * dx + dy * dy;
+
+        if (distSq < maxDistSq) {
+          const opacity = CONFIG.CONNECTION_OPACITY_FACTOR * (1 - Math.sqrt(distSq) / CONFIG.CONNECTION_DISTANCE);
+          ctx.strokeStyle = `rgba(${COLORS.ROSEWOOD.join(", ")}, ${opacity})`;
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.stroke();
+        }
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: true, desynchronized: true });
     if (!ctx) return;
 
-    // Set canvas size
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas(canvas);
+    initParticles(window.innerWidth, window.innerHeight);
 
-    // Particle class
-    class Particle {
-      x: number;
-      y: number;
-      size: number;
-      speedX: number;
-      speedY: number;
-      color: string;
-      private width: number;
-      private height: number;
-      private opacity: number;
-      private baseSize: number;
-
-      constructor(width: number, height: number) {
-        this.width = width;
-        this.height = height;
-        this.x = Math.random() * width;
-        this.y = Math.random() * height;
-        this.baseSize = Math.random() * 4 + 2; // Increased base size
-        this.size = this.baseSize;
-        this.speedX = Math.random() * 1.5 - 0.75; // Slower, more controlled movement
-        this.speedY = Math.random() * 1.5 - 0.75;
-        this.opacity = Math.random() * 0.5 + 0.5; // Higher base opacity
-        this.color = `rgba(188, 143, 143, ${this.opacity})`; // Rosewood color
-      }
-
-      update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-
-        // Subtle size animation
-        this.size = this.baseSize + Math.sin(Date.now() * 0.001 + this.x) * 0.5;
-
-        if (this.x > this.width) this.x = 0;
-        if (this.x < 0) this.x = this.width;
-        if (this.y > this.height) this.y = 0;
-        if (this.y < 0) this.y = this.height;
-      }
-
-      draw() {
-        if (!ctx) return;
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Add glow effect
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = "rgba(188, 143, 143, 0.3)";
-        ctx.fill();
-        ctx.shadowBlur = 0;
-      }
-    }
-
-    // Create particles
-    const particles: Particle[] = [];
-    const particleCount = 70; // Increased particle count
-    for (let i = 0; i < particleCount; i++) {
-      particles.push(new Particle(canvas.width, canvas.height));
-    }
-
-    // Animation loop
-    const animate = () => {
-      if (!ctx) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      particles.forEach((particle) => {
-        particle.update();
-        particle.draw();
-      });
-
-      // Draw connections
-      particles.forEach((particle, i) => {
-        particles.slice(i + 1).forEach((otherParticle) => {
-          const dx = particle.x - otherParticle.x;
-          const dy = particle.y - otherParticle.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < 150) { // Increased connection distance
-            ctx.beginPath();
-            const opacity = 0.2 * (1 - distance / 150); // Increased connection opacity
-            ctx.strokeStyle = `rgba(188, 143, 143, ${opacity})`;
-            ctx.lineWidth = 1; // Slightly thicker lines
-            ctx.moveTo(particle.x, particle.y);
-            ctx.lineTo(otherParticle.x, otherParticle.y);
-            ctx.stroke();
-          }
-        });
-      });
-
-      requestAnimationFrame(animate);
+    let resizeTimeout: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        resizeCanvas(canvas);
+        initParticles(window.innerWidth, window.innerHeight);
+      }, CONFIG.RESIZE_DEBOUNCE);
     };
 
-    animate();
+    const targetFrameTime = 1000 / CONFIG.MAX_FPS;
+
+    const animate = (currentTime: number) => {
+      if (currentTime - lastFrameTime.current < targetFrameTime) {
+        animationFrameId.current = requestAnimationFrame(animate);
+        return;
+      }
+      const deltaTime = Math.min((currentTime - lastFrameTime.current) / targetFrameTime, 2);
+      lastFrameTime.current = currentTime;
+
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+      for (const particle of particlesRef.current) {
+        particle.update(window.innerWidth, window.innerHeight, deltaTime);
+        particle.draw(ctx);
+      }
+
+      drawConnections(ctx);
+      animationFrameId.current = requestAnimationFrame(animate);
+    };
+
+    animationFrameId.current = requestAnimationFrame(animate);
+    window.addEventListener("resize", handleResize, { passive: true });
 
     return () => {
-      window.removeEventListener("resize", resizeCanvas);
+      window.removeEventListener("resize", handleResize);
+      if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
+      clearTimeout(resizeTimeout);
     };
-  }, []);
+  }, [resizeCanvas, initParticles, drawConnections]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 w-full h-full pointer-events-none"
+      className={className}
       style={{ zIndex: 0 }}
+      aria-hidden="true"
+      role="presentation"
     />
   );
 };
