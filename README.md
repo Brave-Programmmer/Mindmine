@@ -53,7 +53,7 @@ Before running MindMine locally, ensure you have:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/mindmine.git
+   git clone https://github.com/Brave-Programmmer/mindmine.git
    cd mindmine
    ```
 
@@ -149,8 +149,6 @@ We welcome contributions to MindMine! Here's how you can help:
 ## 📧 Support & Contact
 
 - **Website:** [https://mindmine.netlify.app/](https://mindmine.netlify.app/)
-- **Issues:** [GitHub Issues](https://github.com/yourusername/mindmine/issues)
-- **Email:** support@mindmine.com
 
 ## 📄 License
 
