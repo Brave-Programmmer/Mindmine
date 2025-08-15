@@ -43,9 +43,9 @@ export async function GET() {
   xmlns:content="http://purl.org/rss/1.0/modules/content/"
   xmlns:media="http://search.yahoo.com/mrss/">
   <channel>
-    <title>Scriptora: New Books</title>
+    <title>mindMine: New Books</title>
     <link>https://yourdomain.com</link>
-    <description>Recently published books on Scriptora</description>
+    <description>Recently published books on mindMine</description>
     <language>en-us</language>
     ${feedItems.join("\n")}
   </channel>

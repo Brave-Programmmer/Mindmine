@@ -9,10 +9,26 @@ import {
   serverTimestamp,
   updateDoc,
   getDocs,
+  orderBy,
 } from "firebase/firestore";
-import { db } from "../../firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+// (removed duplicate import of doc, updateDoc)
+import { db, storage } from "../../firebase";
 import { TextCrafter } from "../TextCrafter";
 import { useAuthStore } from "../../store/authStore";
+import { useNotification } from "../Notification";
+import { NotificationProvider } from "../Notification";
+// TODO: This file is very large. Consider splitting modal, chapter list, and info card into separate components for maintainability.
+
+// --- MAINTAINER NOTES ---
+// This file is large and handles many UI responsibilities.
+// Suggestions:
+// 1. Split into smaller components: Modal, ChapterList, BookInfoCard, etc.
+// 2. Consider using a router for navigation instead of window.location.href.
+// 3. The Book.totalChapters property in Firestore is not updated when chapters are added/deleted; consider updating it for consistency.
+// 4. Add more robust error handling and user feedback for async operations.
+// 5. For large datasets, consider pagination or lazy loading.
+// ------------------------
 
 type Book = {
   id: string;
@@ -22,18 +38,19 @@ type Book = {
   synopsis: string;
   coverImage: string;
   totalChapters: number;
-  createdAt: string;
+  createdAt: string | number;
   email: string;
+  images?: string[]; // Add images property for imgbb links
 };
 
 type Chapter = {
   id: string;
   title: string;
   content: string;
-  createdAt: any;
+  createdAt?: { seconds: number } | string | number;
 };
 
-const Books = () => {
+const BooksComponent = () => {
   const [books, setBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,9 +64,148 @@ const Books = () => {
   const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
   const [editingContent, setEditingContent] = useState("");
   const [creatingChapter, setCreatingChapter] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const [editingBook, setEditingBook] = useState(false);
+  const [editedTitle, setEditedTitle] = useState("");
+  const [editedGenre, setEditedGenre] = useState("");
+  const [savingBook, setSavingBook] = useState(false);
+  const [showNewChapterModal, setShowNewChapterModal] = useState(false);
+
+  const [visibleChapters, setVisibleChapters] = useState<Chapter[]>([]);
+  const [chaptersPage, setChaptersPage] = useState(1);
+  const CHAPTERS_PER_PAGE = 5;
+  const [hasMoreChapters, setHasMoreChapters] = useState(false);
 
   const userEmail = useAuthStore((state) => state.email);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { addNotification } = useNotification();
+
+
+  // Optimized image upload to Firebase Storage
+  const uploadImageToStorage = async (file: File): Promise<string> => {
+    if (!selectedBook) throw new Error("No book selected");
+    setUploadingImage(true);
+    try {
+      const fileName = `${Date.now()}_${file.name}`;
+      const storageRef = ref(storage, `chapter-images/${selectedBook.id}/${fileName}`);
+      const snapshot = await uploadBytes(storageRef, file);
+      return await getDownloadURL(snapshot.ref);
+    } catch (error) {
+      addNotification({
+        type: "error",
+        title: "Upload Failed",
+        message: "Failed to upload image. Please try again.",
+      });
+      throw error;
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+
+  // Upload image to imgbb and store link in Firestore (optimized)
+  const handleImageUpload = async (file: File): Promise<string> => {
+    if (!selectedBook) throw new Error("No book selected");
+    setUploadingImage(true);
+    try {
+      // Upload to imgbb
+      const formData = new FormData();
+      const apiKey = "6d7dfd098e04c249b7410063cc3fff1d";
+      formData.append("image", file);
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error?.message || "Failed to upload image to imgbb");
+      const imageUrl = data.data.url;
+      // Store the image URL in Firestore
+      const bookDocRef = doc(db, "books", selectedBook.id);
+      await updateDoc(bookDocRef, {
+        images: Array.isArray(selectedBook.images) ? [...selectedBook.images, imageUrl] : [imageUrl],
+      });
+      addNotification({
+        type: "success",
+        title: "Image Uploaded",
+        message: "Image uploaded successfully!",
+      });
+      return imageUrl;
+    } catch (error) {
+      addNotification({
+        type: "error",
+        title: "Upload Failed",
+        message: "Failed to upload image. Please try again.",
+      });
+      throw error;
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  // Enhanced content save with image processing
+  const handleContentChange = (content: string) => {
+    setNewChapterContent(content);
+  };
+
+  // Enhanced chapter creation with image processing
+  const handleCreateChapter = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedBook || !newChapterTitle.trim()) return;
+
+    setCreatingChapter(true);
+    try {
+      // Process content to replace local image URLs with Firebase Storage URLs
+      let processedContent = newChapterContent;
+
+      // Find and replace local blob URLs with Firebase Storage URLs
+      const imageRegex = /!\[([^\]]*)\]\(blob:([^)]+)\)/g;
+      const matches = [...processedContent.matchAll(imageRegex)];
+
+      for (const match of matches) {
+        try {
+          // Convert blob URL to file and upload
+          const response = await fetch(match[2]);
+          const blob = await response.blob();
+          const file = new File([blob], `image_${Date.now()}.png`, {
+            type: blob.type,
+          });
+          const firebaseUrl = await uploadImageToStorage(file);
+
+          // Replace the blob URL with Firebase URL
+          processedContent = processedContent.replace(match[2], firebaseUrl);
+        } catch (error) {
+          console.error("Error processing image:", error);
+        }
+      }
+
+      const chaptersRef = collection(db, "books", selectedBook.id, "chapters");
+      await addDoc(chaptersRef, {
+        title: newChapterTitle.trim(),
+        content: processedContent,
+        createdAt: serverTimestamp(),
+      });
+
+      setNewChapterTitle("");
+      setNewChapterContent("");
+      await loadChapters(selectedBook.id);
+      addNotification({
+        type: "success",
+        title: "Chapter Created",
+        message: "Chapter created successfully!",
+      });
+      closeNewChapterModal();
+    } catch (err) {
+      console.error("Error creating chapter:", err);
+      addNotification({
+        type: "error",
+        title: "Creation Failed",
+        message: "Failed to create chapter. Please try again.",
+      });
+    } finally {
+      setCreatingChapter(false);
+    }
+  };
 
   useEffect(() => {
     if (!isAuthenticated || !userEmail) {
@@ -59,6 +215,8 @@ const Books = () => {
       return;
     }
 
+    // Only listen to user's books
+    if (!userEmail) return;
     const q = query(collection(db, "books"));
     const unsubscribe = onSnapshot(
       q,
@@ -66,26 +224,51 @@ const Books = () => {
         const userBooks = snapshot.docs
           .map((doc) => ({ id: doc.id, ...doc.data() } as Book))
           .filter((book) => book.email === userEmail);
-        setBooks(userBooks);
+        setBooks((prev) => {
+          // Only update if changed
+          if (JSON.stringify(prev.map(b => b.id)) !== JSON.stringify(userBooks.map(b => b.id))) {
+            return userBooks;
+          }
+          return prev;
+        });
         setLoading(false);
       },
       (err) => {
-        console.error("Error loading books:", err);
         setError("Failed to load books.");
         setLoading(false);
       }
     );
-
     return () => unsubscribe();
   }, [userEmail, isAuthenticated]);
 
+  // Helper to get timestamp in seconds from createdAt
+  function getTimestampSeconds(createdAt: Chapter["createdAt"]): number {
+    if (typeof createdAt === "object" && createdAt && "seconds" in createdAt) {
+      return createdAt.seconds;
+    } else if (typeof createdAt === "number") {
+      // If it's already a number, assume it's seconds
+      return createdAt;
+    } else if (typeof createdAt === "string") {
+      return Math.floor(new Date(createdAt).getTime() / 1000);
+    }
+    return 0;
+  }
+
   const loadChapters = async (bookId: string) => {
-    const snapshot = await getDocs(collection(db, "books", bookId, "chapters"));
-    const chaptersData = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Chapter[];
-    setChapters(chaptersData);
+    try {
+      const chaptersRef = collection(db, "books", bookId, "chapters");
+      const q = query(chaptersRef, orderBy("createdAt", "asc"));
+      const snapshot = await getDocs(q);
+      let chaptersData = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Chapter[];
+      setChapters(chaptersData);
+    } catch (err) {
+      setChapters([]);
+      setError("Failed to load chapters.");
+      console.error("Error loading chapters:", err);
+    }
   };
 
   const handleDeleteBook = async (bookId: string) => {
@@ -106,6 +289,18 @@ const Books = () => {
     }
   };
 
+  // Update visibleChapters when chapters or page changes
+  useEffect(() => {
+    if (chapters.length > 0) {
+      const end = chaptersPage * CHAPTERS_PER_PAGE;
+      setVisibleChapters(chapters.slice(0, end));
+      setHasMoreChapters(end < chapters.length);
+    } else {
+      setVisibleChapters([]);
+      setHasMoreChapters(false);
+    }
+  }, [chapters, chaptersPage]);
+
   const openModal = async (book: Book) => {
     setSelectedBook(book);
     setIsModalOpen(true);
@@ -113,6 +308,10 @@ const Books = () => {
     setNewChapterContent("");
     setEditingChapterId(null);
     setEditingContent("");
+    setEditingBook(false);
+    setEditedTitle(book.title);
+    setEditedGenre(book.genre);
+    setChaptersPage(1); // reset pagination
     await loadChapters(book.id);
   };
 
@@ -122,29 +321,26 @@ const Books = () => {
     setChapters([]);
     setEditingChapterId(null);
     setEditingContent("");
+    setEditingBook(false);
+    setEditedTitle("");
+    setEditedGenre("");
+    setShowNewChapterModal(false);
+    setNewChapterTitle("");
+    setNewChapterContent("");
   };
 
-  const handleCreateChapter = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedBook || !newChapterTitle.trim()) return;
+  const openNewChapterModal = () => {
+    setShowNewChapterModal(true);
+    setNewChapterTitle("");
+    setNewChapterContent("");
+  };
 
-    setCreatingChapter(true);
-    try {
-      const chaptersRef = collection(db, "books", selectedBook.id, "chapters");
-      await addDoc(chaptersRef, {
-        title: newChapterTitle.trim(),
-        content: newChapterContent.trim(),
-        createdAt: serverTimestamp(),
-      });
-      setNewChapterTitle("");
-      setNewChapterContent("");
-      await loadChapters(selectedBook.id);
-    } catch (err) {
-      console.error("Error creating chapter:", err);
-      alert("Failed to create chapter.");
-    } finally {
-      setCreatingChapter(false);
-    }
+  const closeNewChapterModal = () => {
+    setShowNewChapterModal(false);
+    setNewChapterTitle("");
+    setNewChapterContent("");
+    setEditingChapterId(null);
+    setEditingContent("");
   };
 
   const startEditingChapter = (chapter: Chapter) => {
@@ -155,19 +351,59 @@ const Books = () => {
   const saveEditedChapter = async (chapterId: string) => {
     if (!selectedBook) return;
     try {
-      const chapterRef = doc(db, "books", selectedBook.id, "chapters", chapterId);
-      await updateDoc(chapterRef, { content: editingContent });
+      // Process content to replace local image URLs with Firebase Storage URLs
+      let processedContent = editingContent;
+
+      // Find and replace local blob URLs with Firebase Storage URLs
+      const imageRegex = /!\[([^\]]*)\]\(blob:([^)]+)\)/g;
+      const matches = [...processedContent.matchAll(imageRegex)];
+
+      for (const match of matches) {
+        try {
+          // Convert blob URL to file and upload
+          const response = await fetch(match[2]);
+          const blob = await response.blob();
+          const file = new File([blob], `image_${Date.now()}.png`, {
+            type: blob.type,
+          });
+          const firebaseUrl = await uploadImageToStorage(file);
+
+          // Replace the blob URL with Firebase URL
+          processedContent = processedContent.replace(match[2], firebaseUrl);
+        } catch (error) {
+          console.error("Error processing image:", error);
+        }
+      }
+
+      const chapterRef = doc(
+        db,
+        "books",
+        selectedBook.id,
+        "chapters",
+        chapterId
+      );
+      await updateDoc(chapterRef, { content: processedContent });
+
       // Update only the edited chapter locally
       setChapters((prev) =>
         prev.map((c) =>
-          c.id === chapterId ? { ...c, content: editingContent } : c
+          c.id === chapterId ? { ...c, content: processedContent } : c
         )
       );
       setEditingChapterId(null);
       setEditingContent("");
+      addNotification({
+        type: "success",
+        title: "Chapter Updated",
+        message: "Chapter updated successfully!",
+      });
     } catch (err) {
       console.error("Error saving chapter:", err);
-      alert("Failed to save chapter.");
+      addNotification({
+        type: "error",
+        title: "Save Failed",
+        message: "Failed to save chapter. Please try again.",
+      });
     }
   };
 
@@ -175,69 +411,164 @@ const Books = () => {
     if (!selectedBook) return;
     if (!confirm("Are you sure you want to delete this chapter?")) return;
     try {
-      const chapterRef = doc(db, "books", selectedBook.id, "chapters", chapterId);
+      const chapterRef = doc(
+        db,
+        "books",
+        selectedBook.id,
+        "chapters",
+        chapterId
+      );
       await deleteDoc(chapterRef);
       // Remove the chapter from local state
       setChapters((prev) => prev.filter((c) => c.id !== chapterId));
+      addNotification({
+        type: "success",
+        title: "Chapter Deleted",
+        message: "Chapter deleted successfully!",
+      });
     } catch (err) {
       console.error("Error deleting chapter:", err);
-      alert("Failed to delete chapter.");
+      addNotification({
+        type: "error",
+        title: "Deletion Failed",
+        message: "Failed to delete chapter. Please try again.",
+      });
     }
   };
 
+  const startEditingBook = () => {
+    setEditingBook(true);
+  };
+
+  const cancelEditingBook = () => {
+    setEditingBook(false);
+    setEditedTitle(selectedBook?.title || "");
+    setEditedGenre(selectedBook?.genre || "");
+  };
+
+  const saveBookChanges = async () => {
+    if (!selectedBook) return;
+
+    setSavingBook(true);
+    try {
+      const bookRef = doc(db, "books", selectedBook.id);
+      await updateDoc(bookRef, {
+        title: editedTitle.trim(),
+        genre: editedGenre,
+      });
+
+      // Update local state
+      setBooks((prev) =>
+        prev.map((b) =>
+          b.id === selectedBook.id
+            ? { ...b, title: editedTitle.trim(), genre: editedGenre }
+            : b
+        )
+      );
+
+      // Update selected book
+      setSelectedBook((prev) =>
+        prev ? { ...prev, title: editedTitle.trim(), genre: editedGenre } : null
+      );
+
+      setEditingBook(false);
+    } catch (err) {
+      console.error("Error updating book:", err);
+      alert("Failed to update book. Please try again.");
+    } finally {
+      setSavingBook(false);
+    }
+  };
+
+  // Helper to check if title already contains a chapter prefix
+  function hasChapterPrefix(title: string): boolean {
+    return /^\s*(chapter|chp)\b[\s:.-]*\d*/i.test(title);
+  }
+
   return (
-    <div>
-      <main className="container mx-auto px-4 py-12">
-        <h1 className="text-4xl font-bold text-rosewood mb-8 text-center">
-          My Books
-        </h1>
+    <div className="min-h-screen bg-gradient-to-br from-blush/30 to-peach/30">
+      <main className="container mx-auto px-6 py-8">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-taupe mb-2">My Books</h1>
+          <p className="text-sienna/80 text-lg">
+            Manage and edit your published stories
+          </p>
+        </div>
 
         {loading ? (
-          <p className="text-center text-taupe">Loading books...</p>
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-gold border-t-transparent"></div>
+          </div>
         ) : error ? (
-          <p className="text-center text-red-500">{error}</p>
+          <div className="text-center py-12">
+            <p className="text-red-500 text-lg">{error}</p>
+          </div>
         ) : books.length === 0 ? (
-          <div className="text-center text-taupe">
-            <p className="text-xl">No books available yet.</p>
-            <p className="mt-2">Start by creating your first book!</p>
+          <div className="text-center py-12">
+            <div className="bg-white/80 rounded-2xl p-8 shadow-lg border border-gold/20">
+              <div className="text-6xl mb-4">📚</div>
+              <h2 className="text-2xl font-bold text-taupe mb-2">
+                No Books Yet
+              </h2>
+              <p className="text-sienna/80 mb-6">
+                Start your writing journey by creating your first book!
+              </p>
+              <a
+                href="/write"
+                className="inline-block bg-gradient-to-r from-gold to-sienna text-taupe px-8 py-3 rounded-xl font-semibold hover:from-sienna hover:to-gold transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                Create Your First Book
+              </a>
+            </div>
           </div>
         ) : (
-          <div className="flex flex-col gap-6 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {books.map((book) => (
               <div
                 key={book.id}
-                className="w-full md:w-4/5 bg-white rounded-xl shadow-lg p-4 md:p-6"
+                className="bg-white/90 rounded-2xl shadow-lg border border-gold/20 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:scale-105"
               >
-                <div className="flex flex-col md:flex-row gap-6 items-center">
-                  <div className="relative w-24 md:w-36 aspect-[2/3] flex-shrink-0 group">
-                    <div className="absolute left-0 top-0 h-full w-4 bg-neutral-800 rounded-l-md shadow-inner"></div>
-                    <div
-                      className={`h-full w-full pl-4 rounded-r-md ${book.coverImage} shadow-inner border border-black/10`}
-                    ></div>
-                    <div className="absolute bottom-0 left-4 right-0 bg-black/40 text-white text-xs px-2 py-1 rounded-tr-md">
-                      {book.title}
-                    </div>
+                <div className="relative">
+                  <div
+                    className={`h-48 ${book.coverImage} bg-cover bg-center`}
+                    style={{ backgroundImage: `url(${book.coverImage})` }}
+                  />
+                  <div className="absolute top-3 left-3 bg-gold text-sienna text-xs font-semibold px-3 py-1 rounded-full shadow">
+                    {book.genre}
                   </div>
-                  <div className="flex-1 text-center md:text-left">
-                    <h2 className="text-2xl font-bold text-rosewood">{book.title}</h2>
-                    <p className="text-taupe">by {book.author}</p>
-                    <p className="text-taupe">{book.genre}</p>
-                    <p className="text-sm text-taupe line-clamp-3 mb-3">{book.synopsis}</p>
-                    <p className="text-sm text-taupe border-t border-gold/20 pt-2">
-                      {new Date(book.createdAt).toLocaleDateString()}
-                    </p>
-                    <div className="flex justify-center md:justify-end gap-2 mt-4">
+                </div>
+
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-taupe mb-2 line-clamp-2">
+                    {book.title}
+                  </h3>
+                  <p className="text-sienna/80 text-sm mb-3 line-clamp-2">
+                    {book.synopsis}
+                  </p>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-sienna/60">
+                      Created{" "}
+                      {(function () {
+                        try {
+                          return new Date(book.createdAt).toLocaleDateString();
+                        } catch {
+                          return "N/A";
+                        }
+                      })()}
+                    </span>
+                    <div className="flex gap-2">
                       <button
                         onClick={() => openModal(book)}
-                        className="px-4 py-2 text-sm bg-rose-100 text-rose-700 rounded hover:bg-rose-200"
+                        className="px-4 py-2 bg-gold text-sienna rounded-xl font-semibold hover:bg-sienna hover:text-gold transition-all text-sm"
                       >
-                        🡪 View
+                        Manage
                       </button>
                       <button
                         onClick={() => handleDeleteBook(book.id)}
-                        className="px-4 py-2 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
+                        className="px-4 py-2 bg-red-100 text-red-600 rounded-xl font-semibold hover:bg-red-200 transition-all text-sm"
                       >
-                        🗑️ Delete
+                        Delete
                       </button>
                     </div>
                   </div>
@@ -246,113 +577,656 @@ const Books = () => {
             ))}
           </div>
         )}
-      </main>
 
-      {isModalOpen && selectedBook && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-3xl overflow-y-auto max-h-[90vh] relative">
-            <button
-              onClick={closeModal}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-              aria-label="Close modal"
-            >
-              ✕
-            </button>
-            <div>
-              <h2 className="text-2xl font-bold text-rosewood mb-2">{selectedBook.title}</h2>
-              <p className="text-taupe">Author: {selectedBook.author}</p>
-              <p className="text-taupe">Genre: {selectedBook.genre}</p>
-              <p className="text-taupe mb-3">{selectedBook.synopsis}</p>
-            </div>
+        {/* Enhanced Modal */}
+        {isModalOpen && selectedBook && (
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                closeModal();
+              }
+            }}
+          >
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-7xl h-[95vh] flex flex-col border border-gold/20 overflow-hidden">
+              {/* Enhanced Modal Header */}
+              <div className="flex-shrink-0 bg-gradient-to-r from-blush via-peach to-gold p-6 rounded-t-3xl border-b border-gold/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-18 rounded-xl overflow-hidden border-2 border-white/50 shadow-lg flex-shrink-0">
+                      <div
+                        className={`w-full h-full ${selectedBook.coverImage} bg-cover bg-center`}
+                        style={{
+                          backgroundImage: `url(${selectedBook.coverImage})`,
+                        }}
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <h2 className="text-2xl font-bold text-taupe mb-1 truncate">
+                        📚 {selectedBook.title}
+                      </h2>
+                      <p className="text-sienna/90 text-base truncate">
+                        Manage chapters and content • {chapters.length} chapters
+                      </p>
+                      <div className="flex items-center gap-3 mt-2">
+                        <span className="bg-white/30 text-taupe px-3 py-1 rounded-full text-sm font-medium">
+                          {selectedBook.genre}
+                        </span>
+                        <span className="text-sienna/80 text-sm">
+                          By {selectedBook.author}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={closeModal}
+                    className="p-2 rounded-full hover:bg-white/30 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 flex-shrink-0"
+                    aria-label="Close modal"
+                  >
+                    <span className="text-xl text-taupe">×</span>
+                  </button>
+                </div>
+              </div>
 
-            {/* Create Chapter */}
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-rosewood mb-2">Create New Chapter</h3>
-              <form onSubmit={handleCreateChapter} className="flex flex-col gap-2">
-                <input
-                  type="text"
-                  placeholder="Chapter Title"
-                  className="border border-gray-300 rounded px-3 py-2"
-                  value={newChapterTitle}
-                  onChange={(e) => setNewChapterTitle(e.target.value)}
-                  disabled={creatingChapter}
-                />
-                <TextCrafter
-                  value={newChapterContent}
-                  onChange={setNewChapterContent}
-                />
-                <button
-                  type="submit"
-                  className="bg-rose-500 text-white px-4 py-2 rounded hover:bg-rose-600"
-                  disabled={creatingChapter}
-                >
-                  {creatingChapter ? "Creating..." : "Add Chapter"}
-                </button>
-              </form>
-            </div>
+              {/* Enhanced Modal Content */}
+              <div className="flex-1 overflow-hidden">
+                <div className="flex h-full">
+                  {/* Left Panel - Book Info & Chapter Creation */}
+                  <div className="w-full xl:w-1/3 bg-gradient-to-b from-blush/20 to-peach/20 border-r border-gold/20">
+                    <div className="h-full overflow-y-auto p-6">
+                      <div className="space-y-6">
+                        {/* Book Information Card */}
+                        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gold/20">
+                          <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-bold text-taupe flex items-center gap-2">
+                              <span>📖</span>
+                              <span>Book Information</span>
+                            </h3>
+                            {!editingBook ? (
+                              <button
+                                onClick={startEditingBook}
+                                className="px-3 py-2 bg-blue-100 text-blue-700 rounded-xl text-sm font-medium hover:bg-blue-200 transition-all shadow-sm"
+                              >
+                                ✏️ Edit
+                              </button>
+                            ) : (
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={saveBookChanges}
+                                  disabled={savingBook}
+                                  className="px-3 py-2 bg-green-100 text-green-700 rounded-xl text-sm font-medium hover:bg-green-200 transition-all disabled:opacity-50 shadow-sm"
+                                >
+                                  {savingBook ? "💾 Saving..." : "💾 Save"}
+                                </button>
+                                <button
+                                  onClick={cancelEditingBook}
+                                  className="px-3 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-all shadow-sm"
+                                >
+                                  ❌ Cancel
+                                </button>
+                              </div>
+                            )}
+                          </div>
 
-            {/* Chapters */}
-            <div>
-              <h3 className="text-lg font-semibold text-rosewood mb-2">Chapters</h3>
-              {chapters.length === 0 ? (
-                <p className="text-taupe text-sm">No chapters yet.</p>
-              ) : (
-                <div className="space-y-4">
-                  {chapters.map((chapter) => (
-                    <div key={chapter.id} className="border border-gray-200 p-4 rounded">
-                      <h4 className="font-semibold text-rosewood">{chapter.title}</h4>
-                      {editingChapterId === chapter.id ? (
-                        <>
-                          <TextCrafter
-                            value={editingContent}
-                            onChange={setEditingContent}
-                          />
-                          <div className="flex gap-2 mt-2">
+                          <div className="space-y-4">
+                            <div>
+                              <label className="block text-sm font-semibold text-sienna mb-2">
+                                📝 Title
+                              </label>
+                              {editingBook ? (
+                                <input
+                                  type="text"
+                                  value={editedTitle}
+                                  onChange={(e) =>
+                                    setEditedTitle(e.target.value)
+                                  }
+                                  className="w-full px-4 py-3 border border-gold/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold bg-white text-taupe shadow-sm transition-all"
+                                  placeholder="Enter book title..."
+                                />
+                              ) : (
+                                <p className="text-taupe font-semibold text-lg">
+                                  {selectedBook.title}
+                                </p>
+                              )}
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-semibold text-sienna mb-2">
+                                👤 Author
+                              </label>
+                              <p className="text-taupe">
+                                {selectedBook.author}
+                              </p>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-semibold text-sienna mb-2">
+                                🏷️ Genre
+                              </label>
+                              {editingBook ? (
+                                <select
+                                  value={editedGenre}
+                                  onChange={(e) =>
+                                    setEditedGenre(e.target.value)
+                                  }
+                                  className="w-full px-4 py-3 border border-gold/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold bg-white text-taupe shadow-sm transition-all"
+                                >
+                                  <option value="">Select a genre...</option>
+                                  {[
+                                    "Romance",
+                                    "Fantasy",
+                                    "Mystery",
+                                    "Science Fiction",
+                                    "Historical Fiction",
+                                    "Thriller",
+                                    "Horror",
+                                    "Adventure",
+                                    "Comedy",
+                                    "Drama",
+                                    "Poetry",
+                                    "Non-Fiction",
+                                    "Biography",
+                                    "Self-Help",
+                                    "Educational",
+                                  ].map((genre) => (
+                                    <option key={genre} value={genre}>
+                                      {genre}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <span className="inline-block bg-gold/20 text-taupe px-3 py-1 rounded-full text-sm font-medium">
+                                  {selectedBook.genre}
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-semibold text-sienna mb-1">
+                                  📚 Chapters
+                                </label>
+                                <p className="text-2xl font-bold text-taupe">
+                                  {chapters.length}
+                                </p>
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-semibold text-sienna mb-1">
+                                  📅 Created
+                                </label>
+                                <p className="text-taupe">
+                                  {(function () {
+                                    try {
+                                      return new Date(
+                                        selectedBook.createdAt
+                                      ).toLocaleDateString();
+                                    } catch {
+                                      return "N/A";
+                                    }
+                                  })()}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Quick Actions */}
+                        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gold/20">
+                          <h3 className="text-lg font-bold text-taupe mb-4 flex items-center gap-2">
+                            <span>⚡</span>
+                            <span>Quick Actions</span>
+                          </h3>
+                          <div className="space-y-3">
                             <button
-                              className="bg-green-500 text-white px-3 py-1 rounded"
-                              onClick={() => saveEditedChapter(chapter.id)}
+                              onClick={openNewChapterModal}
+                              className="w-full px-4 py-3 bg-gradient-to-r from-gold to-sienna text-taupe rounded-xl font-bold hover:from-sienna hover:to-gold transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-2"
                             >
-                              Save
+                              <span>✨</span>
+                              <span>Create New Chapter</span>
                             </button>
                             <button
-                              className="bg-gray-300 px-3 py-1 rounded"
-                              onClick={() => setEditingChapterId(null)}
+                              onClick={() =>
+                                window.open(
+                                  `/books/${selectedBook.id}`,
+                                  "_blank"
+                                )
+                              }
+                              className="w-full px-4 py-3 bg-blue-100 text-blue-700 rounded-xl font-semibold hover:bg-blue-200 transition-all shadow-sm flex items-center justify-center gap-2"
                             >
-                              Cancel
+                              <span>👁️</span>
+                              <span>Preview Book</span>
                             </button>
                           </div>
-                        </>
+                        </div>
+
+                        {/* Chapter Stats */}
+                        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gold/20">
+                          <h3 className="text-lg font-bold text-taupe mb-4 flex items-center gap-2">
+                            <span>📊</span>
+                            <span>Chapter Stats</span>
+                          </h3>
+                          <div className="grid grid-cols-2 gap-4 text-center">
+                            <div className="p-3 bg-blush/30 rounded-xl">
+                              <div className="text-2xl font-bold text-taupe">
+                                {chapters.length}
+                              </div>
+                              <div className="text-xs text-sienna/80">
+                                Total Chapters
+                              </div>
+                            </div>
+                            <div className="p-3 bg-peach/30 rounded-xl">
+                              <div className="text-2xl font-bold text-taupe">
+                                {chapters.reduce(
+                                  (total, chapter) =>
+                                    total +
+                                    (chapter.content?.split(/\s+/).length || 0),
+                                  0
+                                )}
+                              </div>
+                              <div className="text-xs text-sienna/80">
+                                Total Words
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Panel - Chapters List */}
+                  <div className="w-full xl:w-2/3 bg-white flex flex-col">
+                    <div className="flex-shrink-0 p-6 border-b border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-xl font-bold text-taupe flex items-center gap-2">
+                          <span>📖</span>
+                          <span>Chapters ({chapters.length})</span>
+                        </h3>
+                        <div className="flex items-center gap-2 text-sm text-sienna/80">
+                          <span>
+                            📊 Total:{" "}
+                            {chapters.reduce(
+                              (acc, ch) =>
+                                acc + (ch.content?.split(/\s+/).length || 0),
+                              0
+                            )}{" "}
+                            words
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-6">
+                      {chapters.length === 0 ? (
+                        <div className="text-center py-16 bg-gradient-to-br from-blush/20 to-peach/20 rounded-2xl border-2 border-dashed border-gold/30">
+                          <div className="text-6xl mb-4">📖</div>
+                          <h4 className="text-xl font-bold text-taupe mb-2">
+                            No Chapters Yet
+                          </h4>
+                          <p className="text-sienna/80 mb-4">
+                            Create your first chapter using the enhanced editor!
+                          </p>
+                          <div className="text-sm text-sienna/60">
+                            💡 Tip: Use the rich text editor to add formatting
+                            and images
+                          </div>
+                        </div>
                       ) : (
-                        <div
-                          className="prose max-w-none mt-2"
-                          dangerouslySetInnerHTML={{ __html: chapter.content }}
-                        />
-                      )}
-                      {editingChapterId !== chapter.id && (
-                        <div className="flex gap-2 mt-2">
-                          <button
-                            className="text-sm text-blue-600 hover:underline"
-                            onClick={() => startEditingChapter(chapter)}
-                          >
-                            ✏️ Edit
-                          </button>
-                          <button
-                            className="text-sm text-red-600 hover:underline"
-                            onClick={() => deleteChapter(chapter.id)}
-                          >
-                            🗑️ Delete
-                          </button>
+                        <div className="space-y-4">
+                          {visibleChapters.map((chapter) => {
+                            const chapterNumber =
+                              chapters.findIndex((c) => c.id === chapter.id) +
+                              1;
+                            return (
+                              <div
+                                key={chapter.id}
+                                className="bg-gradient-to-r from-blush/10 to-peach/10 border border-gold/20 rounded-xl p-5 hover:shadow-lg transition-all duration-300 group"
+                              >
+                                <div className="flex justify-between items-start mb-4">
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="text-lg font-bold text-taupe mb-1 truncate">
+                                      {hasChapterPrefix(chapter.title)
+                                        ? chapter.title
+                                        : `Chapter ${chapterNumber}: ${chapter.title}`}
+                                    </h4>
+                                    <div className="flex items-center gap-4 text-sm text-sienna/80">
+                                      <span className="flex items-center gap-1">
+                                        <span>📅</span>
+                                        <span>
+                                          {(function () {
+                                            try {
+                                              if (
+                                                typeof chapter.createdAt ===
+                                                  "object" &&
+                                                chapter.createdAt?.seconds
+                                              ) {
+                                                return new Date(
+                                                  chapter.createdAt.seconds *
+                                                    1000
+                                                ).toLocaleDateString();
+                                              } else if (
+                                                typeof chapter.createdAt ===
+                                                  "string" ||
+                                                typeof chapter.createdAt ===
+                                                  "number"
+                                              ) {
+                                                return new Date(
+                                                  chapter.createdAt
+                                                ).toLocaleDateString();
+                                              } else {
+                                                return "N/A";
+                                              }
+                                            } catch {
+                                              return "N/A";
+                                            }
+                                          })()}
+                                        </span>
+                                      </span>
+                                      <span className="flex items-center gap-1">
+                                        <span>📝</span>
+                                        <span>
+                                          {(function () {
+                                            try {
+                                              return chapter.content?.trim()
+                                                ? `${
+                                                    chapter.content
+                                                      .trim()
+                                                      .split(/\s+/).length
+                                                  } words`
+                                                : "0 words";
+                                            } catch {
+                                              return "0 words";
+                                            }
+                                          })()}
+                                        </span>
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {editingChapterId === chapter.id ? (
+                                      <>
+                                        <button
+                                          onClick={() =>
+                                            saveEditedChapter(chapter.id)
+                                          }
+                                          className="px-3 py-2 bg-green-100 text-green-700 rounded-xl text-sm font-medium hover:bg-green-200 transition-all shadow-sm"
+                                        >
+                                          💾 Save
+                                        </button>
+                                        <button
+                                          onClick={() =>
+                                            setEditingChapterId(null)
+                                          }
+                                          className="px-3 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-all shadow-sm"
+                                        >
+                                          ❌ Cancel
+                                        </button>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <button
+                                          onClick={() => {
+                                            setEditingContent(chapter.content);
+                                            setEditingChapterId(chapter.id);
+                                          }}
+                                          className="px-3 py-2 bg-blue-100 text-blue-700 rounded-xl text-sm font-medium hover:bg-blue-200 transition-all shadow-sm"
+                                        >
+                                          ✏️ Edit
+                                        </button>
+                                        <button
+                                          onClick={() =>
+                                            deleteChapter(chapter.id)
+                                          }
+                                          className="px-3 py-2 bg-red-100 text-red-700 rounded-xl text-sm font-medium hover:bg-red-200 transition-all shadow-sm"
+                                        >
+                                          🗑️ Delete
+                                        </button>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                          {hasMoreChapters && (
+                            <div className="flex justify-center mt-4">
+                              <button
+                                onClick={() =>
+                                  setChaptersPage((prev) => prev + 1)
+                                }
+                                className="px-6 py-2 bg-gold text-taupe rounded-xl font-semibold hover:bg-sienna hover:text-gold transition-all shadow-lg"
+                              >
+                                Load More
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
-                  ))}
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* New Chapter Creation Modal */}
+        {showNewChapterModal && selectedBook && (
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                closeNewChapterModal();
+              }
+            }}
+          >
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-7xl h-[95vh] flex flex-col border border-gold/20 overflow-hidden">
+              {/* Modal Header */}
+              <div className="flex-shrink-0 bg-gradient-to-r from-blush via-peach to-gold p-6 rounded-t-3xl border-b border-gold/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-18 rounded-xl overflow-hidden border-2 border-white/50 shadow-lg flex-shrink-0">
+                      <div
+                        className={`w-full h-full ${selectedBook.coverImage} bg-cover bg-center`}
+                        style={{
+                          backgroundImage: `url(${selectedBook.coverImage})`,
+                        }}
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <h2 className="text-2xl font-bold text-taupe mb-1 truncate">
+                        ✍️ Create New Chapter
+                      </h2>
+                      <p className="text-sienna/90 text-base truncate">
+                        Add a new chapter to "{selectedBook.title}"
+                      </p>
+                      <div className="flex items-center gap-3 mt-2">
+                        <span className="bg-white/30 text-taupe px-3 py-1 rounded-full text-sm font-medium">
+                          Chapter {chapters.length + 1}
+                        </span>
+                        <span className="text-sienna/80 text-sm">
+                          Enhanced Editor
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={closeNewChapterModal}
+                    className="p-2 rounded-full hover:bg-white/30 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 flex-shrink-0"
+                    aria-label="Close modal"
+                  >
+                    <span className="text-xl text-taupe">×</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Content */}
+              <div className="flex-1 overflow-hidden">
+                <div className="h-full flex flex-col lg:flex-row max-h-screen overflow-hidden">
+                  {/* Right Panel - Text Editor */}
+                  <div className="flex-1 bg-white flex flex-col overflow-hidden">
+                    <div className="flex-shrink-0 p-6 border-b border-gray-200 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-xl font-bold text-taupe flex items-center gap-2">
+                          <span>📝</span>
+                          Chapter Content
+                        </h3>
+                        <div className="text-sm text-sienna/80 bg-sienna/10 px-3 py-1 rounded-full">
+                          Enhanced Editor
+                        </div>
+                      </div>
+                      {/* Upload status indicator */}
+                      {uploadingImage && (
+                        <div className="flex items-center gap-2 text-sienna/80">
+                          <span className="animate-spin">⌛</span>
+                          Uploading image...
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Chapter Title Input */}
+                    <div className="p-6 border-b border-gray-100 bg-gray-50">
+                      <label htmlFor="chapter-title" className="block text-taupe font-semibold mb-2">Chapter Title</label>
+                      <input
+                        id="chapter-title"
+                        type="text"
+                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gold/50 text-base"
+                        placeholder="Enter chapter title..."
+                        value={newChapterTitle}
+                        onChange={e => setNewChapterTitle(e.target.value)}
+                        maxLength={120}
+                        required
+                      />
+                    </div>
+                    {/* This makes the editor pane scrollable */}
+                    <div className="flex-1 overflow-auto p-6">
+                      <div className="min-h-full border border-gold/30 rounded-2xl bg-white shadow-lg">
+                        <TextCrafter
+                          value={newChapterContent}
+                          onChange={handleContentChange}
+                          onImageUpload={handleImageUpload}
+                          placeholder="Start writing your chapter here... Use the toolbar above for formatting and to add images!"
+                          className="h-full"
+                        />
+                      </div>
+                    </div>
+                    {/* Create Chapter Button */}
+                    <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
+                      <button
+                        className="px-6 py-2 bg-gold text-white font-semibold rounded-lg shadow hover:bg-yellow-600 transition disabled:opacity-50"
+                        onClick={handleCreateChapter}
+                        disabled={!newChapterTitle.trim() || !newChapterContent.trim() || creatingChapter}
+                      >
+                        {creatingChapter ? 'Creating...' : 'Create Chapter'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Edit Chapter Modal */}
+        {editingChapterId && selectedBook && (
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setEditingChapterId(null);
+              }
+            }}
+          >
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-7xl h-[95vh] flex flex-col border border-gold/20 overflow-hidden">
+              {/* Modal Header */}
+              <div className="flex-shrink-0 bg-gradient-to-r from-blush via-peach to-gold p-6 rounded-t-3xl border-b border-gold/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-18 rounded-xl overflow-hidden border-2 border-white/50 shadow-lg flex-shrink-0">
+                      <div
+                        className={`w-full h-full ${selectedBook.coverImage} bg-cover bg-center`}
+                        style={{
+                          backgroundImage: `url(${selectedBook.coverImage})`,
+                        }}
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <h2 className="text-2xl font-bold text-taupe mb-1 truncate">
+                        ✍️ Edit Chapter
+                      </h2>
+                      <p className="text-sienna/90 text-base truncate">
+                        Editing chapter in "{selectedBook.title}"
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setEditingChapterId(null)}
+                    className="p-2 rounded-full hover:bg-white/30 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 flex-shrink-0"
+                    aria-label="Close modal"
+                  >
+                    <span className="text-xl text-taupe">×</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Content */}
+              <div className="flex-1 overflow-hidden">
+                <div className="h-full flex flex-col lg:flex-row max-h-screen overflow-hidden">
+                  {/* Right Panel - Text Editor */}
+                  <div className="flex-1 bg-white flex flex-col overflow-hidden">
+                    <div className="flex-shrink-0 p-6 border-b border-gray-200 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-xl font-bold text-taupe flex items-center gap-2">
+                          <span>📝</span>
+                          Chapter Content
+                        </h3>
+                        <div className="text-sm text-sienna/80 bg-sienna/10 px-3 py-1 rounded-full">
+                          Enhanced Editor
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => saveEditedChapter(editingChapterId)}
+                          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
+                        >
+                          Save Changes
+                        </button>
+                        <button
+                          onClick={() => setEditingChapterId(null)}
+                          className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Editor pane */}
+                    <div className="flex-1 overflow-auto p-6">
+                      <div className="min-h-full border border-gold/30 rounded-2xl bg-white shadow-lg">
+                        <TextCrafter
+                          value={editingContent}
+                          onChange={(content) => setEditingContent(content)}
+                          onImageUpload={handleImageUpload}
+                          placeholder="Edit your chapter content here..."
+                          className="h-full"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
     </div>
+  );
+};
+
+export const Books = () => {
+  return (
+    <NotificationProvider>
+      <BooksComponent />
+    </NotificationProvider>
   );
 };
 

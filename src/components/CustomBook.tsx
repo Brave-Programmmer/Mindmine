@@ -1,7 +1,25 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import useSound from "use-sound";
-import flipSound from "/assets/page-flip.mp3"; // Ensure this path is correct for your project
+import flipSound from "/assets/page-flip.mp3";
+import { 
+  FiChevronLeft, 
+  FiChevronRight, 
+  FiList, 
+  FiVolume2, 
+  FiVolumeX, 
+  FiPause, 
+  FiPlay, 
+  FiX, 
+  FiMaximize2, 
+  FiBookOpen,
+  FiHome,
+  FiSettings,
+  FiBookmark,
+  FiShare2,
+  FiMoon,
+  FiSun
+} from "react-icons/fi";
 
 type Chapter = {
   id: string;
@@ -28,209 +46,92 @@ type Props = {
   chapters: Chapter[];
 };
 
-const pageVariants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? 300 : -300,
-    rotateY: direction > 0 ? -90 : 90,
-    opacity: 0,
-  }),
-  center: {
-    zIndex: 1,
-    x: 0,
-    rotateY: 0,
-    opacity: 1,
-    transition: { duration: 0.6, ease: "easeOut" },
-  },
-  exit: (direction: number) => ({
-    zIndex: 0,
-    x: direction < 0 ? 300 : -300,
-    rotateY: direction < 0 ? -90 : 90,
-    opacity: 0,
-    transition: { duration: 0.6, ease: "easeIn" },
-  }),
-};
-
 const CustomBook: React.FC<Props> = ({ chapters, book }) => {
-  const [page, setPage] = useState(0);
-  const [direction, setDirection] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [isReading, setIsReading] = useState(false);
   const [showCover, setShowCover] = useState(true);
-  const [closing, setClosing] = useState(false); // Consider if this state is still needed with the current exit animation
-  const [playFlip] = useSound(flipSound, { volume: 0.5 });
-  const bookRef = useRef<HTMLDivElement>(null);
-
-  // Speech synthesis state
+  const [showChapterList, setShowChapterList] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+  const [playFlip] = useSound(flipSound, { volume: 0.3 });
+  
+  // Speech synthesis
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoice, setSelectedVoice] = useState<SpeechSynthesisVoice | null>(null);
-  const [rate, setRate] = useState(1); // Speed
+  const [speechRate, setSpeechRate] = useState(1);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [currentWordIndex, setCurrentWordIndex] = useState<number | null>(null);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  
+  const bookRef = useRef<HTMLDivElement>(null);
 
-  // For highlighting text
-  const [highlightedText, setHighlightedText] = useState<string[]>([]);
-
-  // Sort chapters by createdAt ascending - memoized
+  // Sort chapters by creation date
   const sortedChapters = useMemo(() => {
     return [...chapters].sort(
       (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
   }, [chapters]);
 
-  // Load bookmark on mount
+  // Load bookmark
   useEffect(() => {
     const savedPage = localStorage.getItem(`bookmark-${book.id}`);
     if (savedPage) {
-      setPage(parseInt(savedPage, 10));
+      setCurrentPage(parseInt(savedPage, 10));
     }
   }, [book.id]);
 
-  // Save bookmark on page change (debounced for potential future optimization, though not strictly needed here)
+  // Save bookmark
   useEffect(() => {
-    const handler = setTimeout(() => {
-      localStorage.setItem(`bookmark-${book.id}`, page.toString());
-    }, 300); // Debounce by 300ms
+    localStorage.setItem(`bookmark-${book.id}`, currentPage.toString());
+  }, [currentPage, book.id]);
 
-    resetHighlight();
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [page, book.id]);
-
-  // Load voices once voiceschanged event fires (some browsers load voices async)
+  // Load voices
   useEffect(() => {
     const loadVoices = () => {
-      const synthVoices = window.speechSynthesis.getVoices();
-      setVoices(synthVoices);
-      if (synthVoices.length > 0 && !selectedVoice) {
-        // Try to select a default English voice if available
-        const englishVoice = synthVoices.find(voice => voice.lang.startsWith('en-'));
-        setSelectedVoice(englishVoice || synthVoices[0]);
+      const availableVoices = window.speechSynthesis.getVoices();
+      setVoices(availableVoices);
+      if (availableVoices.length > 0 && !selectedVoice) {
+        const englishVoice = availableVoices.find(voice => voice.lang.startsWith('en-'));
+        setSelectedVoice(englishVoice || availableVoices[0]);
       }
     };
+    
     loadVoices();
     window.speechSynthesis.onvoiceschanged = loadVoices;
-
-    // Cleanup event listener
+    
     return () => {
       window.speechSynthesis.onvoiceschanged = null;
     };
-  }, [selectedVoice]); // Dependency on selectedVoice ensures re-evaluation if selectedVoice changes from null
+  }, [selectedVoice]);
 
-  // Stop reading function - memoized
-  const stopReading = useCallback(() => {
-    if (window.speechSynthesis.speaking || window.speechSynthesis.paused) {
-      window.speechSynthesis.cancel();
-    }
-    setIsSpeaking(false);
-    setIsPaused(false);
-    setCurrentWordIndex(null);
-    setHighlightedText([]);
-    if (utteranceRef.current) {
-      utteranceRef.current.onend = null;
-      utteranceRef.current.onerror = null;
-      utteranceRef.current.onboundary = null;
-    }
-  }, []);
-
-  // Reset highlight on page change or stop
-  const resetHighlight = useCallback(() => {
-    setCurrentWordIndex(null);
-  }, []);
-
-  // Play flip sound and change page - memoized
-  const handlePageChange = useCallback((dir: number) => {
-    stopReading(); // Stop reading before changing page
-    playFlip();
-    setDirection(dir);
-    setPage((prev) => {
-      const newPage = prev + dir;
-      if (newPage >= 0 && newPage < sortedChapters.length) {
-        return newPage;
-      }
-      return prev;
-    });
-  }, [playFlip, sortedChapters.length, stopReading]);
-
-  // Close book animation - memoized
-  const handleCloseBook = useCallback(() => {
-    stopReading(); // Stop reading before closing
-    playFlip();
-    setClosing(true); // Retain closing state if needed for external animations
-    setTimeout(() => {
-      setShowCover(true);
-      setClosing(false);
-    }, 800);
-  }, [playFlip, stopReading]);
-
-  // Fullscreen toggle - memoized
-  const toggleFullScreen = useCallback(() => {
-    if (!document.fullscreenElement) {
-      bookRef.current?.requestFullscreen().catch((err) => {
-        console.error(`Error enabling fullscreen: ${err.message}`);
-      });
-    } else {
-      document.exitFullscreen();
-    }
-  }, []);
-
-  // Start voice reading with word highlighting - memoized
+  // Speech functions
   const startReading = useCallback(() => {
     if (!("speechSynthesis" in window)) {
-      alert("Sorry, your browser does not support speech synthesis.");
+      alert("Speech synthesis not supported in your browser.");
       return;
     }
-    if (isSpeaking) return; // Already speaking
-
-    const text = sortedChapters[page].content;
+    
+    const text = sortedChapters[currentPage].content;
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.voice = selectedVoice; // selectedVoice can be null, handled by SpeechSynthesis API
-    utterance.rate = rate;
-    utterance.pitch = 1;
-
-    const words = text.split(/\s+/).filter(word => word.length > 0); // Filter out empty strings from split
-    setHighlightedText(words);
-    setCurrentWordIndex(0);
-
-    utterance.onboundary = (event) => {
-      if (event.name === "word") {
-        // A more robust way to find the word index:
-        // Find the word that starts at or after event.charIndex
-        let charAccum = 0;
-        let wordIndex = 0;
-        for (let i = 0; i < words.length; i++) {
-          // Include space after the word for boundary calculation
-          const wordWithSpaceLength = words[i].length + (i < words.length - 1 ? 1 : 0);
-          if (event.charIndex >= charAccum && event.charIndex < charAccum + wordWithSpaceLength) {
-            wordIndex = i;
-            break;
-          }
-          charAccum += wordWithSpaceLength;
-        }
-        setCurrentWordIndex(wordIndex);
-      }
-    };
-
+    utterance.voice = selectedVoice;
+    utterance.rate = speechRate;
+    
     utterance.onend = () => {
       setIsSpeaking(false);
-      setCurrentWordIndex(null);
-      setHighlightedText([]);
-      utteranceRef.current = null; // Clear ref on end
+      setIsPaused(false);
     };
-
-    utterance.onerror = (e) => {
-      console.error("Speech synthesis error:", e);
+    
+    utterance.onerror = () => {
       setIsSpeaking(false);
-      setCurrentWordIndex(null);
-      setHighlightedText([]);
-      utteranceRef.current = null; // Clear ref on error
+      setIsPaused(false);
     };
-
+    
     utteranceRef.current = utterance;
     window.speechSynthesis.speak(utterance);
     setIsSpeaking(true);
     setIsPaused(false);
-  }, [page, sortedChapters, selectedVoice, rate, isSpeaking]);
+  }, [currentPage, sortedChapters, selectedVoice, speechRate]);
 
   const pauseReading = useCallback(() => {
     if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
@@ -248,261 +149,643 @@ const CustomBook: React.FC<Props> = ({ chapters, book }) => {
     }
   }, []);
 
-  // Stop reading if page changes or component unmounts
-  useEffect(() => {
-    return () => {
+  const stopReading = useCallback(() => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+    setIsPaused(false);
+  }, []);
+
+  // Navigation functions
+  const goToPage = useCallback((page: number) => {
+    if (page >= 0 && page < sortedChapters.length) {
       stopReading();
+      playFlip();
+      setCurrentPage(page);
+    }
+  }, [sortedChapters.length, stopReading, playFlip]);
+
+  const nextPage = useCallback(() => {
+    goToPage(currentPage + 1);
+  }, [currentPage, goToPage]);
+
+  const prevPage = useCallback(() => {
+    goToPage(currentPage - 1);
+  }, [currentPage, goToPage]);
+
+  // Fullscreen toggle
+  const toggleFullscreen = useCallback(() => {
+    console.log('Toggle fullscreen clicked, current state:', !!document.fullscreenElement);
+    if (!document.fullscreenElement) {
+      console.log('Attempting to enter fullscreen...');
+      bookRef.current?.requestFullscreen().catch((err) => {
+        console.error('Error entering fullscreen:', err);
+      });
+    } else {
+      console.log('Attempting to exit fullscreen...');
+      document.exitFullscreen().catch((err) => {
+        console.error('Error exiting fullscreen:', err);
+      });
+    }
+  }, []);
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
     };
-  }, [stopReading]);
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+    };
+  }, []);
 
   // Keyboard navigation
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "ArrowLeft") {
-        handlePageChange(-1);
-      } else if (event.key === "ArrowRight") {
-        handlePageChange(1);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") prevPage();
+      if (e.key === "ArrowRight") nextPage();
+      if (e.key === "Escape") {
+        if (showChapterList) setShowChapterList(false);
+        if (showSettings) setShowSettings(false);
+        if (isFullscreen && document.fullscreenElement) {
+          document.exitFullscreen().catch(console.error);
+        }
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [handlePageChange]);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [prevPage, nextPage, showChapterList, showSettings, isFullscreen]);
 
-  // Render text with highlight on current word
-  const renderHighlightedText = useCallback(() => {
-    if (!highlightedText.length || currentWordIndex === null) {
-      return <p className="whitespace-pre-wrap">{sortedChapters[page].content}</p>;
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => stopReading();
+  }, [stopReading]);
+
+  // Markdown to HTML conversion
+  // Enhanced: Render Editor.js JSON blocks (including images)
+  const renderContent = useCallback((content: string) => {
+    if (!content) return "";
+    let data;
+    try {
+      data = JSON.parse(content);
+    } catch {
+      // fallback to old markdown logic
+      return content
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>')
+        .replace(/`(.*?)`/g, '<code class="bg-gray-100 px-1 rounded">$1</code>')
+        .replace(/\n/g, '<br/>');
     }
-    return (
-      <p className="whitespace-pre-wrap text-justify leading-relaxed">
-        {highlightedText.map((word, i) => (
-          <span
-            key={i}
-            className={`inline-block ${i === currentWordIndex ? "bg-yellow-300 rounded px-1" : ""
-              }`}
-          >
-            {word + " "}
-          </span>
-        ))}
-      </p>
-    );
-  }, [highlightedText, currentWordIndex, page, sortedChapters]);
+    if (!data || !Array.isArray(data.blocks)) return "";
+    return data.blocks.map((block, idx) => {
+      switch (block.type) {
+        case "paragraph":
+          return `<p>${block.data.text || ""}</p>`;
+        case "header":
+          return `<h${block.data.level || 2}>${block.data.text || ""}</h${block.data.level || 2}>`;
+        case "image":
+          if (block.data.file && block.data.file.url) {
+            const style = [
+              block.data.stretched ? "width:100%" : "",
+              block.data.withBorder ? "border:1px solid #e2e8f0;border-radius:8px;" : "",
+              block.data.withBackground ? "background:#f7fafc;padding:1rem;" : ""
+            ].join("");
+            return `<div style="text-align:center;margin:1.5em 0;"><img src="${block.data.file.url}" alt="${block.data.caption || ''}" style="max-width:100%;height:auto;${style}" />${block.data.caption ? `<div style='font-size:0.95em;color:#888;margin-top:0.5em;'>${block.data.caption}</div>` : ""}</div>`;
+          }
+          return "";
+        case "list":
+          if (block.data.style === "ordered") {
+            return `<ol>${(block.data.items || []).map((item) => `<li>${item}</li>`).join("")}</ol>`;
+          } else {
+            return `<ul>${(block.data.items || []).map((item) => `<li>${item}</li>`).join("")}</ul>`;
+          }
+        case "quote":
+          return `<blockquote style='border-left:4px solid #cbd5e1;padding-left:1em;color:#555;font-style:italic;'>${block.data.text}${block.data.caption ? `<footer style='margin-top:0.5em;font-size:0.9em;color:#888;'>— ${block.data.caption}</footer>` : ""}</blockquote>`;
+        case "code":
+          return `<pre style='background:#f3f4f6;padding:1em;border-radius:6px;overflow-x:auto;'><code>${block.data.code}</code></pre>`;
+        case "delimiter":
+          return `<hr style='margin:2em 0;'/>`;
+        case "table":
+          return `<table style='width:100%;border-collapse:collapse;margin:1em 0;'>${(block.data.content || []).map((row) => `<tr>${row.map((cell) => `<td style='border:1px solid #e2e8f0;padding:0.5em;'>${cell}</td>`).join("")}</tr>`).join("")}</table>`;
+        default:
+          return "";
+      }
+    }).join("");
+  }, []);
 
-  // Show book cover screen
+  // Cover page
   if (showCover) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#f3eadd] px-6 py-12">
-        <head>
-          <title>Reading: {book.title}</title>
-        </head>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.7 }}
-          className="bg-[#d5c5aa] border-8 border-[#c9b28a] w-72 h-96 md:w-96 md:h-[520px] rounded-2xl shadow-2xl flex flex-col justify-center items-center text-center p-6 select-none cursor-pointer"
-          role="button"
-          tabIndex={0}
-          onClick={() => {
-            playFlip();
-            setShowCover(false);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              playFlip();
-              setShowCover(false);
-            }
-          }}
-          aria-label={`Open the book titled ${book.title}`}
-        >
-          <h1 className="text-3xl font-extrabold mb-2 text-[#5a3e2b]">📘 {book.title}</h1>
-          <h4 className="font-semibold mb-3 text-[#4a3520]">By {book.author}</h4>
-          <p className="text-sm text-[#5a3e2b]">Tap or press Enter to open and start reading</p>
-          <button
-            onClick={(e) => {
-              e.stopPropagation(); // Prevent the div's onClick from firing
-              playFlip();
-              setShowCover(false);
-            }}
-            className="mt-6 px-6 py-3 bg-[#7b5e45] text-white rounded-lg hover:bg-[#5a3e2b] transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-[#5a3e2b]"
-          >
-            Open Book
-          </button>
-        </motion.div>
+      <div className={`min-h-screen flex items-center justify-center p-4 ${
+        darkMode 
+          ? 'bg-gradient-to-br from-gray-900 to-gray-800' 
+          : 'bg-gradient-to-br from-blush/30 to-peach/30'
+      }`}>
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-8">
+              <button
+                onClick={() => setShowCover(false)}
+                className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur rounded-xl hover:bg-white transition-all text-taupe font-semibold"
+              >
+                <FiHome size={20} />
+                <span>Start Reading</span>
+              </button>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    console.log('Cover page dark mode toggle clicked, current state:', darkMode);
+                    setDarkMode(!darkMode);
+                  }}
+                  className="p-2 rounded-lg bg-white/80 backdrop-blur hover:bg-white transition-all text-taupe"
+                >
+                  {darkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
+                </button>
+                <button
+                  onClick={() => {
+                    console.log('Cover page fullscreen button clicked, current state:', isFullscreen);
+                    toggleFullscreen();
+                  }}
+                  className={`p-2 rounded-lg backdrop-blur transition-all text-taupe ${
+                    isFullscreen 
+                      ? 'bg-gold/80 hover:bg-gold' 
+                      : 'bg-white/80 hover:bg-white'
+                  }`}
+                  title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                >
+                  {isFullscreen ? <FiX size={20} /> : <FiMaximize2 size={20} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Book Cover */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`backdrop-blur rounded-3xl shadow-2xl overflow-hidden border ${
+                darkMode 
+                  ? 'bg-gray-800/90 border-gray-600' 
+                  : 'bg-white/90 border-gold/20'
+              }`}
+            >
+              <div className="p-8 md:p-12">
+                <div className="text-center">
+                  <div className="w-24 h-32 mx-auto mb-6 bg-gradient-to-br from-gold via-sienna to-taupe rounded-lg shadow-lg flex items-center justify-center">
+                    <FiBookOpen size={40} className="text-white" />
+                  </div>
+                  
+                  <h1 className={`text-3xl md:text-4xl font-bold mb-4 ${
+                    darkMode ? 'text-gray-200' : 'text-taupe'
+                  }`}>
+                    {book.title}
+                  </h1>
+                  
+                  <p className={`text-xl mb-6 ${
+                    darkMode ? 'text-gray-400' : 'text-sienna'
+                  }`}>
+                    by {book.author}
+                  </p>
+                  
+                  {book.synopsis && (
+                    <p className={`max-w-2xl mx-auto mb-8 leading-relaxed ${
+                      darkMode ? 'text-gray-300' : 'text-taupe/80'
+                    }`}>
+                      {book.synopsis}
+                    </p>
+                  )}
+                  
+                  <div className="flex flex-wrap justify-center gap-4 mb-8">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-gold">{sortedChapters.length}</div>
+                      <div className={`text-sm ${
+                        darkMode ? 'text-gray-400' : 'text-sienna'
+                      }`}>Chapters</div>
+                    </div>
+                    {book.genre && (
+                      <div className="text-center">
+                        <div className={`text-sm font-medium ${
+                          darkMode ? 'text-gray-400' : 'text-sienna'
+                        }`}>Genre</div>
+                        <div className={`text-sm ${
+                          darkMode ? 'text-gray-300' : 'text-taupe'
+                        }`}>{book.genre}</div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <button
+                    onClick={() => setShowCover(false)}
+                    className="px-8 py-4 bg-gradient-to-r from-gold to-sienna text-taupe rounded-xl font-semibold hover:from-sienna hover:to-gold transition-all shadow-lg hover:shadow-xl"
+                  >
+                    Begin Reading
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
       </div>
     );
   }
 
-  // Main reading view
+  // Main reading interface
   return (
-    <div
+    <div 
       ref={bookRef}
-      className="min-h-screen flex flex-col items-center justify-center px-4 md:px-6 py-12 font-serif bg-[#f3eadd]"
+      className={`min-h-screen ${
+        isFullscreen ? 'p-4' : ''
+      } ${
+        darkMode 
+          ? 'bg-gradient-to-br from-gray-900 to-gray-800 text-white' 
+          : 'bg-gradient-to-br from-blush/20 to-peach/20'
+      }`}
+      style={{
+        ...(isFullscreen && {
+          backgroundColor: darkMode ? '#1f2937' : '#F9E4E0',
+          backgroundImage: darkMode 
+            ? 'linear-gradient(to bottom right, rgba(31, 41, 55, 0.9), rgba(17, 24, 39, 0.8))'
+            : 'linear-gradient(to bottom right, rgba(249, 228, 224, 0.2), rgba(252, 238, 234, 0.2))'
+        })
+      }}
     >
-      <motion.div
-        initial={{ opacity: closing ? 1 : 0, scale: closing ? 1 : 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.9 }}
-        transition={{ duration: 0.6 }}
-        className="relative rounded-2xl border-8 border-[#c9b28a] shadow-2xl overflow-hidden flex flex-col md:flex-row bg-[#d5c5aa] w-full max-w-4xl h-[520px]"
-      >
-        {/* Book Binding */}
-        <div className="w-6 bg-[#4b2e2e] shadow-inner hidden md:block" />
+      {/* Fullscreen Indicator */}
+      {isFullscreen && (
+        <div className="fixed top-4 right-4 z-60 bg-gold/90 text-taupe px-3 py-1 rounded-lg text-sm font-medium shadow-lg">
+          Fullscreen Mode
+        </div>
+      )}
 
-        {/* Page Content */}
-        <div className="flex-1 relative aged-paper text-[#3e2d20] fold-corner p-6 md:p-10 flex flex-col overflow-hidden">
-          <AnimatePresence custom={direction} initial={false} mode="wait">
-            <motion.div
-              key={sortedChapters[page].id}
-              custom={direction}
-              variants={pageVariants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              className="absolute inset-0 flex flex-col justify-between"
-            >
-              <div className="overflow-auto max-h-[410px] md:max-h-[430px] pr-2">
-                <h2 className="text-2xl md:text-3xl font-bold underline text-center mb-6 tracking-wide">
-                  {sortedChapters[page].title}
-                </h2>
-                {renderHighlightedText()}
+      {/* Top Navigation Bar */}
+      <header className={`sticky top-0 z-50 backdrop-blur border-b ${
+        darkMode 
+          ? 'bg-gray-800/95 border-gray-600' 
+          : 'bg-white/95 border-gold/20'
+      } ${isFullscreen ? 'bg-opacity-98' : 'bg-opacity-95'}`}>
+        <div className="max-w-6xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setShowCover(true)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all font-medium ${
+                  darkMode 
+                    ? 'hover:bg-gray-700 text-gray-200' 
+                    : 'hover:bg-blush/50 text-taupe'
+                }`}
+              >
+                <FiHome size={18} />
+                <span className="hidden sm:inline">Cover</span>
+              </button>
+              
+              <div className="hidden md:block">
+                <h1 className={`font-semibold text-lg ${
+                  darkMode ? 'text-gray-200' : 'text-taupe'
+                }`}>{book.title}</h1>
+                <p className={`text-sm ${
+                  darkMode ? 'text-gray-400' : 'text-sienna'
+                }`}>by {book.author}</p>
               </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowChapterList(true)}
+                className={`p-2 rounded-lg transition-all ${
+                  darkMode 
+                    ? 'hover:bg-gray-700 text-gray-200' 
+                    : 'hover:bg-blush/50 text-taupe'
+                }`}
+                title="Chapter List"
+              >
+                <FiList size={20} />
+              </button>
+              
+              <button
+                onClick={() => setShowSettings(true)}
+                className={`p-2 rounded-lg transition-all ${
+                  darkMode 
+                    ? 'hover:bg-gray-700 text-gray-200' 
+                    : 'hover:bg-blush/50 text-taupe'
+                }`}
+                title="Settings"
+              >
+                <FiSettings size={20} />
+              </button>
+              
+              <button
+                onClick={() => {
+                  console.log('Dark mode toggle clicked, current state:', darkMode);
+                  setDarkMode(!darkMode);
+                }}
+                className={`p-2 rounded-lg transition-all ${
+                  darkMode 
+                    ? 'hover:bg-gray-700 text-gray-200' 
+                    : 'hover:bg-blush/50 text-taupe'
+                }`}
+                title="Toggle Dark Mode"
+              >
+                {darkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
+              </button>
+              
+              <button
+                onClick={() => {
+                  console.log('Fullscreen button clicked, current state:', isFullscreen);
+                  toggleFullscreen();
+                }}
+                className={`p-2 rounded-lg transition-all ${
+                  isFullscreen 
+                    ? darkMode 
+                      ? 'bg-gold/30 hover:bg-gold/50 text-gray-200' 
+                      : 'bg-gold/50 hover:bg-gold/70 text-taupe'
+                    : darkMode 
+                      ? 'hover:bg-gray-700 text-gray-200' 
+                      : 'hover:bg-blush/50 text-taupe'
+                }`}
+                title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+              >
+                {isFullscreen ? <FiX size={20} /> : <FiMaximize2 size={20} />}
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
 
-              <div className="text-center text-xs md:text-sm mt-6 text-[#5a3e2b] font-medium">
-                Page {page + 1} of {sortedChapters.length}
+      {/* Main Content */}
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Progress Bar */}
+        <div className="mb-6">
+          <div className="flex justify-between items-center mb-2">
+            <span className={`text-sm font-medium ${
+              darkMode ? 'text-gray-200' : 'text-taupe'
+            }`}>
+              Chapter {currentPage + 1} of {sortedChapters.length}
+            </span>
+            <span className={`text-sm ${
+              darkMode ? 'text-gray-400' : 'text-sienna'
+            }`}>
+              {Math.round(((currentPage + 1) / sortedChapters.length) * 100)}%
+            </span>
+          </div>
+          <div className={`w-full rounded-full h-2 ${
+            darkMode ? 'bg-gray-700' : 'bg-gold/30'
+          }`}>
+            <div 
+              className="bg-gradient-to-r from-gold to-sienna h-2 rounded-full transition-all duration-300"
+              style={{ width: `${((currentPage + 1) / sortedChapters.length) * 100}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Chapter Content */}
+        <motion.div
+          key={currentPage}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          transition={{ duration: 0.3 }}
+          className={`backdrop-blur rounded-2xl shadow-lg p-8 mb-8 border ${
+            darkMode 
+              ? 'bg-gray-800/95 border-gray-600' 
+              : 'bg-white/95 border-gold/20'
+          }`}
+        >
+          <h2 className={`text-2xl md:text-3xl font-bold mb-6 text-center ${
+            darkMode ? 'text-gray-200' : 'text-taupe'
+          }`}>
+            {sortedChapters[currentPage].title}
+          </h2>
+          
+          <div 
+            className={`prose prose-lg max-w-none leading-relaxed ${
+              darkMode ? 'prose-invert text-gray-200' : 'text-taupe'
+            }`}
+            dangerouslySetInnerHTML={{ 
+              __html: renderContent(sortedChapters[currentPage].content) 
+            }}
+          />
+        </motion.div>
+
+        {/* Navigation Controls */}
+        <div className="flex justify-between items-center mb-8">
+          <button
+            onClick={prevPage}
+            disabled={currentPage === 0}
+            className="flex items-center gap-2 px-6 py-3 bg-white/90 backdrop-blur rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed text-taupe font-medium"
+          >
+            <FiChevronLeft size={20} />
+            <span>Previous</span>
+          </button>
+          
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowChapterList(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blush/50 rounded-lg hover:bg-blush/70 transition-all text-taupe font-medium"
+            >
+              <FiList size={18} />
+              <span>Chapters</span>
+            </button>
+            
+            <button
+              onClick={() => {/* TODO: Implement bookmark */}}
+              className="flex items-center gap-2 px-4 py-2 bg-blush/50 rounded-lg hover:bg-blush/70 transition-all text-taupe font-medium"
+            >
+              <FiBookmark size={18} />
+              <span>Bookmark</span>
+            </button>
+          </div>
+          
+          <button
+            onClick={nextPage}
+            disabled={currentPage === sortedChapters.length - 1}
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gold to-sienna text-taupe rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
+          >
+            <span>Next</span>
+            <FiChevronRight size={20} />
+          </button>
+        </div>
+
+        {/* Audio Controls */}
+        <div className="bg-white/95 backdrop-blur rounded-2xl shadow-lg p-6 border border-gold/20">
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            {!isSpeaking && !isPaused ? (
+              <button
+                onClick={startReading}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gold to-sienna text-taupe rounded-xl hover:from-sienna hover:to-gold transition-all font-semibold shadow-md hover:shadow-lg"
+              >
+                <FiVolume2 size={20} />
+                <span>Read Aloud</span>
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={isPaused ? resumeReading : pauseReading}
+                  className="flex items-center gap-2 px-6 py-3 bg-mauve text-taupe rounded-xl hover:bg-gold transition-all font-semibold shadow-md hover:shadow-lg"
+                >
+                  {isPaused ? <FiPlay size={20} /> : <FiPause size={20} />}
+                  <span>{isPaused ? 'Resume' : 'Pause'}</span>
+                </button>
+                
+                <button
+                  onClick={stopReading}
+                  className="flex items-center gap-2 px-6 py-3 bg-rosewood text-white rounded-xl hover:bg-sienna transition-all font-semibold shadow-md hover:shadow-lg"
+                >
+                  <FiVolumeX size={20} />
+                  <span>Stop</span>
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Chapter List Modal */}
+      <AnimatePresence>
+        {showChapterList && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowChapterList(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4 max-h-[80vh] overflow-hidden border border-gold/20"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-taupe">Chapters</h3>
+                <button
+                  onClick={() => setShowChapterList(false)}
+                  className="p-2 rounded-lg hover:bg-blush/50 transition-all text-taupe"
+                  title="Close Chapter List"
+                >
+                  <FiX size={20} />
+                </button>
+              </div>
+              
+              <div className="max-h-96 overflow-y-auto">
+                {sortedChapters.map((chapter, index) => (
+                  <button
+                    key={chapter.id}
+                    onClick={() => {
+                      goToPage(index);
+                      setShowChapterList(false);
+                    }}
+                    className={`w-full text-left p-3 rounded-lg transition-all ${
+                      index === currentPage
+                        ? 'bg-gold text-taupe font-semibold'
+                        : 'hover:bg-blush/50 text-taupe'
+                    }`}
+                  >
+                    <div className="font-medium">Chapter {index + 1}</div>
+                    <div className="text-sm text-sienna truncate">
+                      {chapter.title}
+                    </div>
+                  </button>
+                ))}
               </div>
             </motion.div>
-          </AnimatePresence>
-        </div>
-      </motion.div>
-
-      {/* Progress bar */}
-      <div className="w-full max-w-4xl mt-6 h-3 bg-[#e8dcc7] rounded-full overflow-hidden shadow-inner">
-        <div
-          className="h-full bg-[#a37c4e] transition-all duration-500 ease-in-out"
-          style={{ width: `${((page + 1) / sortedChapters.length) * 100}%` }}
-          aria-label={`Reading progress: ${Math.round(((page + 1) / sortedChapters.length) * 100)}%`}
-          role="progressbar"
-        />
-      </div>
-
-      {/* Controls */}
-      <div className="flex flex-wrap justify-center gap-4 mt-8 w-full max-w-4xl">
-        <button
-          onClick={() => handlePageChange(-1)}
-          disabled={page === 0}
-          className="flex-1 min-w-[120px] px-5 py-3 bg-[#7b5e45] text-white rounded-lg shadow hover:bg-[#5a3e2b] transition disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#5a3e2b]"
-          aria-label="Previous page"
-        >
-          ⬅ Prev
-        </button>
-
-        <button
-          onClick={() => handlePageChange(1)}
-          disabled={page === sortedChapters.length - 1}
-          className="flex-1 min-w-[120px] px-5 py-3 bg-[#7b5e45] text-white rounded-lg shadow hover:bg-[#5a3e2b] transition disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#5a3e2b]"
-          aria-label="Next page"
-        >
-          Next ➡
-        </button>
-
-        {/* Voice Controls */}
-        {!isSpeaking && !isPaused ? (
-          <button
-            onClick={startReading}
-            className="flex-1 min-w-[120px] px-5 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition focus:outline-none focus:ring-2 focus:ring-green-700"
-            aria-label="Start voice reading"
-          >
-            🔊 Read Aloud
-          </button>
-        ) : (
-          <>
-            <button
-              onClick={pauseReading}
-              disabled={isPaused}
-              className="flex-1 min-w-[120px] px-5 py-3 bg-yellow-500 text-white rounded-lg shadow hover:bg-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-yellow-600"
-              aria-label="Pause voice reading"
-            >
-              ⏸ Pause
-            </button>
-            <button
-              onClick={resumeReading}
-              disabled={isSpeaking}
-              className="flex-1 min-w-[120px] px-5 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-700"
-              aria-label="Resume voice reading"
-            >
-              ▶ Resume
-            </button>
-            <button
-              onClick={stopReading}
-              className="flex-1 min-w-[120px] px-5 py-3 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 transition focus:outline-none focus:ring-2 focus:ring-red-600"
-              aria-label="Stop voice reading"
-            >
-              ⏹ Stop
-            </button>
-          </>
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        <button
-          onClick={handleCloseBook}
-          className="flex-1 min-w-[120px] px-5 py-3 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition focus:outline-none focus:ring-2 focus:ring-red-700"
-          aria-label="Close book"
-        >
-          ✖ Close Book
-        </button>
-
-        <button
-          onClick={toggleFullScreen}
-          className="flex-1 min-w-[120px] px-5 py-3 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-700"
-          aria-label="Toggle fullscreen"
-        >
-          🖵 Fullscreen
-        </button>
-      </div>
-
-      {/* Voice Settings: Voice Selector & Rate Slider */}
-      <div className="mt-8 w-full max-w-4xl flex flex-col md:flex-row items-center gap-4 px-4 md:px-0">
-        <label htmlFor="voiceSelect" className="flex-1 text-[#5a3e2b] font-semibold flex items-center">
-          Voice:
-          <select
-            id="voiceSelect"
-            className="ml-3 p-2 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#5a3e2b] flex-grow"
-            value={selectedVoice?.voiceURI || ""}
-            onChange={(e) => {
-              const voice = voices.find((v) => v.voiceURI === e.target.value);
-              if (voice) setSelectedVoice(voice);
-            }}
-            disabled={isSpeaking}
-            aria-label="Select voice"
+      {/* Settings Modal */}
+      <AnimatePresence>
+        {showSettings && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            onClick={() => setShowSettings(false)}
           >
-            {voices.length === 0 && <option>Loading voices...</option>}
-            {voices.map((voice) => (
-              <option key={voice.voiceURI} value={voice.voiceURI}>
-                {voice.name} ({voice.lang})
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label htmlFor="rateRange" className="flex-1 text-[#5a3e2b] font-semibold flex items-center">
-          Speed:
-          <input
-            id="rateRange"
-            type="range"
-            min={0.5}
-            max={2}
-            step={0.1}
-            value={rate}
-            disabled={isSpeaking}
-            onChange={(e) => setRate(parseFloat(e.target.value))}
-            className="mx-3 w-full accent-[#5a3e2b]"
-            aria-label="Adjust speech speed"
-          />
-          <span className="min-w-[30px]">{rate.toFixed(1)}x</span>
-        </label>
-      </div>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4 border border-gold/20"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-taupe">Settings</h3>
+                <button
+                  onClick={() => setShowSettings(false)}
+                  className="p-2 rounded-lg hover:bg-blush/50 transition-all text-taupe"
+                  title="Close Settings"
+                >
+                  <FiX size={20} />
+                </button>
+              </div>
+              
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-taupe">Voice</label>
+                  <select
+                    value={selectedVoice?.voiceURI || ""}
+                    onChange={(e) => {
+                      const voice = voices.find(v => v.voiceURI === e.target.value);
+                      setSelectedVoice(voice || null);
+                    }}
+                    className="w-full p-3 border border-gold/30 rounded-lg bg-white text-taupe focus:outline-none focus:ring-2 focus:ring-gold"
+                  >
+                    {voices.map((voice) => (
+                      <option key={voice.voiceURI} value={voice.voiceURI}>
+                        {voice.name} ({voice.lang})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-2 text-taupe">
+                    Speech Rate: {speechRate}x
+                  </label>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="2"
+                    step="0.1"
+                    value={speechRate}
+                    onChange={(e) => setSpeechRate(parseFloat(e.target.value))}
+                    className="w-full accent-gold"
+                    title="Adjust speech rate"
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-taupe">Dark Mode</span>
+                  <button
+                    onClick={() => setDarkMode(!darkMode)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      darkMode ? 'bg-gold' : 'bg-mauve'
+                    }`}
+                    title="Toggle Dark Mode"
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        darkMode ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

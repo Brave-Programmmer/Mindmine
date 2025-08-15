@@ -31,6 +31,40 @@ MindMine is a comprehensive platform designed for the modern literary community.
 - **📱 Responsive Design** - Perfect experience on desktop, tablet, and mobile
 - **🌐 SEO Optimized** - Built for discoverability
 
+### 📚 Book Management
+- Create and manage your own books
+- Rich text editing with markdown support
+- Real-time preview while writing
+- Chapter organization and management
+
+### ✍️ Enhanced Chapter Creation
+- **Advanced Text Editor**: Full-featured TextCrafter editor with rich formatting options
+- **Robust Markdown Support**: Write in GitHub Flavored Markdown (GFM) with live preview, powered by the `marked` library.
+- **Formatting Tools**: Bold, italic, strikethrough, headings, lists, code blocks, links, task lists, blockquotes, and horizontal rules.
+- **Extended Formatting (Non-Standard Markdown)**: Support for highlight (==text==), superscript (<sup>text</sup>), and subscript (<sub>text</sub>) via HTML passthrough.
+- **Image Upload**: Drag & drop or click to upload images directly into your chapters, with progress indicator and alt text support.
+- **Auto-save**: Automatic saving of your work as you type
+- **Word Count**: Real-time word and character counting
+- **Export Options**: Export your content as Markdown or HTML
+
+### 🎨 Rich Content Support
+- **Images**: Upload and embed images in your chapters
+- **Formatting**: Rich text formatting with toolbar
+- **Links**: Add external links to your content
+- **Code Blocks**: Include code snippets with syntax highlighting
+- **Lists**: Create bulleted and numbered lists
+- **Quotes**: Add blockquotes for emphasis
+
+### 🔐 Authentication
+- Secure user authentication with Firebase Auth
+- User-specific book management
+- Protected admin areas
+
+### 📱 Responsive Design
+- Mobile-friendly interface
+- Touch-optimized controls
+- Adaptive layout for all devices
+
 ## 🛠️ Tech Stack
 
 - **Frontend Framework:** [Astro](https://astro.build/) - Modern static site generator
@@ -168,3 +202,32 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Built with ❤️ for the literary community**
 
 *MindMine - Where stories come to life*
+
+## Chapter Creation Guide
+
+### Using the TextCrafter Editor
+
+1. **Access**: Go to "My Books" and click "Manage" on any book
+2. **Create Chapter**: Fill in the chapter title and use the enhanced text editor
+3. **Formatting**: Use the toolbar for:
+   - **Bold** (Ctrl+B): Make text bold
+   - **Italic** (Ctrl+I): Make text italic
+   - **Headings** (Ctrl+Alt+1-6): Create different heading levels
+   - **Lists**: Create bulleted or numbered lists
+   - **Links**: Add clickable links
+   - **Code**: Add inline code or code blocks
+
+### Adding Images
+
+1. **Upload**: Click the image button in the toolbar or drag & drop images
+2. **Preview**: Adjust image size and position in the preview modal
+3. **Insert**: Click "Insert Image" to add it to your content
+4. **Storage**: Images are automatically uploaded to Firebase Storage
+
+### Tips for Better Content
+
+- Use headings to organize your chapter structure
+- Add images to make your content more engaging
+- Use bold and italic for emphasis
+- Include links to external resources
+- Preview your content before saving

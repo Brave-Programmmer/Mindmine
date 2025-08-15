@@ -5,6 +5,9 @@ import Books from "../components/admin/Books";
 ---
 
 <Layout title="Write">
+  {
+    /* Only render Books or Admin as needed. If both are needed, consider tabs or conditional rendering. */
+  }
   <Books client:only="react" />
   <Admin client:only="react" />
 </Layout>
