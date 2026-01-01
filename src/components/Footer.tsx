@@ -2,19 +2,23 @@ import React from "react";
 
 export const Footer = () => {
   return (
-    <footer className="pt-4 pb-4 mb-5 mt-24 mx-4 bg-white/40 backdrop-blur-md rounded-2xl px-6 py-3 shadow-md flex flex-col md:flex-row justify-between items-center text-sm text-rosewood">
-      <span>© {new Date().getFullYear()} mindMine</span>
-      <div className="space-x-4 mt-2 md:mt-0">
-        <a href="/books" className="hover:text-sienna transition-colors">
+    <footer className="mt-24 mx-4 bg-white/60 backdrop-blur-md rounded-2xl px-6 py-6 shadow-md flex flex-col md:flex-row justify-between items-center text-sm text-rosewood">
+      <div className="flex items-center gap-4">
+        <span className="font-semibold">mindMine</span>
+        <span className="text-muted">© {new Date().getFullYear()}</span>
+      </div>
+
+      <nav className="flex items-center gap-3 mt-3 md:mt-0">
+        <a href="/books" className="btn btn-ghost px-4 py-2 rounded-full">
           Books
         </a>
-        <a href="/about" className="hover:text-sienna transition-colors">
+        <a href="/about" className="btn btn-ghost px-4 py-2 rounded-full">
           About
         </a>
-        <a href="/write" className="hover:text-sienna transition-colors">
+        <a href="/write" className="btn btn-primary px-4 py-2 rounded-full">
           Write
         </a>
-      </div>
+      </nav>
     </footer>
   );
 };

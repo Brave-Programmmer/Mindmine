@@ -237,8 +237,26 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
       if (saveDebounceRef.current) {
         window.clearTimeout(saveDebounceRef.current);
       }
-      editorRef.current?.destroy();
-      editorRef.current = null;
+      // Before unmounting, attempt final save when autoSave is enabled
+      (async () => {
+        try {
+          if (autoSave && editorRef.current && onSave) {
+            const finalData = await (editorRef.current.save?.() as Promise<OutputData>);
+            if (finalData && onSave) onSave(JSON.stringify(finalData));
+          }
+        } catch (e) {
+          // ignore final save errors
+        } finally {
+          try {
+            if (editorRef.current && typeof (editorRef.current as any).destroy === "function") {
+              (editorRef.current as any).destroy();
+            }
+          } catch (e) {
+            // ignore destroy errors
+          }
+          editorRef.current = null;
+        }
+      })();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -246,22 +264,52 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
   // Keep editor in sync with external `value` prop, but avoid stomping when content is same
   useEffect(() => {
     if (!editorRef.current) return;
-    if (!value) return;
+    // If value is empty string, clear editor
+    const empty = { time: Date.now(), blocks: [] } as OutputData;
+    if (!value || value === "" || value === "null") {
+      const tryRenderEmpty = async () => {
+        try {
+          if (typeof (editorRef.current as any).render === "function") {
+            await (editorRef.current as any).render(empty);
+          } else if ((editorRef.current as any).blocks && typeof (editorRef.current as any).blocks.render === "function") {
+            await (editorRef.current as any).blocks.render(empty.blocks || []);
+          } else if (typeof (editorRef.current as any).clear === "function") {
+            (editorRef.current as any).clear();
+          }
+        } catch (err) {
+          // ignore
+        } finally {
+          setEditorData(null);
+        }
+      };
+      tryRenderEmpty();
+      return;
+    }
 
     try {
       const incoming = JSON.parse(value) as OutputData;
       // shallow compare by JSON - avoids render loop
       if (JSON.stringify(incoming) !== JSON.stringify(editorData)) {
-        // render new content
-        editorRef.current.render(incoming).then(() => {
-          setEditorData(incoming);
-        });
+        const tryRender = async () => {
+          try {
+            if (typeof (editorRef.current as any).render === "function") {
+              await (editorRef.current as any).render(incoming);
+            } else if ((editorRef.current as any).blocks && typeof (editorRef.current as any).blocks.render === "function") {
+              await (editorRef.current as any).blocks.render(incoming.blocks || []);
+            }
+            setEditorData(incoming);
+          } catch (err) {
+            // ignore render errors
+          }
+        };
+        tryRender();
       }
     } catch (e) {
       // invalid json -> ignore
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
+
 
   const handleSave = useCallback(async () => {
     if (!editorRef.current || !onSave) return;
@@ -281,8 +329,15 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
   const handleClear = useCallback(() => {
     if (!editorRef.current) return;
     try {
-      editorRef.current.clear();
-      const empty = { time: Date.now(), blocks: [] };
+      // Some EditorJS builds don't clear UI reliably; render an empty dataset instead
+      const empty = { time: Date.now(), blocks: [] } as OutputData;
+      if (typeof (editorRef.current as any).render === "function") {
+        (editorRef.current as any).render(empty).catch(() => {});
+      } else if ((editorRef.current as any).blocks && typeof (editorRef.current as any).blocks.render === "function") {
+        (editorRef.current as any).blocks.render(empty.blocks || []).catch(() => {});
+      } else if (typeof (editorRef.current as any).clear === "function") {
+        (editorRef.current as any).clear();
+      }
       setEditorData(null);
       onChange(JSON.stringify(empty));
       // optionally also call onSave if autoSave
@@ -464,18 +519,18 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
 
   return (
     <div
-      className={`text-crafter-editor relative max-w-3xl mx-auto my-6 shadow-lg rounded-xl bg-white border border-gray-200 ${className}`}
+      className={`text-crafter-editor relative w-full md:max-w-3xl md:mx-auto md:my-6 shadow-lg rounded-xl bg-white border border-gray-200 ${className}`}
       aria-label={props["aria-label"] || "Book chapter editor"}
       tabIndex={0}
       {...props}
     >
-      {/* Toolbar */}
-      <div className="flex flex-wrap justify-between items-center mb-0 p-2 bg-gray-50 border-b border-gray-200 rounded-t-xl gap-2">
-        <div className="flex items-center space-x-2">
+      {/* Toolbar - Mobile responsive */}
+      <div className="flex flex-col md:flex-row md:flex-wrap justify-between md:items-center mb-0 p-1 md:p-2 bg-gray-50 border-b border-gray-200 rounded-t-xl gap-1 md:gap-2">
+        <div className="flex flex-row items-center gap-1 md:gap-2 w-full md:w-auto">
           {onSave && (
             <button
               onClick={handleSave}
-              className="flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60"
+              className="flex-1 md:flex-none flex items-center justify-center md:justify-start px-2 md:px-3 py-2 md:py-1 text-xs md:text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60"
               title="Save Content (Ctrl+S)"
               aria-label="Save chapter"
               disabled={isSaving}
@@ -485,12 +540,13 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
               ) : (
                 <FiSave className="mr-1" />
               )}
-              {isSaving ? "Saving..." : "Save"}
+              <span className="hidden sm:inline">{isSaving ? "Saving..." : "Save"}</span>
+              <span className="sm:hidden">{isSaving ? "..." : "Save"}</span>
             </button>
           )}
           <button
             onClick={() => setShowPreview((prev) => !prev)}
-            className="flex items-center px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="flex-1 md:flex-none flex items-center justify-center md:justify-start px-2 md:px-3 py-2 md:py-1 text-xs md:text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition focus:outline-none focus:ring-2 focus:ring-blue-400"
             title="Toggle Preview (Esc to close)"
             aria-label="Toggle Preview"
           >
@@ -498,44 +554,60 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
               <FiEyeOff className="mr-1" />
             ) : (
               <FiEye className="mr-1" />
-            )}{" "}
-            Preview
+            )}
+            <span className="hidden sm:inline">Preview</span>
           </button>
           <button
             onClick={handleClear}
-            className="flex items-center px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 transition focus:outline-none focus:ring-2 focus:ring-red-400"
+            className="flex-1 md:flex-none flex items-center justify-center md:justify-start px-2 md:px-3 py-2 md:py-1 text-xs md:text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 transition focus:outline-none focus:ring-2 focus:ring-red-400"
             title="Clear Editor"
             aria-label="Clear Editor"
           >
-            <FiTrash2 className="mr-1" /> Clear
+            <FiTrash2 className="mr-1" /> <span className="hidden sm:inline">Clear</span>
           </button>
         </div>
-        <div className="text-xs text-gray-500 font-mono">
+        <div className="text-xs md:text-xs text-gray-500 font-mono w-full md:w-auto text-center md:text-right">
           {words} words &middot; {chars} chars
         </div>
       </div>
 
-      {/* Editor area */}
-      <div className="relative">
+      {/* Editor area - Mobile responsive height */}
+      <div className="relative h-auto md:h-auto flex flex-col">
         <div
           ref={holderRef}
-          className={`editorjs-holder min-h-[300px] bg-white rounded-b-xl focus:outline-none ${
+          className={`editorjs-holder min-h-[250px] sm:min-h-[300px] md:min-h-[400px] bg-white rounded-b-xl focus:outline-none text-sm sm:text-base overflow-y-auto ${
             showPreview ? "pointer-events-none select-none opacity-40" : ""
           } editor-dragdrop`}
           tabIndex={0}
           aria-hidden={showPreview}
+          style={{
+            WebkitTextSizeAdjust: "100%",
+            WebkitTouchCallout: "none",
+          } as React.CSSProperties}
         />
-        {/* Preview overlay */}
+        {/* Preview overlay - Mobile optimized */}
         {showPreview && (
-          <div className="absolute inset-0 z-20 bg-gray-50 bg-opacity-95 rounded-b-xl overflow-auto border-t border-gray-200 shadow flex flex-col">
-            {renderPreview()}
+          <div className="fixed inset-0 md:absolute md:inset-0 z-40 md:z-20 bg-white md:bg-gray-50 md:bg-opacity-95 md:rounded-b-xl overflow-auto border-t border-gray-200 shadow flex flex-col md:flex-col p-4 md:p-0">
+            <div className="md:hidden flex justify-between items-center mb-4 pb-4 border-b border-gray-300">
+              <h3 className="font-semibold text-gray-700">Preview</h3>
+              <button
+                onClick={() => setShowPreview(false)}
+                className="text-gray-600 hover:text-gray-900 text-2xl"
+                aria-label="Close preview"
+              >
+                ×
+              </button>
+            </div>
+            <div className="md:p-4">
+              {renderPreview()}
+            </div>
           </div>
         )}
 
         {/* Loading overlay */}
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70 rounded-xl z-30">
-            <FiLoader className="animate-spin text-3xl text-blue-500" />
+          <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-70 rounded-xl z-30 pointer-events-none">
+            <FiLoader className="animate-spin text-2xl md:text-3xl text-blue-500" />
           </div>
         )}
       </div>

@@ -17,7 +17,7 @@ const { title } = Astro.props as Props;
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://mindmine.netlify.app/" />
     <title>{title} | mindMine</title>
@@ -85,13 +85,39 @@ const { title } = Astro.props as Props;
   <body class="pt-navbar">
     <LayoutWrapper client:only="react">
       <Navbar client:only="react" />
-      <slot />
+      <main className="min-h-screen">
+        <slot />
+      </main>
       <Footer client:only="react" />
     </LayoutWrapper>
   </body>
 </html>
 
 <style is:global>
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  body.no-scroll {
+    overflow: hidden;
+  }
+
+  @media (max-width: 768px) {
+    body {
+      font-size: 16px; /* Prevent iOS zoom */
+    }
+  }
+
   :root {
     --rosewood: #8b4513;
     --gold: #d4af37;

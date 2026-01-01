@@ -222,10 +222,10 @@ const AllBooksGrid = () => {
   const featuredViews = Math.ceil(books.length * 0.05);
 
   return (
-    <div className="p-8 max-w-screen-xl mx-auto font-sans font-inter text-taupe">
+    <div className="p-4 sm:p-6 md:p-8 w-full max-w-screen-2xl mx-auto font-sans font-inter text-taupe">
       {/* Search and Sort */}
-      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-peach/20 p-4 rounded-b-xl shadow-sm mb-4">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="sticky top-16 md:top-20 z-40 bg-white/90 backdrop-blur-md border-b border-peach/20 p-3 sm:p-4 rounded-b-lg shadow-sm mb-4">
+        <div className="flex flex-col gap-3 sm:gap-4">
           <input
             type="text"
             placeholder="Search by title or author..."
@@ -234,13 +234,13 @@ const AllBooksGrid = () => {
               setCurrentPage(1);
               setSearchTerm(e.target.value);
             }}
-            className="w-full md:w-72 px-5 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-gold bg-blush text-taupe placeholder-taupe shadow-sm"
+            className="w-full px-4 sm:px-5 py-2 sm:py-3 rounded-full focus:outline-none focus:ring-2 focus:ring-gold bg-blush text-taupe placeholder-taupe/60 shadow-sm text-sm sm:text-base"
             aria-label="Search books"
           />
           <select
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value as any)}
-            className="w-full md:w-48 px-4 py-2 rounded-full focus:outline-none focus:ring-2 focus:ring-gold bg-blush text-taupe shadow-sm"
+            className="w-full sm:w-48 px-4 py-2 sm:py-3 rounded-full focus:outline-none focus:ring-2 focus:ring-gold bg-blush text-taupe shadow-sm text-sm sm:text-base"
             aria-label="Sort books"
           >
             <option value="title">Sort by Title (A-Z)</option>
@@ -250,12 +250,12 @@ const AllBooksGrid = () => {
         </div>
       </div>
 
-      {/* Genre Filters */}
-      <div className="mb-8 flex overflow-x-auto no-scrollbar gap-2 pb-2">
+      {/* Genre Filters - Horizontal Scroll */}
+      <div className="mb-6 sm:mb-8 flex overflow-x-auto no-scrollbar gap-2 pb-3">
         <button
           onClick={() => setSelectedGenres([])}
-          className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold transition bg-gold/80 text-sienna border border-sienna/30 shadow-sm focus:outline-none focus:ring-2 focus:ring-gold ${
-            selectedGenres.length === 0 ? "ring-2 ring-gold" : ""
+          className={`shrink-0 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition touch-target focus:outline-none focus:ring-2 focus:ring-gold ${
+            selectedGenres.length === 0 ? "ring-2 ring-gold bg-gold/20" : "bg-blush text-taupe hover:bg-peach"
           }`}
           aria-pressed={selectedGenres.length === 0}
           aria-label="Show all genres"
@@ -266,7 +266,7 @@ const AllBooksGrid = () => {
           <button
             key={genre}
             onClick={() => toggleGenre(genre)}
-            className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-gold border border-gold/30 shadow-sm ${
+            className={`shrink-0 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-gold touch-target ${
               selectedGenres.includes(genre)
                 ? "bg-gold text-sienna font-bold ring-2 ring-gold"
                 : "bg-blush text-taupe hover:bg-peach"
@@ -281,16 +281,16 @@ const AllBooksGrid = () => {
         {selectedGenres.length > 0 && (
           <button
             onClick={() => setSelectedGenres([])}
-            className="shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold bg-red-100 text-red-600 border border-red-200 shadow-sm ml-2 focus:outline-none focus:ring-2 focus:ring-red-400"
+            className="shrink-0 px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold bg-red-100 text-red-600 border border-red-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-red-400 touch-target"
             aria-label="Clear genre filters"
           >
-            Clear Filters
+            Clear
           </button>
         )}
       </div>
 
       {/* Results count */}
-      <div className="mb-4 text-sm text-sienna/70 font-medium">
+      <div className="mb-4 text-xs sm:text-sm text-sienna/70 font-medium">
         Showing {filteredBooks.length} book
         {filteredBooks.length !== 1 ? "s" : ""}
         {selectedGenres.length > 0 && (
@@ -299,17 +299,17 @@ const AllBooksGrid = () => {
         {searchTerm && <span> matching "{searchTerm}"</span>}
       </div>
 
-      {/* Grid of books or loading/empty state */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-14">
+      {/* Grid of books or loading/empty state - Responsive columns */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         {isLoading ? (
           Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
         ) : paginatedBooks.length === 0 ? (
-          <div className="col-span-full text-center py-24 bg-gradient-to-br from-blush/20 to-peach/20 rounded-2xl border-2 border-dashed border-gold/30">
-            <div className="text-6xl mb-4">📚</div>
-            <h4 className="text-xl font-bold text-taupe mb-2">
+          <div className="col-span-full text-center py-12 sm:py-24 bg-gradient-to-br from-blush/20 to-peach/20 rounded-2xl border-2 border-dashed border-gold/30">
+            <div className="text-4xl sm:text-6xl mb-3 sm:mb-4">📚</div>
+            <h4 className="text-lg sm:text-xl font-bold text-taupe mb-2">
               No books found
             </h4>
-            <p className="text-sienna/80 mb-4">
+            <p className="text-sm sm:text-base text-sienna/80">
               Try adjusting your search or filters.
             </p>
           </div>
@@ -322,25 +322,25 @@ const AllBooksGrid = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center mt-8 gap-2">
+        <div className="flex flex-col sm:flex-row justify-center items-center mt-6 sm:mt-8 gap-2 sm:gap-4">
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            className="px-4 py-2 rounded-full bg-blush text-taupe border border-gold/30 shadow-sm font-semibold hover:bg-gold hover:text-sienna transition disabled:opacity-50"
+            className="w-full sm:w-auto px-4 py-2 rounded-full bg-blush text-taupe hover:bg-peach disabled:opacity-50 disabled:cursor-not-allowed transition font-semibold text-sm touch-target"
             disabled={currentPage === 1}
             aria-label="Previous page"
           >
-            Previous
+            ← Previous
           </button>
-          <span className="px-4 py-2 text-taupe font-bold">
-            Page {currentPage} of {totalPages}
+          <span className="px-3 py-2 text-taupe font-bold text-sm">
+            {currentPage} / {totalPages}
           </span>
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            className="px-4 py-2 rounded-full bg-blush text-taupe border border-gold/30 shadow-sm font-semibold hover:bg-gold hover:text-sienna transition disabled:opacity-50"
+            className="w-full sm:w-auto px-4 py-2 rounded-full bg-blush text-taupe hover:bg-peach disabled:opacity-50 disabled:cursor-not-allowed transition font-semibold text-sm touch-target"
             disabled={currentPage === totalPages}
             aria-label="Next page"
           >
-            Next
+            Next →
           </button>
         </div>
       )}
@@ -349,3 +349,19 @@ const AllBooksGrid = () => {
 };
 
 export default AllBooksGrid;
+
+const styles = `
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+`;

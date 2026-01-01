@@ -109,9 +109,17 @@ const BooksComponent = () => {
     if (!selectedBook) throw new Error("No book selected");
     setUploadingImage(true);
     try {
-      // Upload to imgbb
+      // Upload to imgbb (API key must be provided via env variable)
       const formData = new FormData();
-      const apiKey = "6d7dfd098e04c249b7410063cc3fff1d";
+      const apiKey = import.meta.env?.PUBLIC_IMGBB_API_KEY || process.env?.PUBLIC_IMGBB_API_KEY;
+      if (!apiKey) {
+        addNotification({
+          type: "error",
+          title: "Configuration Error",
+          message: "Image upload is not configured. Please set PUBLIC_IMGBB_API_KEY.",
+        });
+        throw new Error("IMGBB API key missing");
+      }
       formData.append("image", file);
       const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
         method: "POST",
@@ -149,9 +157,32 @@ const BooksComponent = () => {
   };
 
   // Enhanced chapter creation with image processing
-  const handleCreateChapter = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedBook || !newChapterTitle.trim()) return;
+  const handleCreateChapter = async (e?: React.FormEvent) => {
+    if (e && typeof e.preventDefault === "function") e.preventDefault();
+    if (!selectedBook) {
+      addNotification({
+        type: "error",
+        title: "No Book Selected",
+        message: "Please select a book before creating a chapter.",
+      });
+      return;
+    }
+    if (!newChapterTitle.trim()) {
+      addNotification({
+        type: "error",
+        title: "Validation Error",
+        message: "Please enter a chapter title.",
+      });
+      return;
+    }
+    if (!newChapterContent.trim()) {
+      addNotification({
+        type: "error",
+        title: "Validation Error",
+        message: "Chapter content cannot be empty.",
+      });
+      return;
+    }
 
     setCreatingChapter(true);
     try {
@@ -557,18 +588,18 @@ const BooksComponent = () => {
                         }
                       })()}
                     </span>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap sm:flex-nowrap">
                       <button
                         onClick={() => openModal(book)}
-                        className="px-4 py-2 bg-gold text-sienna rounded-xl font-semibold hover:bg-sienna hover:text-gold transition-all text-sm"
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2.5 sm:py-2 bg-gradient-to-r from-gold to-sienna text-taupe rounded-lg font-semibold hover:from-sienna hover:to-gold shadow-md hover:shadow-lg transition-all text-xs sm:text-sm active:scale-95 touch-target"
                       >
-                        Manage
+                        ✏️ Manage
                       </button>
                       <button
                         onClick={() => handleDeleteBook(book.id)}
-                        className="px-4 py-2 bg-red-100 text-red-600 rounded-xl font-semibold hover:bg-red-200 transition-all text-sm"
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2.5 sm:py-2 bg-red-100 text-red-600 rounded-lg font-semibold hover:bg-red-200 shadow-md hover:shadow-lg transition-all text-xs sm:text-sm active:scale-95 touch-target"
                       >
-                        Delete
+                        🗑️ Delete
                       </button>
                     </div>
                   </div>
@@ -588,12 +619,12 @@ const BooksComponent = () => {
               }
             }}
           >
-            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-7xl h-[95vh] flex flex-col border border-gold/20 overflow-hidden">
-              {/* Enhanced Modal Header */}
-              <div className="flex-shrink-0 bg-gradient-to-r from-blush via-peach to-gold p-6 rounded-t-3xl border-b border-gold/20">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-14 h-18 rounded-xl overflow-hidden border-2 border-white/50 shadow-lg flex-shrink-0">
+            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-h-[95vh] sm:max-w-7xl flex flex-col border border-gold/20 overflow-hidden">
+              {/* Enhanced Modal Header - Mobile responsive */}
+              <div className="flex-shrink-0 bg-gradient-to-r from-blush via-peach to-gold p-3 sm:p-6 rounded-t-2xl sm:rounded-t-3xl border-b border-gold/20">
+                <div className="flex items-start sm:items-center justify-between gap-3">
+                  <div className="flex items-start sm:items-center gap-2 sm:gap-4 min-w-0 flex-1">
+                    <div className="w-10 sm:w-14 h-14 sm:h-18 rounded-lg sm:rounded-xl overflow-hidden border-2 border-white/50 shadow-lg flex-shrink-0">
                       <div
                         className={`w-full h-full ${selectedBook.coverImage} bg-cover bg-center`}
                         style={{
@@ -601,18 +632,18 @@ const BooksComponent = () => {
                         }}
                       />
                     </div>
-                    <div className="min-w-0">
-                      <h2 className="text-2xl font-bold text-taupe mb-1 truncate">
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-lg sm:text-2xl font-bold text-taupe mb-0.5 sm:mb-1 truncate">
                         📚 {selectedBook.title}
                       </h2>
-                      <p className="text-sienna/90 text-base truncate">
-                        Manage chapters and content • {chapters.length} chapters
+                      <p className="text-xs sm:text-base text-sienna/90 truncate">
+                        Manage • {chapters.length} chapters
                       </p>
-                      <div className="flex items-center gap-3 mt-2">
-                        <span className="bg-white/30 text-taupe px-3 py-1 rounded-full text-sm font-medium">
+                      <div className="flex items-center gap-2 mt-1 sm:mt-2 flex-wrap">
+                        <span className="bg-white/30 text-taupe px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-xs font-medium">
                           {selectedBook.genre}
                         </span>
-                        <span className="text-sienna/80 text-sm">
+                        <span className="text-sienna/80 text-xs sm:text-sm truncate">
                           By {selectedBook.author}
                         </span>
                       </div>
@@ -620,21 +651,21 @@ const BooksComponent = () => {
                   </div>
                   <button
                     onClick={closeModal}
-                    className="p-2 rounded-full hover:bg-white/30 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 flex-shrink-0"
+                    className="p-1.5 sm:p-2 rounded-full hover:bg-white/30 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 flex-shrink-0 touch-target"
                     aria-label="Close modal"
                   >
-                    <span className="text-xl text-taupe">×</span>
+                    <span className="text-xl sm:text-2xl text-taupe">×</span>
                   </button>
                 </div>
               </div>
 
-              {/* Enhanced Modal Content */}
-              <div className="flex-1 overflow-hidden">
-                <div className="flex h-full">
-                  {/* Left Panel - Book Info & Chapter Creation */}
-                  <div className="w-full xl:w-1/3 bg-gradient-to-b from-blush/20 to-peach/20 border-r border-gold/20">
-                    <div className="h-full overflow-y-auto p-6">
-                      <div className="space-y-6">
+              {/* Enhanced Modal Content - Responsive layout */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="flex flex-col lg:flex-row gap-0">
+                  {/* Left Panel - Book Info & Chapter Creation - Full width on mobile */}
+                  <div className="w-full lg:w-1/3 bg-gradient-to-b from-blush/20 to-peach/20 border-b lg:border-b-0 lg:border-r border-gold/20 overflow-y-auto lg:max-h-full">
+                    <div className="h-full p-3 sm:p-6">
+                      <div className="space-y-4 sm:space-y-6">
                         {/* Book Information Card */}
                         <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gold/20">
                           <div className="flex items-center justify-between mb-4">
@@ -650,17 +681,17 @@ const BooksComponent = () => {
                                 ✏️ Edit
                               </button>
                             ) : (
-                              <div className="flex gap-2">
+                              <div className="flex gap-2 flex-col sm:flex-row">
                                 <button
                                   onClick={saveBookChanges}
                                   disabled={savingBook}
-                                  className="px-3 py-2 bg-green-100 text-green-700 rounded-xl text-sm font-medium hover:bg-green-200 transition-all disabled:opacity-50 shadow-sm"
+                                  className="flex-1 sm:flex-none px-3 py-2.5 sm:py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg text-sm font-medium hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50 shadow-md hover:shadow-lg active:scale-95"
                                 >
                                   {savingBook ? "💾 Saving..." : "💾 Save"}
                                 </button>
                                 <button
                                   onClick={cancelEditingBook}
-                                  className="px-3 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-all shadow-sm"
+                                  className="flex-1 sm:flex-none px-3 py-2.5 sm:py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition-all shadow-md hover:shadow-lg active:scale-95"
                                 >
                                   ❌ Cancel
                                 </button>
@@ -772,18 +803,18 @@ const BooksComponent = () => {
                         </div>
 
                         {/* Quick Actions */}
-                        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gold/20">
-                          <h3 className="text-lg font-bold text-taupe mb-4 flex items-center gap-2">
+                        <div className="bg-white/90 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-lg border border-gold/20">
+                          <h3 className="text-base sm:text-lg font-bold text-taupe mb-3 sm:mb-4 flex items-center gap-2">
                             <span>⚡</span>
-                            <span>Quick Actions</span>
+                            <span className="hidden sm:inline">Quick Actions</span>
                           </h3>
-                          <div className="space-y-3">
+                          <div className="space-y-2 sm:space-y-3">
                             <button
                               onClick={openNewChapterModal}
-                              className="w-full px-4 py-3 bg-gradient-to-r from-gold to-sienna text-taupe rounded-xl font-bold hover:from-sienna hover:to-gold transition-all shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center gap-2"
+                              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-gold to-sienna text-taupe rounded-lg sm:rounded-xl font-bold hover:from-sienna hover:to-gold transition-all shadow-md hover:shadow-lg active:scale-95 flex items-center justify-center gap-2 text-sm sm:text-base"
                             >
                               <span>✨</span>
-                              <span>Create New Chapter</span>
+                              <span>New Chapter</span>
                             </button>
                             <button
                               onClick={() =>
@@ -792,31 +823,31 @@ const BooksComponent = () => {
                                   "_blank"
                                 )
                               }
-                              className="w-full px-4 py-3 bg-blue-100 text-blue-700 rounded-xl font-semibold hover:bg-blue-200 transition-all shadow-sm flex items-center justify-center gap-2"
+                              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg sm:rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg active:scale-95 flex items-center justify-center gap-2 text-sm sm:text-base"
                             >
                               <span>👁️</span>
-                              <span>Preview Book</span>
+                              <span>Preview</span>
                             </button>
                           </div>
                         </div>
 
                         {/* Chapter Stats */}
-                        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gold/20">
-                          <h3 className="text-lg font-bold text-taupe mb-4 flex items-center gap-2">
+                        <div className="bg-white/90 backdrop-blur-sm rounded-xl sm:rounded-2xl p-3 sm:p-6 shadow-lg border border-gold/20">
+                          <h3 className="text-base sm:text-lg font-bold text-taupe mb-3 sm:mb-4 flex items-center gap-2">
                             <span>📊</span>
-                            <span>Chapter Stats</span>
+                            <span className="hidden sm:inline">Stats</span>
                           </h3>
-                          <div className="grid grid-cols-2 gap-4 text-center">
-                            <div className="p-3 bg-blush/30 rounded-xl">
-                              <div className="text-2xl font-bold text-taupe">
+                          <div className="grid grid-cols-2 gap-2 sm:gap-4 text-center">
+                            <div className="p-2 sm:p-3 bg-blush/30 rounded-lg sm:rounded-xl">
+                              <div className="text-xl sm:text-2xl font-bold text-taupe">
                                 {chapters.length}
                               </div>
                               <div className="text-xs text-sienna/80">
-                                Total Chapters
+                                Chapters
                               </div>
                             </div>
-                            <div className="p-3 bg-peach/30 rounded-xl">
-                              <div className="text-2xl font-bold text-taupe">
+                            <div className="p-2 sm:p-3 bg-peach/30 rounded-lg sm:rounded-xl">
+                              <div className="text-xl sm:text-2xl font-bold text-taupe">
                                 {chapters.reduce(
                                   (total, chapter) =>
                                     total +
@@ -835,10 +866,10 @@ const BooksComponent = () => {
                   </div>
 
                   {/* Right Panel - Chapters List */}
-                  <div className="w-full xl:w-2/3 bg-white flex flex-col">
-                    <div className="flex-shrink-0 p-6 border-b border-gray-200">
+                  <div className="w-full lg:w-2/3 bg-white flex flex-col overflow-hidden lg:max-h-full">
+                    <div className="flex-shrink-0 p-3 sm:p-6 border-b border-gray-200">
                       <div className="flex items-center justify-between">
-                        <h3 className="text-xl font-bold text-taupe flex items-center gap-2">
+                        <h3 className="text-lg sm:text-xl font-bold text-taupe flex items-center gap-2">
                           <span>📖</span>
                           <span>Chapters ({chapters.length})</span>
                         </h3>
@@ -856,7 +887,7 @@ const BooksComponent = () => {
                       </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-6">
+                    <div className="flex-1 overflow-y-auto p-3 sm:p-6">
                       {chapters.length === 0 ? (
                         <div className="text-center py-16 bg-gradient-to-br from-blush/20 to-peach/20 rounded-2xl border-2 border-dashed border-gold/30">
                           <div className="text-6xl mb-4">📖</div>
@@ -880,16 +911,16 @@ const BooksComponent = () => {
                             return (
                               <div
                                 key={chapter.id}
-                                className="bg-gradient-to-r from-blush/10 to-peach/10 border border-gold/20 rounded-xl p-5 hover:shadow-lg transition-all duration-300 group"
+                                className="bg-gradient-to-r from-blush/10 to-peach/10 border border-gold/20 rounded-xl p-4 sm:p-5 hover:shadow-lg transition-all duration-300"
                               >
-                                <div className="flex justify-between items-start mb-4">
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
                                   <div className="flex-1 min-w-0">
-                                    <h4 className="text-lg font-bold text-taupe mb-1 truncate">
+                                    <h4 className="text-base sm:text-lg font-bold text-taupe mb-1 truncate">
                                       {hasChapterPrefix(chapter.title)
                                         ? chapter.title
                                         : `Chapter ${chapterNumber}: ${chapter.title}`}
                                     </h4>
-                                    <div className="flex items-center gap-4 text-sm text-sienna/80">
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-sienna/80">
                                       <span className="flex items-center gap-1">
                                         <span>📅</span>
                                         <span>
@@ -942,14 +973,14 @@ const BooksComponent = () => {
                                       </span>
                                     </div>
                                   </div>
-                                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <div className="flex gap-2 flex-wrap justify-start sm:justify-end">
                                     {editingChapterId === chapter.id ? (
                                       <>
                                         <button
                                           onClick={() =>
                                             saveEditedChapter(chapter.id)
                                           }
-                                          className="px-3 py-2 bg-green-100 text-green-700 rounded-xl text-sm font-medium hover:bg-green-200 transition-all shadow-sm"
+                                          className="px-3 py-2 bg-green-100 text-green-700 rounded-xl text-sm font-medium hover:bg-green-200 transition-all shadow-sm touch-target"
                                         >
                                           💾 Save
                                         </button>
@@ -957,7 +988,7 @@ const BooksComponent = () => {
                                           onClick={() =>
                                             setEditingChapterId(null)
                                           }
-                                          className="px-3 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-all shadow-sm"
+                                          className="px-3 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-all shadow-sm touch-target"
                                         >
                                           ❌ Cancel
                                         </button>
@@ -969,7 +1000,7 @@ const BooksComponent = () => {
                                             setEditingContent(chapter.content);
                                             setEditingChapterId(chapter.id);
                                           }}
-                                          className="px-3 py-2 bg-blue-100 text-blue-700 rounded-xl text-sm font-medium hover:bg-blue-200 transition-all shadow-sm"
+                                          className="px-3 py-2 bg-blue-100 text-blue-700 rounded-xl text-sm font-medium hover:bg-blue-200 transition-all shadow-sm touch-target"
                                         >
                                           ✏️ Edit
                                         </button>
@@ -977,7 +1008,7 @@ const BooksComponent = () => {
                                           onClick={() =>
                                             deleteChapter(chapter.id)
                                           }
-                                          className="px-3 py-2 bg-red-100 text-red-700 rounded-xl text-sm font-medium hover:bg-red-200 transition-all shadow-sm"
+                                          className="px-3 py-2 bg-red-100 text-red-700 rounded-xl text-sm font-medium hover:bg-red-200 transition-all shadow-sm touch-target"
                                         >
                                           🗑️ Delete
                                         </button>

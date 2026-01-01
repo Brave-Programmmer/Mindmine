@@ -81,6 +81,7 @@ const genreOptions = [
 
 const AdminComponent = () => {
   const email = useAuthStore((state) => state.email);
+  const setUser = useAuthStore((state) => state.setUser);
   const { addNotification } = useNotification();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -95,6 +96,12 @@ const AdminComponent = () => {
           author: user.displayName || "",
           email: user.email || "",
         }));
+        // Keep global auth store in sync so other components (Create button) work
+        try {
+          setUser(user.email || "", user.displayName || "", true);
+        } catch (e) {
+          // ignore if store not available
+        }
       }
     });
     return unsubscribe;
@@ -201,9 +208,6 @@ const AdminComponent = () => {
     }));
   };
 
-  function handleGenreChange(event: ChangeEvent<HTMLSelectElement>): void {
-    throw new Error("Function not implemented.");
-  }
 
   return (
     <div>
@@ -428,11 +432,11 @@ const AdminComponent = () => {
             </div>
 
             {/* Action Buttons - Fixed at bottom */}
-            <div className="flex-shrink-0 p-6 border-t border-gold/20 bg-white rounded-b-2xl">
-              <div className="flex gap-3">
+            <div className="flex-shrink-0 p-4 sm:p-6 border-t border-gold/20 bg-white rounded-b-2xl">
+              <div className="flex gap-2 sm:gap-3 flex-col sm:flex-row">
                 <button
                   onClick={resetForm}
-                  className="flex-1 px-6 py-3 bg-blush text-taupe rounded-xl font-semibold hover:bg-peach transition-colors focus:outline-none focus:ring-2 focus:ring-gold"
+                  className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-blush text-taupe rounded-lg sm:rounded-xl font-semibold hover:bg-peach transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gold active:scale-95 text-sm sm:text-base touch-target"
                   disabled={isLoading}
                 >
                   Reset
@@ -440,7 +444,7 @@ const AdminComponent = () => {
                 <button
                   onClick={handleCreateBook}
                   disabled={isLoading}
-                  className="flex-1 px-6 py-3 bg-gold text-sienna rounded-xl font-semibold hover:bg-sienna hover:text-gold transition-all focus:outline-none focus:ring-2 focus:ring-gold disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-gold to-sienna text-taupe rounded-lg sm:rounded-xl font-semibold hover:from-sienna hover:to-gold transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gold disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 text-sm sm:text-base touch-target"
                 >
                   {isLoading ? (
                     <span className="flex items-center justify-center gap-2">
