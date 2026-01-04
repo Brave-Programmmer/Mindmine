@@ -37,35 +37,43 @@ const communityMembers = [
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <div class="text-left space-y-6">
           <h1
-            class="text-4xl sm:text-5xl lg:text-6xl font-bold text-rosewood leading-tight"
+            class="text-4xl sm:text-5xl lg:text-6xl font-bold text-rosewood leading-tight animate-slide-in-left"
           >
             Your Story
             <span class="block text-taupe">Begins Here</span>
           </h1>
-          <p class="text-lg sm:text-xl text-taupe max-w-lg leading-relaxed">
+          <p class="text-lg sm:text-xl text-taupe max-w-lg leading-relaxed animate-fade-in" style="animation-delay: 0.2s">
             Discover captivating stories, share your own tales, and connect with
             fellow book lovers in our vibrant community.
           </p>
-          <div class="flex flex-col sm:flex-row gap-4">
+          <div class="flex flex-col sm:flex-row gap-4 animate-fade-in" style="animation-delay: 0.4s">
             <a
               href="/books"
-              class="btn btn-primary px-8 py-3 rounded-full"
+              class="group relative inline-flex items-center justify-center px-8 py-3 rounded-full font-bold text-taupe overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2"
               aria-label="Explore available books"
             >
-              Explore Books
+              <div class="absolute inset-0 bg-gradient-to-r from-gold to-sienna opacity-100 group-hover:opacity-0 transition-opacity duration-300"></div>
+              <div class="absolute inset-0 bg-gradient-to-r from-sienna to-gold opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <span class="relative flex items-center gap-2">
+                <span>📚</span>
+                <span>Explore Books</span>
+              </span>
             </a>
             <a
               href="/write"
-              class="btn btn-ghost px-8 py-3 rounded-full"
+              class="group relative inline-flex items-center justify-center px-8 py-3 rounded-full font-bold text-taupe border-2 border-gold hover:border-sienna transition-all duration-300 hover:scale-105 active:scale-95 hover:bg-gold/10 focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2"
               aria-label="Start writing your story"
             >
-              Start Writing
+              <span class="flex items-center gap-2">
+                <span>✨</span>
+                <span>Start Writing</span>
+              </span>
             </a>
           </div>
         </div>
 
         <div
-          class="relative h-[300px] sm:h-[350px] lg:h-[400px] flex justify-center items-center"
+          class="relative h-[300px] sm:h-[350px] lg:h-[400px] flex justify-center items-center animate-slide-in-right"
         >
           <div class="transform scale-75 sm:scale-90 lg:scale-100">
             <FlippingPageBook />
@@ -80,29 +88,37 @@ const communityMembers = [
     <div class="container mx-auto">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
         <article
-          class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+          class="group bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-gold/50 hover:-translate-y-2"
         >
-          <h2 class="text-2xl sm:text-3xl font-bold text-rosewood mb-4">
+          <div class="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">📖</div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-rosewood mb-4 group-hover:text-gold transition-colors">
             For Readers
           </h2>
           <p class="text-taupe mb-6 leading-relaxed">
             Discover new stories, follow your favorite authors, and build your
             reading list with personalized recommendations.
           </p>
-          <a href="/books" class="btn btn-primary px-6 py-3 rounded-full" aria-label="Browse book collection">Explore Books</a>
+          <a href="/books" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold bg-gradient-to-r from-gold to-sienna text-taupe hover:from-sienna hover:to-gold transition-all duration-300 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2" aria-label="Browse book collection">
+            <span>📚</span>
+            <span>Explore Books</span>
+          </a>
         </article>
 
         <article
-          class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300"
+          class="group bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-sienna/50 hover:-translate-y-2"
         >
-          <h2 class="text-2xl sm:text-3xl font-bold text-rosewood mb-4">
+          <div class="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">✍️</div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-rosewood mb-4 group-hover:text-sienna transition-colors">
             For Authors
           </h2>
           <p class="text-taupe mb-6 leading-relaxed">
             Share your stories with the world, connect with readers, and grow
             your audience through our supportive platform.
           </p>
-          <a href="/write" class="btn btn-primary px-6 py-3 rounded-full" aria-label="Start your writing journey">Start Writing</a>
+          <a href="/write" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold bg-gradient-to-r from-gold to-sienna text-taupe hover:from-sienna hover:to-gold transition-all duration-300 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2" aria-label="Start your writing journey">
+            <span>✨</span>
+            <span>Start Writing</span>
+          </a>
         </article>
       </div>
     </div>
@@ -150,17 +166,20 @@ const communityMembers = [
             constructive feedback, and grow together in our supportive and
             vibrant community.
           </p>
-          <a href="/community" class="btn btn-primary px-8 py-3 rounded-full" aria-label="Join our writing community">Join Now</a>
+          <a href="/community" class="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full font-bold bg-gradient-to-r from-gold to-sienna text-taupe hover:from-sienna hover:to-gold transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2" aria-label="Join our writing community">
+            <span>🤝</span>
+            <span>Join Now</span>
+          </a>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {
             communityMembers.map((member) => (
-              <article class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300">
-                <div class="w-12 h-12 bg-gradient-to-br from-mauve to-rosewood rounded-full mb-4 flex items-center justify-center text-white font-bold text-sm">
+              <article class="group bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-gold/50 hover:-translate-y-1">
+                <div class="w-12 h-12 bg-gradient-to-br from-mauve to-rosewood rounded-full mb-4 flex items-center justify-center text-white font-bold text-sm group-hover:scale-125 transition-transform duration-300">
                   {member.avatar}
                 </div>
-                <h3 class="font-semibold text-rosewood text-lg mb-2">
+                <h3 class="font-semibold text-rosewood text-lg mb-2 group-hover:text-gold transition-colors">
                   {member.name}
                 </h3>
                 <p class="text-sm text-taupe leading-relaxed">
@@ -191,6 +210,21 @@ const communityMembers = [
     section:nth-child(4) {
       animation-delay: 0.6s;
     }
+
+    .animate-slide-in-left {
+      animation: slideInLeft 0.8s ease-out forwards;
+      opacity: 0;
+    }
+
+    .animate-slide-in-right {
+      animation: slideInRight 0.8s ease-out forwards;
+      opacity: 0;
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.6s ease-out forwards;
+      opacity: 0;
+    }
   }
 
   @keyframes fadeInUp {
@@ -201,6 +235,37 @@ const communityMembers = [
     to {
       opacity: 1;
       transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(50px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
     }
   }
 
@@ -223,5 +288,15 @@ const communityMembers = [
   a:focus-visible {
     outline: 2px solid #bc8f8f;
     outline-offset: 2px;
+  }
+
+  /* Button glow effect */
+  a[href]:not(.btn) {
+    position: relative;
+  }
+
+  /* Smooth transitions */
+  a, button, input, textarea, select {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 </style>

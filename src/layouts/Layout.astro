@@ -54,11 +54,13 @@ const { title } = Astro.props as Props;
       name="google-site-verification"
       content="Z9C27DbDJdGc-gpOVkfnacCQHrj1Y4crC3FQEU0TM1U"
     />
-    <!-- Ads  -->
-    <script
-      async
-      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1586605068707622"
-      crossorigin="anonymous"></script>
+    <!-- Ads - Only in production to avoid CORS issues in development -->
+    {import.meta.env.PROD && (
+      <script
+        async
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1586605068707622"
+        crossorigin="anonymous"></script>
+    )}
 
     <!-- Favicon -->
     <link rel="icon" href="/favicon.svg" />
@@ -85,7 +87,7 @@ const { title } = Astro.props as Props;
   <body class="pt-navbar">
     <LayoutWrapper client:only="react">
       <Navbar client:only="react" />
-      <main className="min-h-screen">
+      <main class="min-h-screen">
         <slot />
       </main>
       <Footer client:only="react" />

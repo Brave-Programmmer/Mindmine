@@ -233,14 +233,7 @@ export const Navbar = () => {
                 <span className="mr-3">✍️</span>
                 Write New Book
               </a>
-              <a
-                href="/admin"
-                onClick={closeAllMenus}
-                className="flex items-center px-4 py-3 text-taupe hover:bg-blush/50 rounded-xl transition-colors font-medium text-sm touch-target"
-              >
-                <span className="mr-3">📚</span>
-                My Books
-              </a>
+          
               <button
                 onClick={() => {
                   handleLogout();

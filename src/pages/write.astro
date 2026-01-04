@@ -5,9 +5,32 @@ import Books from "../components/admin/Books";
 ---
 
 <Layout title="Write">
-  {
-    /* Only render Books or Admin as needed. If both are needed, consider tabs or conditional rendering. */
-  }
-  <Books client:only="react" />
-  <Admin client:only="react" />
+  <div class="min-h-screen bg-gradient-to-b from-blush/20 via-white to-peach/20">
+    {/* Header Section */}
+    <div class="bg-gradient-to-r from-blush via-peach to-gold py-8 sm:py-12 md:py-16 px-4 sm:px-6 shadow-lg">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center">
+          <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold text-taupe mb-3 animate-fade-in">
+            ✨ Your Writing Studio
+          </h1>
+          <p class="text-lg sm:text-xl text-sienna/90 max-w-2xl mx-auto animate-fade-in">
+            Create captivating stories, manage chapters, and share your imagination with the world
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {/* Main Content */}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      {/* Books Section */}
+      <div class="mb-12 sm:mb-16">
+        <Books client:only="react" />
+      </div>
+    </div>
+
+    {/* Admin (FAB and Modal) - Floating */}
+    <div>
+      <Admin client:only="react" />
+    </div>
+  </div>
 </Layout>
