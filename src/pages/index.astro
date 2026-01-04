@@ -17,25 +17,26 @@ const communityMembers = [
     avatar: "CS",
   },
 ];
+
+const pageDescription = "Welcome to MindMine - the platform where aspiring authors publish interactive books and readers discover immersive storytelling. Start writing or reading today.";
 ---
 
-<Layout title="Welcome">
+<Layout 
+  title="Welcome"
+  description={pageDescription}
+  image="https://mindmine.netlify.app/og-image.png"
+  canonical="https://mindmine.netlify.app/"
+>
   <!-- Hero Section -->
   <section
     class="relative overflow-hidden py-20 min-h-[90vh] flex items-center"
     role="banner"
     aria-label="Hero section"
   >
-    <ParticleBackground client:load />
-    <div
-      class="absolute inset-0 bg-gradient-to-br from-blush/20 to-peach/20"
-      aria-hidden="true"
-    >
-    </div>
-
-    <div class="container mx-auto px-4 relative z-10">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-        <div class="text-left space-y-6">
+    <ParticleBackground client:idle />
+    <!-- Only keep overlay if needed for UI/UX -->
+    <section class="container mx-auto px-4 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      <article class="text-left space-y-6">
           <h1
             class="text-4xl sm:text-5xl lg:text-6xl font-bold text-rosewood leading-tight animate-slide-in-left"
           >
@@ -46,7 +47,7 @@ const communityMembers = [
             Discover captivating stories, share your own tales, and connect with
             fellow book lovers in our vibrant community.
           </p>
-          <div class="flex flex-col sm:flex-row gap-4 animate-fade-in" style="animation-delay: 0.4s">
+          <nav class="flex flex-col sm:flex-row gap-4 animate-fade-in" style="animation-delay: 0.4s">
             <a
               href="/books"
               class="group relative inline-flex items-center justify-center px-8 py-3 rounded-full font-bold text-taupe overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2"
@@ -72,21 +73,14 @@ const communityMembers = [
           </div>
         </div>
 
-        <div
-          class="relative h-[300px] sm:h-[350px] lg:h-[400px] flex justify-center items-center animate-slide-in-right"
-        >
-          <div class="transform scale-75 sm:scale-90 lg:scale-100">
-            <FlippingPageBook />
-          </div>
-        </div>
+        <aside class="relative h-[300px] sm:h-[350px] lg:h-[400px] flex justify-center items-center animate-slide-in-right transform scale-75 sm:scale-90 lg:scale-100">
+          <FlippingPageBook client:idle />
+        </aside>
       </div>
-    </div>
-  </section>
+    </section>
 
   <!-- Features Section -->
-  <section class="py-16 px-4" aria-labelledby="features-heading">
-    <div class="container mx-auto">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
+  <section class="py-16 px-4 container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl" aria-labelledby="features-heading">
         <article
           class="group bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-gold/50 hover:-translate-y-2"
         >
@@ -120,17 +114,11 @@ const communityMembers = [
             <span>Start Writing</span>
           </a>
         </article>
-      </div>
-    </div>
-  </section>
+    </section>
 
   <!-- Featured Books Section -->
-  <section
-    class="py-16 px-4 bg-gradient-to-b from-transparent to-blush/10"
-    aria-labelledby="featured-books-heading"
-  >
-    <div class="container mx-auto">
-      <header class="text-center mb-12">
+  <section class="py-16 px-4 bg-gradient-to-b from-transparent to-blush/10 container mx-auto" aria-labelledby="featured-books-heading">
+    <header class="text-center mb-12">
         <h2
           id="featured-books-heading"
           class="text-3xl sm:text-4xl font-bold text-rosewood mb-4"
@@ -142,19 +130,11 @@ const communityMembers = [
           you
         </p>
       </header>
-      <div class="max-w-7xl mx-auto">
-        <AllBooksGrid client:only="react" />
-      </div>
-    </div>
-  </section>
+      <AllBooksGrid client:visible />
 
   <!-- Community Section -->
-  <section class="py-20 px-4" aria-labelledby="community-heading">
-    <div class="container mx-auto">
-      <div
-        class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto"
-      >
-        <div class="space-y-6">
+  <section class="py-20 px-4 container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-6xl" aria-labelledby="community-heading">
+    <article class="space-y-6">
           <h2
             id="community-heading"
             class="text-3xl sm:text-4xl font-bold text-rosewood"
@@ -166,13 +146,13 @@ const communityMembers = [
             constructive feedback, and grow together in our supportive and
             vibrant community.
           </p>
-          <a href="/community" class="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full font-bold bg-gradient-to-r from-gold to-sienna text-taupe hover:from-sienna hover:to-gold transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2" aria-label="Join our writing community">
+          <a href="/login" class="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full font-bold bg-gradient-to-r from-gold to-sienna text-taupe hover:from-sienna hover:to-gold transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2" aria-label="Join our writing community">
             <span>🤝</span>
             <span>Join Now</span>
           </a>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <section class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {
             communityMembers.map((member) => (
               <article class="group bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-gold/50 hover:-translate-y-1">
@@ -188,10 +168,8 @@ const communityMembers = [
               </article>
             ))
           }
-        </div>
-      </div>
-    </div>
-  </section>
+        </section>
+    </section>
 </Layout>
 
 <style>

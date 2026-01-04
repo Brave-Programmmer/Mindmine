@@ -1,9 +1,17 @@
 ---
 import Layout from "../layouts/Layout.astro";
+
+const pageDescription =
+  "Learn about MindMine and its creator Mohit Pujari (Brave Programmer). Discover the story behind the platform that connects authors and readers.";
 ---
 
-<Layout title="About Us">
-  <section class="bg-peach text-taupe py-12 px-6 md:px-20">
+<Layout
+  title="About Us"
+  description={pageDescription}
+  image="https://mindmine.netlify.app/og-image.png"
+  canonical="https://mindmine.netlify.app/about/"
+>
+  <div class="bg-peach text-taupe py-12 px-6 md:px-20">
     <div class="max-w-5xl mx-auto">
       <h2 class="text-4xl md:text-5xl font-bold text-rosewood mb-4">
         About Me
@@ -93,7 +101,7 @@ import Layout from "../layouts/Layout.astro";
         </ul>
       </div>
     </div>
-  </section>
+  </div>
 </Layout>
 <script>
   // Dynamic age calculation

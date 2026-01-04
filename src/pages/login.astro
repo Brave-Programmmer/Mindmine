@@ -1,9 +1,16 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { Auth } from "../components/Auth";
+
+const pageDescription = "Sign in to MindMine to access your account, manage your books, and connect with the community of authors and readers.";
 ---
 
-<Layout title="Login">
+<Layout 
+  title="Login"
+  description={pageDescription}
+  image="https://mindmine.netlify.app/og-image.png"
+  canonical="https://mindmine.netlify.app/login/"
+>
   <main
     class="min-h-screen bg-blush flex items-center justify-center px-4 py-16"
   >

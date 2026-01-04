@@ -552,83 +552,122 @@ const BooksComponent = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-blush/10 to-peach/10">
+    <div className="min-h-screen bg-gradient-to-br from-white via-blush/5 to-peach/10">
       <main className="container mx-auto px-3 sm:px-4 md:px-6 py-8 md:py-12">
-        <div className="text-center mb-8 md:mb-12 animate-fade-in">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-taupe mb-3">
-            📚 My Books
+        {/* Header Section */}
+        <div className="text-center mb-12 md:mb-16 space-y-4 animate-fade-in">
+          <div className="inline-flex items-center justify-center gap-2 mb-4">
+            <span className="text-5xl sm:text-6xl animate-bounce" style={{ animationDelay: '0s' }}>📚</span>
+          </div>
+          
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-taupe drop-shadow-lg">
+            My Books
           </h1>
-          <p className="text-sienna/80 text-base sm:text-lg md:text-xl max-w-2xl mx-auto">
-            Manage your stories, edit chapters, and watch your chapters grow
+          
+          <p className="text-sienna/80 text-base sm:text-lg md:text-xl max-w-2xl mx-auto font-semibold">
+            Manage your stories, edit chapters, and watch your creativity grow
           </p>
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center py-16 sm:py-20">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-gold border-t-transparent mx-auto mb-4"></div>
-              <p className="text-sienna/80 font-semibold">Loading your books...</p>
+          <div className="flex justify-center items-center py-20 sm:py-32">
+            <div className="text-center space-y-6">
+              <div className="relative w-20 h-20 mx-auto">
+                <div className="absolute inset-0 rounded-full border-4 border-gold/30 border-t-gold animate-spin"></div>
+                <div className="absolute inset-2 rounded-full border-4 border-peach/30 border-b-peach animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+              </div>
+              <p className="text-sienna/80 font-bold text-lg">Loading your books...</p>
+              <p className="text-sienna/60 text-sm">This may take a moment</p>
             </div>
           </div>
         ) : error ? (
-          <div className="text-center py-16 sm:py-20">
-            <div className="bg-red-100 border-2 border-red-300 rounded-2xl p-8 inline-block">
-              <p className="text-red-600 text-lg font-semibold">❌ {error}</p>
-              <p className="text-red-500/80 text-sm mt-2">Please try refreshing the page</p>
+          <div className="text-center py-20 sm:py-32">
+            <div className="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300 rounded-3xl p-12 inline-block shadow-lg">
+              <p className="text-red-600 text-2xl font-bold mb-3">❌ Error</p>
+              <p className="text-red-600 text-lg font-semibold mb-4">{error}</p>
+              <p className="text-red-500/80 text-sm">Try refreshing the page</p>
             </div>
           </div>
         ) : books.length === 0 ? (
-          <div className="text-center py-16 sm:py-20">
-            <div className="bg-gradient-to-br from-blush/30 to-peach/30 rounded-3xl p-12 shadow-lg border-2 border-dashed border-gold/40 max-w-md mx-auto">
-              <div className="text-7xl mb-4 animate-bounce">📚</div>
-              <h2 className="text-2xl font-bold text-taupe mb-3">
+          <div className="text-center py-20 sm:py-32">
+            <div className="bg-gradient-to-br from-blush/40 to-peach/40 rounded-3xl p-12 shadow-xl border-3 border-dashed border-gold/50 max-w-md mx-auto backdrop-blur-sm">
+              <div className="text-7xl mb-6 animate-bounce" style={{ animationDelay: '0.1s' }}>📚</div>
+              <h2 className="text-3xl font-bold text-taupe mb-3">
                 No Books Yet
               </h2>
-              <p className="text-sienna/80 mb-6 text-lg">
+              <p className="text-sienna/90 mb-8 text-lg font-semibold">
                 Start your writing journey by creating your first book!
               </p>
-              <div className="text-xs sm:text-sm text-sienna/60 space-y-2">
-                <p>💡 Click the "✨" button in the bottom right to get started</p>
-                <p>📖 Choose a cover style and write your story</p>
-                <p>✨ Share your imagination with readers</p>
+              <div className="text-sm text-sienna/70 space-y-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">💡</span>
+                  <span>Click the "✨" button in the bottom right to get started</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">🎨</span>
+                  <span>Choose a cover style and write your story</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">🚀</span>
+                  <span>Share your imagination with readers worldwide</span>
+                </div>
               </div>
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
-            {books.map((book) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 lg:gap-7">
+            {books.map((book, index) => (
               <div
                 key={book.id}
-                className="bg-white/95 rounded-xl sm:rounded-2xl shadow-lg border-2 border-gold/20 overflow-hidden hover:shadow-2xl hover:border-gold/50 transition-all duration-300 transform hover:scale-105 active:scale-95 group"
+                className="group bg-white/80 backdrop-blur-lg rounded-2xl sm:rounded-3xl shadow-xl border border-gold/30 overflow-hidden hover:shadow-2xl hover:border-gold/60 transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.03] active:scale-95 animate-fade-in"
+                style={{ animationDelay: `${index * 50}ms` }}
               >
-                <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-blush to-peach">
+                {/* Book Cover */}
+                <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-blush to-peach shadow-lg">
                   <div
-                    className={`w-full h-full ${book.coverImage} bg-cover bg-center group-hover:scale-110 transition-transform duration-500`}
-                    style={{ backgroundImage: `url(${book.coverImage})` }}
+                
+                    className={`${book.coverImage} w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-500 rounded-t-2xl sm:rounded-t-3xl`}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                  <div className="absolute top-2 sm:top-3 left-2 sm:left-3 bg-gold/95 text-sienna text-xs font-bold px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-lg">
+                  {/* Genre Badge - bottom right */}
+                  <div className="absolute bottom-3 right-3 bg-gold/95 text-taupe text-xs sm:text-sm font-bold px-3 sm:px-4 py-1.5 sm:py-2 rounded-full shadow-lg border border-white/40 backdrop-blur-sm">
                     🏷️ {book.genre}
+                  </div>
+                  {/* Overlay on hover */}
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
+                    <span className="text-white text-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                     
+                    </span>
                   </div>
                 </div>
 
-                <div className="p-3 sm:p-4 md:p-5 flex flex-col">
-                  <h3 className="text-sm sm:text-base md:text-lg font-bold text-taupe mb-1.5 line-clamp-2 group-hover:text-gold transition-colors">
-                    {book.title}
-                  </h3>
-                  <p className="text-sienna/80 text-xs sm:text-sm mb-3 line-clamp-2 flex-1">
+                {/* Book Info */}
+                <div className="p-4 sm:p-5 md:p-6 flex flex-col gap-3 sm:gap-4">
+                  {/* Title */}
+                  <div>
+                    <h3 className="text-base sm:text-lg md:text-xl font-bold text-taupe line-clamp-2 group-hover:text-gold transition-colors duration-300">
+                      {book.title}
+                    </h3>
+                    {/* Author */}
+                    <p className="text-xs sm:text-sm text-sienna/70 mt-1 font-semibold">
+                      By {book.author}
+                    </p>
+                  </div>
+
+                  {/* Synopsis */}
+                  <p className="text-sienna/80 text-xs sm:text-sm line-clamp-2 flex-1">
                     {book.synopsis}
                   </p>
 
-                  <div className="flex justify-between items-start gap-2 mb-3 text-xs sm:text-sm">
-                    <span className="text-sienna/70 flex items-center gap-1">
+                  {/* Meta Info */}
+                  <div className="flex justify-between items-center gap-2 text-xs sm:text-sm pt-2 border-t border-gold/20">
+                    <span className="text-sienna/70 flex items-center gap-1.5 font-semibold">
                       <span>📅</span>
                       <span>
                         {(function () {
                           try {
                             return new Date(book.createdAt).toLocaleDateString(
                               "en-US",
-                              { month: "short", day: "numeric" }
+                              { month: "short", day: "numeric", year: "2-digit" }
                             );
                           } catch {
                             return "N/A";
@@ -636,23 +675,26 @@ const BooksComponent = () => {
                         })()}
                       </span>
                     </span>
-                    <span className="text-sienna/70 flex items-center gap-1 bg-blush/40 px-2 py-0.5 rounded-full">
-                      <span>📖</span>
-                      <span className="font-semibold">Chapters</span>
+                    <span className="text-taupe font-bold bg-gold/20 px-2.5 py-1 rounded-full">
+                      📖 {book.totalChapters || 0}
                     </span>
                   </div>
-                  <div className="flex gap-1.5 sm:gap-2">
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2 pt-2">
                     <button
                       onClick={() => openModal(book)}
-                      className="flex-1 px-2.5 sm:px-3 py-2 sm:py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-semibold shadow-md hover:shadow-lg transition-all text-xs sm:text-sm active:scale-95 touch-target border border-blue-600/30"
+                      className="flex-1 px-3 py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg sm:rounded-xl font-bold shadow-md hover:shadow-lg transition-all text-xs sm:text-sm active:scale-95 transform hover:scale-105 border border-blue-600/30"
+                      title="Edit this book"
                     >
                       ✏️ Edit
                     </button>
                     <button
                       onClick={() => handleDeleteBook(book.id)}
-                      className="flex-1 px-2.5 sm:px-3 py-2 sm:py-2.5 bg-red-100 hover:bg-red-200 text-red-600 font-semibold rounded-lg shadow-md hover:shadow-lg transition-all text-xs sm:text-sm active:scale-95 touch-target border border-red-300/50"
+                      className="px-3 py-2.5 sm:py-3 bg-red-100 hover:bg-red-200 text-red-600 font-bold rounded-lg sm:rounded-xl shadow-md hover:shadow-lg transition-all text-xs sm:text-sm active:scale-95 transform hover:scale-105 border border-red-300/50"
+                      title="Delete this book"
                     >
-                      🗑️ Delete
+                      🗑️
                     </button>
                   </div>
                 </div>
@@ -664,14 +706,14 @@ const BooksComponent = () => {
         {/* Enhanced Modal */}
         {isModalOpen && selectedBook && (
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-start justify-center z-50 p-4 pt-[80px] sm:pt-[100px]"
             onClick={(e) => {
               if (e.target === e.currentTarget) {
                 closeModal();
               }
             }}
           >
-            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-h-[95vh] sm:max-w-7xl flex flex-col border-2 border-gold/30 overflow-hidden">
+            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-h-[calc(95vh-80px)] sm:max-w-7xl flex flex-col border-2 border-gold/30 overflow-hidden">
               {/* Enhanced Modal Header - Mobile responsive */}
               <div className="flex-shrink-0 bg-gradient-to-r from-blush via-peach to-gold p-3 sm:p-6 rounded-t-2xl sm:rounded-t-3xl border-b border-gold/20 shadow-md">
                 <div className="flex items-start sm:items-center justify-between gap-3">

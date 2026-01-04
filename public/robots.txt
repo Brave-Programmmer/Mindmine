@@ -1,4 +1,32 @@
+# MindMine SEO robots.txt configuration
+# Updated: 2024
+
+# Allow all user agents
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /api
+Disallow: /private
+Disallow: /*.json$
+Disallow: /*.xml$
+Disallow: /search
 
+# Crawl delay to be respectful to servers
+Crawl-delay: 1
+
+# Request rate limit
+Request-rate: 1/1s
+
+# Specific rules for Googlebot for faster crawling
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0.5
+
+# Specific rules for Bingbot
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Sitemap location
 Sitemap: https://mindmine.netlify.app/sitemap-index.xml
+Sitemap: https://mindmine.netlify.app/sitemap-0.xml

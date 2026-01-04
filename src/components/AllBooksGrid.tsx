@@ -253,17 +253,28 @@ const AllBooksGrid = () => {
       {/* Search and Sort */}
       <div className="sticky top-16 md:top-20 z-40 bg-white/95 backdrop-blur-lg border-b-2 border-gold/20 p-2 sm:p-3 md:p-4 rounded-b-lg shadow-lg mb-3 sm:mb-4 transition-all duration-300">
         <div className="flex flex-col gap-2 sm:gap-3 md:gap-4">
-          <input
-            type="text"
-            placeholder="🔍 Search by title or author..."
-            value={searchTerm}
-            onChange={(e) => {
-              setCurrentPage(1);
-              setSearchTerm(e.target.value);
-            }}
-            className="w-full px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 md:py-3 rounded-full focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 bg-blush text-taupe placeholder-taupe/60 shadow-md hover:shadow-lg transition-all duration-300 text-sm sm:text-base border-2 border-gold/30 font-medium"
-            aria-label="Search books"
-          />
+          <div className="flex items-center gap-2 w-full">
+            <input
+              type="text"
+              placeholder="🔍 Search by title or author..."
+              value={searchTerm}
+              onChange={(e) => {
+                setCurrentPage(1);
+                setSearchTerm(e.target.value);
+              }}
+              className="w-full px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 md:py-3 rounded-full focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 bg-blush text-taupe placeholder-taupe/60 shadow-md hover:shadow-lg transition-all duration-300 text-sm sm:text-base border-2 border-gold/30 font-medium"
+              aria-label="Search books"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="ml-1 px-2 py-2 rounded-full bg-red-100 text-red-600 border border-red-300 shadow hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 transition-all duration-200"
+                aria-label="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
           <select
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value as any)}
@@ -295,15 +306,18 @@ const AllBooksGrid = () => {
           <button
             key={genre}
             onClick={() => toggleGenre(genre)}
-            className={`shrink-0 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 touch-target whitespace-nowrap hover:scale-105 active:scale-95 ${
+            className={`shrink-0 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 touch-target whitespace-nowrap hover:scale-105 active:scale-95 flex items-center gap-1 ${
               selectedGenres.includes(genre)
                 ? "bg-gradient-to-r from-gold to-sienna text-white ring-2 ring-gold shadow-lg"
                 : "bg-blush text-taupe hover:bg-peach border-2 border-gold/30 shadow-sm hover:shadow-md"
             }`}
             aria-pressed={selectedGenres.includes(genre)}
             aria-label={`Filter by genre: ${genre}`}
+            title={genre}
           >
-            🏷️ {genre}
+            {GENRE_ICONS[genre] || <FiBookOpen className="inline-block w-3 h-3" />}
+            <span className="hidden sm:inline">{genre}</span>
+            <span className="sm:hidden text-xs">{genre.slice(0, 1)}</span>
           </button>
         ))}
         {/* Clear Filters Button */}

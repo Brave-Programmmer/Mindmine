@@ -224,61 +224,81 @@ const AdminComponent = () => {
           }
           setIsModalOpen(true);
         }}
-        className={`fixed bottom-8 right-8 p-4 sm:p-5 rounded-full shadow-2xl z-50 transition-all duration-300 transform hover:scale-110 active:scale-95 focus:outline-none focus:ring-4 focus:ring-gold focus:ring-offset-2 font-bold text-lg sm:text-xl touch-target ${
+        className={`fixed bottom-8 right-8 p-4 sm:p-6 rounded-full shadow-2xl z-50 transition-all duration-300 transform hover:scale-125 active:scale-95 focus:outline-none focus:ring-4 focus:ring-offset-2 font-bold text-2xl sm:text-3xl touch-target group relative overflow-hidden ${
           email
-            ? "bg-gradient-to-br from-gold via-sienna to-red-500 hover:from-sienna hover:via-gold hover:to-sienna text-white shadow-2xl cursor-pointer hover:shadow-3xl"
+            ? "bg-gradient-to-br from-gold via-sienna to-red-500 hover:from-sienna hover:via-gold hover:to-sienna text-white shadow-3xl cursor-pointer hover:shadow-4xl focus:ring-gold"
             : "bg-gray-400 cursor-not-allowed text-white opacity-60"
         }`}
         aria-label="Add New Book"
         disabled={!email}
         title={email ? "Create a new book" : "Log in to create a book"}
       >
-        <span className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10">
+        {/* Animated background */}
+        <span className="absolute inset-0 bg-white/20 rounded-full animate-pulse" />
+        
+        {/* Content */}
+        <span className="relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 transform group-hover:rotate-12 transition-transform duration-300">
           ✨
         </span>
+
+        {/* Floating label on hover */}
+        {email && (
+          <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 bg-taupe text-white px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none shadow-lg">
+            Create Book
+          </span>
+        )}
       </button>
 
       {/* Enhanced Modal */}
       {isModalOpen && email && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setIsModalOpen(false);
             }
           }}
         >
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-gold/20">
-            {/* Modal Header - Sticky */}
-            <div className="flex-shrink-0 bg-gradient-to-r from-blush via-peach to-gold p-4 sm:p-6 rounded-t-2xl sm:rounded-t-3xl border-b border-gold/20 shadow-md">
-              <div className="flex items-center justify-between gap-3 sm:gap-4">
-                <div className="flex-1">
-                  <h2 className="text-xl sm:text-3xl font-bold text-taupe mb-1">
-                    ✨ Create a New Book
-                  </h2>
-                  <p className="text-sienna/90 text-xs sm:text-sm">
-                    Share your story with the world
+          <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col border-2 border-gold/20 overflow-hidden transform transition-all duration-300 scale-100 animate-fade-in">
+            {/* Modal Header - Sticky with glassmorphism */}
+            <div className="flex-shrink-0 bg-gradient-to-r from-blush via-peach to-gold p-4 sm:p-8 rounded-t-2xl sm:rounded-t-3xl border-b-2 border-gold/30 shadow-lg relative overflow-hidden">
+              {/* Background animation */}
+              <div className="absolute inset-0 opacity-30">
+                <div className="absolute w-40 h-40 bg-white rounded-full mix-blend-overlay animate-pulse" style={{ top: '-20px', left: '-20px' }} />
+              </div>
+
+              <div className="relative flex items-center justify-between gap-3 sm:gap-4">
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-4xl animate-bounce" style={{ animationDelay: '0s' }}>✨</span>
+                    <h2 className="text-2xl sm:text-4xl font-black text-taupe drop-shadow">
+                      Create a New Book
+                    </h2>
+                  </div>
+                  <p className="text-sienna/90 text-xs sm:text-sm font-semibold flex items-center gap-2">
+                    <span>📖</span>
+                    <span>Share your story with the world</span>
                   </p>
                 </div>
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="p-2 rounded-full hover:bg-white/40 active:bg-white/60 transition-colors focus:outline-none focus:ring-2 focus:ring-white/50 flex-shrink-0 touch-target"
+                  className="p-2 rounded-full hover:bg-white/40 active:bg-white/60 transition-all focus:outline-none focus:ring-2 focus:ring-white/50 flex-shrink-0 touch-target hover:scale-110 active:scale-95"
                   aria-label="Close modal"
                 >
-                  <span className="text-2xl sm:text-3xl text-taupe">×</span>
+                  <span className="text-2xl sm:text-3xl text-taupe font-bold">×</span>
                 </button>
               </div>
             </div>
 
             {/* Modal Content - Scrollable */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 sm:space-y-8 bg-gradient-to-b from-white via-blush/5 to-peach/10">
               {/* Title Input */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <label
                   htmlFor="title"
-                  className="block text-sm font-bold text-taupe flex items-center gap-2"
+                  className="block text-sm font-black text-taupe flex items-center gap-2"
                 >
-                  <span>📖</span>
+                  <span className="text-xl">📖</span>
                   <span>Book Title *</span>
                 </label>
                 <input
@@ -288,42 +308,53 @@ const AdminComponent = () => {
                   placeholder="Enter your book title..."
                   value={newBook.title}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gold/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold focus:border-gold bg-white text-taupe placeholder-taupe/50 transition-all hover:border-gold/50 shadow-sm hover:shadow-md"
+                  className="w-full px-5 py-4 border-2 border-gold/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gold focus:border-gold bg-white/95 text-taupe placeholder-taupe/40 transition-all duration-300 hover:border-gold/60 shadow-sm hover:shadow-lg font-semibold text-lg focus:bg-white"
                   required
                 />
+                {newBook.title && (
+                  <p className="text-xs text-gold font-semibold flex items-center gap-1">
+                    <span>✓</span>
+                    <span>Title looks good!</span>
+                  </p>
+                )}
               </div>
 
               {/* Author Input */}
-              <div>
+              <div className="space-y-3">
                 <label
                   htmlFor="author"
-                  className="block text-sm font-semibold text-taupe mb-2 flex items-center gap-2"
+                  className="block text-sm font-black text-taupe flex items-center gap-2"
                 >
-                  <span>👤</span>
+                  <span className="text-xl">👤</span>
                   <span>Author</span>
                 </label>
-                <input
-                  id="author"
-                  type="text"
-                  name="author"
-                  placeholder="Author name"
-                  value={newBook.author}
-                  disabled
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-600 cursor-not-allowed italic"
-                />
-                <p className="text-xs text-sienna/70 mt-2 flex items-center gap-1">
+                <div className="relative">
+                  <input
+                    id="author"
+                    type="text"
+                    name="author"
+                    placeholder="Author name"
+                    value={newBook.author}
+                    disabled
+                    className="w-full px-5 py-4 border-2 border-gold/20 rounded-2xl bg-gradient-to-br from-gold/10 to-peach/10 text-taupe/80 cursor-not-allowed italic font-semibold shadow-inner"
+                  />
+                  <span className="absolute right-4 top-1/2 transform -translate-y-1/2 text-lg">
+                    ✓
+                  </span>
+                </div>
+                <p className="text-xs text-sienna/70 flex items-center gap-2 font-semibold">
                   <span>ℹ️</span>
                   <span>Automatically set from your profile</span>
                 </p>
               </div>
 
               {/* Genre Selection */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <label
                   htmlFor="genre"
-                  className="block text-sm font-bold text-taupe flex items-center gap-2"
+                  className="block text-sm font-black text-taupe flex items-center gap-2"
                 >
-                  <span>🏷️</span>
+                  <span className="text-xl">🏷️</span>
                   <span>Genre *</span>
                 </label>
                 <select
@@ -331,10 +362,10 @@ const AdminComponent = () => {
                   name="genre"
                   value={newBook.genre}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gold/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold focus:border-gold bg-white text-taupe transition-all hover:border-gold/50 shadow-sm hover:shadow-md appearance-none cursor-pointer font-semibold"
+                  className="w-full px-5 py-4 border-2 border-gold/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gold focus:border-gold bg-white/95 text-taupe transition-all duration-300 hover:border-gold/60 shadow-sm hover:shadow-lg appearance-none cursor-pointer font-bold text-base focus:bg-white"
                   required
                 >
-                  <option value="">Select a genre...</option>
+                  <option value="">📚 Select a genre...</option>
                   {[
                     "Romance",
                     "Fantasy",
@@ -363,12 +394,12 @@ const AdminComponent = () => {
               </div>
 
               {/* Synopsis */}
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <label
                   htmlFor="synopsis"
-                  className="block text-sm font-bold text-taupe flex items-center gap-2"
+                  className="block text-sm font-black text-taupe flex items-center gap-2"
                 >
-                  <span>📝</span>
+                  <span className="text-xl">📝</span>
                   <span>Synopsis *</span>
                 </label>
                 <textarea
@@ -379,35 +410,43 @@ const AdminComponent = () => {
                   onChange={handleInputChange}
                   rows={4}
                   maxLength={500}
-                  className="w-full px-4 py-3 border-2 border-gold/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold focus:border-gold bg-white text-taupe placeholder-taupe/50 resize-none transition-all hover:border-gold/50 shadow-sm hover:shadow-md font-medium"
+                  className="w-full px-5 py-4 border-2 border-gold/40 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gold focus:border-gold bg-white/95 text-taupe placeholder-taupe/40 resize-none transition-all duration-300 hover:border-gold/60 shadow-sm hover:shadow-lg font-medium text-base focus:bg-white"
                   required
                 />
-                <div className="flex items-center justify-between mt-2 text-xs text-sienna/70 font-semibold">
-                  <span className="flex items-center gap-1">
+                <div className="flex items-center justify-between mt-3">
+                  <span className="text-xs text-sienna/70 font-bold flex items-center gap-2">
                     <span>📊</span>
                     <span>{newBook.synopsis.length}/500</span>
                   </span>
+                  {newBook.synopsis.length > 0 && (
+                    <div className="w-24 h-2 bg-gold/20 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-gold to-sienna transition-all duration-300 rounded-full"
+                        style={{ width: `${(newBook.synopsis.length / 500) * 100}%` }}
+                      />
+                    </div>
+                  )}
                   {newBook.synopsis.length > 450 && (
-                    <span className="text-orange-600">⚠️ Getting close to limit</span>
+                    <span className="text-xs text-orange-600 font-bold animate-pulse">⚠️ Getting close</span>
                   )}
                 </div>
               </div>
 
               {/* Enhanced Cover Styles */}
-              <div className="space-y-3">
-                <label className="block text-sm font-bold text-taupe flex items-center gap-2">
-                  <span>🎨</span>
+              <div className="space-y-4">
+                <label className="block text-sm font-black text-taupe flex items-center gap-2">
+                  <span className="text-xl">🎨</span>
                   <span>Choose Cover Style</span>
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {coverStyles.map((style) => (
+                  {coverStyles.map((style, index) => (
                     <div
                       key={style.label}
                       onClick={() => handleCoverImageChange(style.className)}
-                      className={`relative cursor-pointer transform transition-all duration-300 rounded-2xl overflow-hidden group ${
+                      className={`relative cursor-pointer transform transition-all duration-300 rounded-2xl overflow-hidden group shadow-md hover:shadow-xl ${
                         newBook.coverImage === style.className
                           ? "scale-105 ring-4 ring-gold shadow-2xl"
-                          : "hover:scale-105 hover:shadow-lg hover:ring-2 hover:ring-gold/50"
+                          : "hover:scale-105 hover:ring-2 hover:ring-gold/50"
                       }`}
                       role="button"
                       tabIndex={0}
@@ -417,6 +456,7 @@ const AdminComponent = () => {
                         }
                       }}
                       aria-label={`Select ${style.label} cover style`}
+                      style={{ animationDelay: `${index * 50}ms` }}
                     >
                       <div className="aspect-[2/3] relative w-full">
                         {/* Book spine */}
@@ -439,7 +479,7 @@ const AdminComponent = () => {
                         </div>
                       </div>
                       {newBook.coverImage === style.className && (
-                        <div className="absolute top-2 right-2 bg-gold text-taupe w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm shadow-lg">
+                        <div className="absolute top-2 right-2 bg-gold text-taupe w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm shadow-lg animate-pulse">
                           ✓
                         </div>
                       )}
@@ -450,11 +490,11 @@ const AdminComponent = () => {
             </div>
 
             {/* Action Buttons - Fixed at bottom */}
-            <div className="flex-shrink-0 p-4 sm:p-6 border-t-2 border-gold/20 bg-gradient-to-r from-white via-blush/20 to-peach/20 rounded-b-2xl sm:rounded-b-3xl">
-              <div className="flex gap-2 sm:gap-4 flex-col sm:flex-row">
+            <div className="flex-shrink-0 p-4 sm:p-8 border-t-2 border-gold/20 bg-gradient-to-r from-white via-blush/30 to-peach/20 rounded-b-2xl sm:rounded-b-3xl shadow-inner">
+              <div className="flex gap-3 sm:gap-4 flex-col sm:flex-row">
                 <button
                   onClick={resetForm}
-                  className="flex-1 px-4 sm:px-6 py-3 sm:py-3.5 bg-white border-2 border-gold/30 text-taupe rounded-lg sm:rounded-xl font-bold hover:bg-blush hover:border-gold transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gold active:scale-95 text-sm sm:text-base touch-target"
+                  className="flex-1 px-5 sm:px-8 py-3 sm:py-4 bg-white border-2 border-gold/40 text-taupe rounded-xl sm:rounded-2xl font-bold hover:bg-blush hover:border-gold transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gold active:scale-95 text-sm sm:text-base touch-target transform hover:scale-105"
                   disabled={isLoading}
                 >
                   🔄 Reset
@@ -462,8 +502,9 @@ const AdminComponent = () => {
                 <button
                   onClick={handleCreateBook}
                   disabled={isLoading}
-                  className="flex-1 px-4 sm:px-6 py-3 sm:py-3.5 bg-gradient-to-br from-gold via-sienna to-red-500 text-white rounded-lg sm:rounded-xl font-bold hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-gold disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 text-sm sm:text-base touch-target flex items-center justify-center gap-2 shadow-lg hover:from-sienna hover:via-gold hover:to-sienna transition-all duration-300"
+                  className="flex-1 px-5 sm:px-8 py-3 sm:py-4 bg-gradient-to-br from-gold via-sienna to-red-500 text-white rounded-xl sm:rounded-2xl font-bold hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 text-sm sm:text-base touch-target flex items-center justify-center gap-2 shadow-lg hover:from-sienna hover:via-gold hover:to-sienna transition-all duration-300 transform hover:scale-105 group relative overflow-hidden"
                 >
+                  <span className="absolute inset-0 bg-white/20 rounded-xl transform scale-0 group-hover:scale-100 transition-transform duration-300 origin-center" />
                   {isLoading ? (
                     <>
                       <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -471,7 +512,7 @@ const AdminComponent = () => {
                     </>
                   ) : (
                     <>
-                      <span>✨</span>
+                      <span className="text-lg">✨</span>
                       <span>Create Book</span>
                     </>
                   )}
