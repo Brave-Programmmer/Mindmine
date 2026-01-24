@@ -53,20 +53,16 @@ export const Navbar = () => {
     <>
       <header className="fixed top-0 left-0 right-0 z-50 safe-area-inset-top">
         <nav
-          className={`mx-auto px-3 md:px-6 py-3 md:py-4 backdrop-blur-md transition-all duration-300 ${
+          className={`mx-auto px-3 md:px-8 py-4 md:py-5 backdrop-blur-xl transition-all duration-400 border-b ${
             isScrolled
-              ? "bg-white/90 shadow-xl border-b border-gold/20"
-              : "bg-white/80 shadow-lg"
+              ? "bg-white/95 shadow-2xl border-gold/30"
+              : "bg-white/85 shadow-xl border-gold/20"
           }`}
-          style={{
-            borderBottomLeftRadius: isScrolled ? "0" : "20px",
-            borderBottomRightRadius: isScrolled ? "0" : "20px",
-          }}
         >
-          <div className="flex justify-between items-center w-full">
+          <div className="flex justify-between items-center w-full max-w-7xl mx-auto">
             <a
               href="/"
-              className="text-xl md:text-2xl font-extrabold bg-gradient-to-r from-gold via-sienna to-taupe bg-clip-text text-transparent hover:from-sienna hover:via-gold hover:to-taupe transition-all duration-300 flex-shrink-0"
+              className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-gold via-sienna to-taupe bg-clip-text text-transparent hover:from-sienna hover:via-gold hover:to-taupe transition-all duration-300 flex-shrink-0 transform hover:scale-105"
             >
               mindMine
             </a>
@@ -77,7 +73,7 @@ export const Navbar = () => {
                 setMobileMenuOpen((prev) => !prev);
                 setProfileOpenMobile(false);
               }}
-              className="md:hidden p-2 text-taupe hover:text-sienna hover:bg-blush/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold transition-all touch-target"
+              className="md:hidden p-2 text-taupe hover:text-sienna hover:bg-blush/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 transition-all touch-target"
               aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={mobileMenuOpen}
             >
@@ -85,11 +81,11 @@ export const Navbar = () => {
             </button>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-2 lg:space-x-8">
+            <div className="hidden md:flex items-center gap-2 lg:gap-6">
               {NAVIGATION_LINKS.map(({ href, label, icon }) => (
                 <NavLink key={href} href={href}>
                   <span className="mr-2 text-lg">{icon}</span>
-                  <span className="hidden lg:inline">{label}</span>
+                  <span className="hidden lg:inline font-medium">{label}</span>
                 </NavLink>
               ))}
 
@@ -97,7 +93,7 @@ export const Navbar = () => {
                 <div className="relative" ref={desktopProfileRef}>
                   <button
                     onClick={() => setProfileOpenDesktop((prev) => !prev)}
-                    className="flex items-center gap-2 text-taupe font-semibold hover:text-sienna px-2 py-2 md:px-3 md:py-2 rounded-xl hover:bg-blush/50 focus:outline-none focus:ring-2 focus:ring-gold transition-all touch-target"
+                    className="flex items-center gap-2 text-taupe font-semibold hover:text-sienna px-3 py-2 md:px-4 md:py-2.5 rounded-full hover:bg-blush/60 focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 transition-all touch-target border border-gold/20 hover:border-gold/40"
                     aria-haspopup="true"
                     aria-expanded={profileOpenDesktop}
                   >
@@ -109,33 +105,33 @@ export const Navbar = () => {
                   </button>
 
                   <div
-                    className={`absolute right-0 mt-3 w-48 md:w-64 bg-white/95 backdrop-blur-md rounded-2xl border border-gold/20 shadow-2xl overflow-hidden transition-all duration-300 ${
+                    className={`absolute right-0 mt-3 w-56 md:w-72 bg-white/98 backdrop-blur-xl rounded-3xl border border-gold/30 shadow-2xl overflow-hidden transition-all duration-300 ${
                       profileOpenDesktop
                         ? "opacity-100 scale-100 translate-y-0"
-                        : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
+                        : "opacity-0 scale-95 -translate-y-4 pointer-events-none"
                     }`}
                   >
-                    <div className="px-4 md:px-6 py-3 md:py-4 border-b border-gold/10 bg-gradient-to-r from-blush/50 to-peach/50">
-                      <div className="flex items-center gap-2 md:gap-3">
+                    <div className="px-5 md:px-7 py-4 md:py-5 border-b border-gold/20 bg-gradient-to-r from-peach/40 to-blush/40">
+                      <div className="flex items-center gap-3">
                         <ProfileAvatar displayName={displayName} />
                         <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-taupe truncate text-sm">
+                          <p className="font-bold text-taupe truncate text-sm md:text-base">
                             {displayName || "User"}
                           </p>
-                          <p className="text-xs text-sienna/80 truncate">
+                          <p className="text-xs text-sienna/70 truncate">
                             {email || "No Email"}
                           </p>
                         </div>
                       </div>
                     </div>
 
-                    <div className="py-1 md:py-2">
+                    <div className="py-2 md:py-3">
                       <a
                         href="/write"
                         onClick={() => setProfileOpenDesktop(false)}
-                        className="flex items-center px-4 md:px-6 py-2 md:py-3 text-taupe hover:bg-blush/50 transition-colors font-medium text-sm md:text-base touch-target"
+                        className="flex items-center px-5 md:px-7 py-3 md:py-3.5 text-taupe hover:bg-blush/50 hover:text-sienna transition-colors font-semibold text-sm md:text-base touch-target"
                       >
-                        <span className="mr-2 md:mr-3">✍️</span>
+                        <span className="mr-3 md:mr-4">✍️</span>
                         Write New Book
                       </a>
 
@@ -144,9 +140,9 @@ export const Navbar = () => {
                           handleLogout();
                           setProfileOpenDesktop(false);
                         }}
-                        className="w-full text-left flex items-center px-4 md:px-6 py-2 md:py-3 text-taupe hover:bg-red-50 transition-colors font-medium text-sm md:text-base touch-target"
+                        className="w-full text-left flex items-center px-5 md:px-7 py-3 md:py-3.5 text-taupe hover:bg-red-50 hover:text-red-600 transition-colors font-semibold text-sm md:text-base touch-target"
                       >
-                        <span className="mr-2 md:mr-3">🚪</span>
+                        <span className="mr-3 md:mr-4">🚪</span>
                         Logout
                       </button>
                     </div>
@@ -155,7 +151,7 @@ export const Navbar = () => {
               ) : (
                 <a
                   href="/login"
-                  className="bg-gradient-to-r from-gold to-sienna text-taupe px-3 md:px-6 py-2 md:py-3 rounded-xl hover:from-sienna hover:to-gold transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 text-sm md:text-base touch-target"
+                  className="bg-gradient-to-r from-gold to-sienna text-white px-5 md:px-7 py-2.5 md:py-3 rounded-full hover:from-sienna hover:to-gold transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 text-sm md:text-base touch-target"
                 >
                   Login
                 </a>
@@ -168,41 +164,41 @@ export const Navbar = () => {
       {/* Mobile Overlay */}
       <div
         onClick={closeAllMenus}
-        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300 ${
+        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-400 ${
           mobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         } md:hidden`}
       />
 
       {/* Mobile Sidebar - Full height, safe area aware */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 w-72 sm:w-80 bg-white/95 backdrop-blur-md shadow-2xl z-50 transform transition-transform ease-in-out duration-500 overflow-y-auto ${
+        className={`fixed top-0 bottom-0 left-0 w-72 sm:w-80 bg-white/95 backdrop-blur-xl shadow-2xl z-50 transform transition-transform ease-in-out duration-400 overflow-y-auto ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        } md:hidden safe-area-inset-left safe-area-inset-bottom`}
+        } md:hidden safe-area-inset-left safe-area-inset-bottom border-r border-taupe/20`}
       >
-        <div className="flex justify-between items-center px-4 sm:px-6 py-4 sm:py-5 border-b border-gold/10 bg-gradient-to-r from-blush/50 to-peach/50 sticky top-0">
+        <div className="flex justify-between items-center px-6 py-4 border-b border-taupe/20 bg-taupe/5">
           <a
             href="/"
-            className="text-lg sm:text-xl font-bold bg-gradient-to-r from-gold via-sienna to-taupe bg-clip-text text-transparent"
+            className="text-2xl font-bold text-taupe"
             onClick={closeAllMenus}
           >
             mindMine
           </a>
           <button
             onClick={closeAllMenus}
-            className="text-taupe hover:text-sienna p-2 rounded-xl hover:bg-blush/50 focus:outline-none focus:ring-2 focus:ring-gold transition-all touch-target"
+            className="text-taupe hover:text-rosewood p-2 rounded-full hover:bg-taupe/10 focus:outline-none focus:ring-2 focus:ring-gold transition-all"
             aria-label="Close menu"
           >
             <CloseIcon />
           </button>
         </div>
 
-        <nav className="flex flex-col px-4 sm:px-6 py-5 sm:py-6 space-y-2">
+        <nav className="flex flex-col px-6 py-6 space-y-2">
           {NAVIGATION_LINKS.map(({ href, label, icon }) => (
             <NavLink
               key={href}
               href={href}
               onClick={closeAllMenus}
-              className="flex items-center px-4 py-3 rounded-xl hover:bg-blush/50 transition-all text-sm sm:text-base touch-target"
+              className="flex items-center px-4 py-3 rounded-lg hover:bg-taupe/10 hover:text-rosewood transition-all text-base font-medium text-taupe"
             >
               <span className="mr-3 text-lg">{icon}</span>
               {label}
@@ -210,15 +206,15 @@ export const Navbar = () => {
           ))}
 
           {isAuthenticated && (
-            <div className="border-t border-gold/10 pt-4 mt-4">
-              <div className="px-4 py-3 mb-4 bg-blush/30 rounded-xl">
-                <div className="flex items-center gap-2">
+            <div className="border-t border-taupe/20 pt-4 mt-4">
+              <div className="px-4 py-3 mb-3 bg-taupe/5 rounded-lg">
+                <div className="flex items-center gap-3">
                   <ProfileAvatar displayName={displayName} />
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-taupe truncate text-sm">
                       {displayName || "User"}
                     </p>
-                    <p className="text-xs text-sienna/80 truncate">
+                    <p className="text-xs text-sienna truncate">
                       {email || "No Email"}
                     </p>
                   </div>
@@ -228,18 +224,18 @@ export const Navbar = () => {
               <a
                 href="/write"
                 onClick={closeAllMenus}
-                className="flex items-center px-4 py-3 text-taupe hover:bg-blush/50 rounded-xl transition-colors font-medium text-sm touch-target"
+                className="flex items-center px-4 py-3 text-taupe hover:bg-taupe/10 hover:text-sienna rounded-lg transition-all font-medium text-sm"
               >
                 <span className="mr-3">✍️</span>
                 Write New Book
               </a>
-          
+
               <button
                 onClick={() => {
                   handleLogout();
                   closeAllMenus();
                 }}
-                className="w-full text-left flex items-center px-4 py-3 text-taupe hover:bg-red-50 rounded-xl transition-colors font-medium text-sm touch-target"
+                className="w-full text-left flex items-center px-4 py-3 text-taupe hover:bg-red-50 hover:text-red-600 rounded-lg transition-all font-medium text-sm"
               >
                 <span className="mr-3">🚪</span>
                 Logout
@@ -248,11 +244,11 @@ export const Navbar = () => {
           )}
 
           {!isAuthenticated && (
-            <div className="border-t border-gold/10 pt-4 mt-4">
+            <div className="border-t border-taupe/20 pt-4 mt-4">
               <a
                 href="/login"
                 onClick={closeAllMenus}
-                className="w-full bg-gradient-to-r from-gold to-sienna text-taupe px-6 py-3 rounded-xl hover:from-sienna hover:to-gold transition-all font-semibold shadow-lg text-center block text-sm touch-target"
+                className="w-full bg-gold text-white px-6 py-3 rounded-lg hover:bg-sienna transition-all font-medium text-center block text-sm"
               >
                 Login
               </a>

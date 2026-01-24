@@ -15,11 +15,17 @@ export default {
         sienna: "#A35641",
         gold: "#D9BFA3",
         mauve: "#EECFC5",
+        cream: "#FEFCF8",
+        sage: "#A8B5A0",
+        coral: "#E8A692",
+        "warm-gray": "#8B7D6B",
       },
       animation: {
-        "fade-in": "fadeIn 0.5s ease-in-out",
-        "slide-up": "slideUp 0.5s ease-out",
-        "slide-down": "slideDown 0.5s ease-out",
+        "fade-in": "fadeIn 0.6s ease-in-out",
+        "slide-up": "slideUp 0.6s ease-out",
+        "slide-down": "slideDown 0.6s ease-out",
+        "bounce-soft": "bounceSoft 2s ease-in-out infinite",
+        "glow-pulse": "glowPulse 2s ease-in-out infinite",
       },
       keyframes: {
         fadeIn: {
@@ -27,13 +33,28 @@ export default {
           "100%": { opacity: "1" },
         },
         slideUp: {
-          "0%": { transform: "translateY(20px)", opacity: "0" },
+          "0%": { transform: "translateY(24px)", opacity: "0" },
           "100%": { transform: "translateY(0)", opacity: "1" },
         },
         slideDown: {
-          "0%": { transform: "translateY(-20px)", opacity: "0" },
+          "0%": { transform: "translateY(-24px)", opacity: "0" },
           "100%": { transform: "translateY(0)", opacity: "1" },
         },
+        bounceSoft: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-8px)" },
+        },
+        glowPulse: {
+          "0%, 100%": { opacity: "0.5" },
+          "50%": { opacity: "1" },
+        },
+      },
+      boxShadow: {
+        "glow-gold": "0 0 20px rgba(217, 191, 163, 0.3)",
+        "glow-sienna": "0 0 20px rgba(163, 86, 65, 0.3)",
+      },
+      transitionTimingFunction: {
+        "smooth": "cubic-bezier(0.4, 0, 0.2, 1)",
       },
     },
   },

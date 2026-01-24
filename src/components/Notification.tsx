@@ -120,21 +120,21 @@ const NotificationContainer: React.FC = () => {
               {getIcon(notification.type)}
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-semibold text-gray-900">
+              <h4 className="text-sm font-semibold text-taupe">
                 {notification.title}
               </h4>
               {notification.message && (
-                <p className="mt-1 text-sm text-gray-600">
+                <p className="mt-1 text-sm text-taupe/80">
                   {notification.message}
                 </p>
               )}
             </div>
             <button
               onClick={() => removeNotification(notification.id)}
-              className="flex-shrink-0 p-1 rounded-full hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
+              className="flex-shrink-0 p-1 rounded-full hover:bg-taupe/10 transition-colors focus:outline-none focus:ring-2 focus:ring-taupe/50"
               aria-label="Close notification"
             >
-              <FiX className="w-4 h-4 text-gray-500" />
+              <FiX className="w-4 h-4 text-taupe/70" />
             </button>
           </div>
         </div>

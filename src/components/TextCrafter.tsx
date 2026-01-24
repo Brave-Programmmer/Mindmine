@@ -421,13 +421,13 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
               return (
                 <blockquote
                   key={idx}
-                  className="border-l-4 border-blue-300 pl-4 italic text-gray-700"
+                  className="border-l-4 border-blue-300 pl-4 italic text-taupe"
                 >
                   <div
                     dangerouslySetInnerHTML={{ __html: block.data.text || "" }}
                   />
                   {block.data.caption && (
-                    <footer className="mt-2 text-xs text-gray-500">
+                    <footer className="mt-2 text-xs text-taupe/70">
                       — {block.data.caption}
                     </footer>
                   )}
@@ -493,7 +493,7 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
   const renderPreview = () => {
     if (!editorData)
       return (
-        <div className="text-gray-400 italic p-4">Nothing to preview.</div>
+        <div className="text-taupe/60 italic p-4">Nothing to preview.</div>
       );
 
     // Try editorjs-html parser first
@@ -546,7 +546,7 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
           )}
           <button
             onClick={() => setShowPreview((prev) => !prev)}
-            className="flex-1 md:flex-none flex items-center justify-center md:justify-start px-2 md:px-3 py-2 md:py-1 text-xs md:text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="flex-1 md:flex-none flex items-center justify-center md:justify-start px-2 md:px-3 py-2 md:py-1 text-xs md:text-sm bg-taupe/10 text-taupe rounded hover:bg-taupe/20 transition focus:outline-none focus:ring-2 focus:ring-taupe/50"
             title="Toggle Preview (Esc to close)"
             aria-label="Toggle Preview"
           >
@@ -566,7 +566,7 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
             <FiTrash2 className="mr-1" /> <span className="hidden sm:inline">Clear</span>
           </button>
         </div>
-        <div className="text-xs md:text-xs text-gray-500 font-mono w-full md:w-auto text-center md:text-right">
+        <div className="text-xs md:text-xs text-taupe/70 font-mono w-full md:w-auto text-center md:text-right">
           {words} words &middot; {chars} chars
         </div>
       </div>
@@ -589,10 +589,10 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
         {showPreview && (
           <div className="fixed inset-0 md:absolute md:inset-0 z-40 md:z-20 bg-white md:bg-gray-50 md:bg-opacity-95 md:rounded-b-xl overflow-auto border-t border-gray-200 shadow flex flex-col md:flex-col p-4 md:p-0">
             <div className="md:hidden flex justify-between items-center mb-4 pb-4 border-b border-gray-300">
-              <h3 className="font-semibold text-gray-700">Preview</h3>
+              <h3 className="font-semibold text-taupe">Preview</h3>
               <button
                 onClick={() => setShowPreview(false)}
-                className="text-gray-600 hover:text-gray-900 text-2xl"
+                className="text-taupe/70 hover:text-taupe text-2xl"
                 aria-label="Close preview"
               >
                 ×

@@ -11,166 +11,328 @@ const communityMembers = [
     description: "Mohit Pujari - The Creator of mindMine",
     avatar: "BP",
   },
-  {
-    name: "ChaosAndSketch",
-    description: "Creative Writer & Artist",
-    avatar: "CS",
-  },
 ];
 
-const pageDescription = "Welcome to MindMine - the platform where aspiring authors publish interactive books and readers discover immersive storytelling. Start writing or reading today.";
+const pageDescription =
+  "Welcome to MindMine - the platform where aspiring authors publish interactive books and readers discover immersive storytelling. Start writing or reading today.";
 ---
 
-<Layout 
-  title="Welcome"
+<Layout
+  title="Welcome to MindMine - Discover & Create Interactive Stories"
   description={pageDescription}
   image="https://mindmine.netlify.app/og-image.png"
   canonical="https://mindmine.netlify.app/"
 >
-  <!-- Hero Section -->
-  <section
-    class="relative overflow-hidden py-20 min-h-[90vh] flex items-center"
-    role="banner"
-    aria-label="Hero section"
-  >
-    <ParticleBackground client:idle />
-    <!-- Only keep overlay if needed for UI/UX -->
-    <section class="container mx-auto px-4 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-      <article class="text-left space-y-6">
-          <h1
-            class="text-4xl sm:text-5xl lg:text-6xl font-bold text-rosewood leading-tight animate-slide-in-left"
+  <!-- Skip link for accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <main id="main-content">
+    <!-- Hero Section -->
+    <section
+      class="relative overflow-hidden pt-16 sm:pt-20 md:pt-24 pb-16 sm:pb-20 md:pb-24 min-h-[70vh] sm:min-h-[75vh] md:min-h-[80vh] flex items-center bg-gradient-to-br from-cream via-peach/40 to-blush/50"
+      role="banner"
+      aria-labelledby="hero-heading"
+    >
+      <ParticleBackground client:idle />
+
+      <!-- Pattern overlay -->
+      <div
+        class="absolute inset-0 opacity-5 pattern-overlay"
+        aria-hidden="true"
+      >
+      </div>
+
+      <div
+        class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center"
+      >
+        <article class="text-left space-y-6 sm:space-y-8">
+          <div class="space-y-4 sm:space-y-6">
+            <div
+              class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-gold/15 to-sienna/15 rounded-full border border-gold/30 backdrop-blur-sm animate-fade-in"
+            >
+              <span class="text-base sm:text-lg" aria-hidden="true">✨</span>
+              <span class="text-xs sm:text-sm font-semibold text-sienna tracking-wide"
+                >Welcome to MindMine</span
+              >
+            </div>
+            <h1
+              id="hero-heading"
+              class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight animate-slide-in-left bg-gradient-to-r from-rosewood via-sienna to-warm-gray bg-clip-text text-transparent"
+            >
+              Your Story
+              <span
+                class="block bg-gradient-to-r from-sienna to-coral bg-clip-text text-transparent"
+                >Begins Here</span
+              >
+            </h1>
+          </div>
+          <p
+            class="text-base sm:text-lg md:text-xl text-taupe/80 max-w-xl leading-relaxed animate-fade-in font-light"
+            style="animation-delay: 0.2s"
           >
-            Your Story
-            <span class="block text-taupe">Begins Here</span>
-          </h1>
-          <p class="text-lg sm:text-xl text-taupe max-w-lg leading-relaxed animate-fade-in" style="animation-delay: 0.2s">
             Discover captivating stories, share your own tales, and connect with
-            fellow book lovers in our vibrant community.
+            fellow book lovers in our vibrant community of creative minds.
           </p>
-          <nav class="flex flex-col sm:flex-row gap-4 animate-fade-in" style="animation-delay: 0.4s">
+          <nav
+            class="flex flex-col sm:flex-row gap-4 sm:gap-5 animate-fade-in pt-2 sm:pt-4"
+            style="animation-delay: 0.4s"
+          >
             <a
               href="/books"
-              class="group relative inline-flex items-center justify-center px-8 py-3 rounded-full font-bold text-taupe overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2"
+              class="group relative inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-white overflow-hidden transition-all duration-300 hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 bg-gradient-to-r from-gold to-sienna hover:from-sienna hover:to-coral min-h-[44px]"
               aria-label="Explore available books"
             >
-              <div class="absolute inset-0 bg-gradient-to-r from-gold to-sienna opacity-100 group-hover:opacity-0 transition-opacity duration-300"></div>
-              <div class="absolute inset-0 bg-gradient-to-r from-sienna to-gold opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <span class="relative flex items-center gap-2">
-                <span>📚</span>
+                <span aria-hidden="true">📚</span>
                 <span>Explore Books</span>
               </span>
             </a>
             <a
               href="/write"
-              class="group relative inline-flex items-center justify-center px-8 py-3 rounded-full font-bold text-taupe border-2 border-gold hover:border-sienna transition-all duration-300 hover:scale-105 active:scale-95 hover:bg-gold/10 focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2"
+              class="group relative inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-rosewood border-2 border-gold/60 hover:border-sienna transition-all duration-300 hover:scale-105 active:scale-95 bg-cream/80 hover:bg-gold/10 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 min-h-[44px]"
               aria-label="Start writing your story"
             >
               <span class="flex items-center gap-2">
-                <span>✨</span>
+                <span aria-hidden="true">✨</span>
                 <span>Start Writing</span>
               </span>
             </a>
           </nav>
         </article>
 
-        <aside class="relative h-[300px] sm:h-[350px] lg:h-[400px] flex justify-center items-center animate-slide-in-right transform scale-75 sm:scale-90 lg:scale-100">
+        <aside
+          class="relative h-[250px] sm:h-[300px] md:h-[350px] lg:h-[420px] flex justify-center items-center animate-slide-in-right mt-8 lg:mt-0"
+        >
+          <div
+            class="absolute inset-0 bg-gradient-to-br from-gold/20 to-sienna/20 rounded-3xl blur-2xl"
+            aria-hidden="true"
+          >
+          </div>
+          <div
+            class="absolute inset-0 bg-gradient-to-tl from-coral/10 to-sage/10 rounded-3xl blur-xl"
+            aria-hidden="true"
+          >
+          </div>
           <FlippingPageBook client:idle />
         </aside>
-      </section>
+      </div>
     </section>
 
-  <!-- Features Section -->
-  <section class="py-16 px-4 container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl" aria-labelledby="features-heading">
-        <article
-          class="group bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-gold/50 hover:-translate-y-2"
+    <!-- Features Section -->
+    <section
+      class="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 max-w-6xl"
+      aria-labelledby="features-heading"
+    >
+      <header class="lg:col-span-2 text-center mb-8 sm:mb-12 space-y-4">
+        <div
+          class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-sage/20 to-gold/20 rounded-full border border-sage/30 mb-4"
         >
-          <div class="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">📖</div>
-          <h2 class="text-2xl sm:text-3xl font-bold text-rosewood mb-4 group-hover:text-gold transition-colors">
-            For Readers
-          </h2>
-          <p class="text-taupe mb-6 leading-relaxed">
+          <span class="text-sm font-semibold text-sage" aria-hidden="true"
+            >🌟</span
+          >
+          <span class="text-sm font-semibold text-taupe">Explore & Create</span>
+        </div>
+        <h2
+          id="features-heading"
+          class="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-rosewood via-sienna to-coral bg-clip-text text-transparent"
+        >
+          Your Creative Journey Starts Here
+        </h2>
+        <p
+          class="text-base sm:text-lg text-taupe/70 max-w-2xl mx-auto font-light leading-relaxed px-4"
+        >
+          Whether you're a reader discovering new worlds or a writer sharing
+          your voice, MindMine is your creative home.
+        </p>
+      </header>
+
+      <article
+        class="group relative bg-gradient-to-br from-cream/80 to-peach/30 p-6 sm:p-8 rounded-2xl sm:rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 border border-gold/20 hover:border-gold/40 hover:-translate-y-2 overflow-hidden backdrop-blur-sm"
+      >
+        <div
+          class="absolute -top-8 sm:-top-12 -right-8 sm:-right-12 w-32 sm:w-48 h-32 sm:h-48 bg-gradient-to-br from-gold/15 to-sienna/15 rounded-full blur-2xl sm:blur-3xl group-hover:bg-gold/25 transition-all duration-500"
+          aria-hidden="true"
+        >
+        </div>
+        <div
+          class="absolute top-4 sm:top-6 right-4 sm:right-6 w-12 sm:w-16 h-12 sm:h-16 bg-gradient-to-br from-gold/20 to-sienna/20 rounded-full flex items-center justify-center text-2xl sm:text-4xl group-hover:scale-110 transition-transform duration-500"
+          aria-hidden="true"
+        >
+          📖
+        </div>
+        <div class="relative z-10 space-y-4 sm:space-y-6">
+          <div class="space-y-2 sm:space-y-3">
+            <h3
+              class="text-xl sm:text-2xl font-bold text-rosewood group-hover:text-sienna transition-colors duration-300"
+            >
+              For Readers
+            </h3>
+            <div
+              class="h-1 w-12 sm:w-16 bg-gradient-to-r from-gold to-sienna rounded-full"
+              aria-hidden="true"
+            >
+            </div>
+          </div>
+          <p class="text-sm sm:text-base text-taupe/75 leading-relaxed font-light">
             Discover new stories, follow your favorite authors, and build your
             reading list with personalized recommendations.
           </p>
-          <a href="/books" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold bg-gradient-to-r from-gold to-sienna text-taupe hover:from-sienna hover:to-gold transition-all duration-300 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2" aria-label="Browse book collection">
-            <span>📚</span>
+          <a
+            href="/books"
+            class="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 sm:py-3.5 rounded-full font-semibold text-white bg-gradient-to-r from-gold to-sienna hover:from-sienna hover:to-coral transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 min-h-[44px]"
+            aria-label="Browse book collection"
+          >
+            <span aria-hidden="true">📚</span>
             <span>Explore Books</span>
           </a>
-        </article>
+        </div>
+      </article>
 
-        <article
-          class="group bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-sienna/50 hover:-translate-y-2"
+      <article
+        class="group relative bg-gradient-to-br from-cream/80 to-blush/30 p-6 sm:p-8 rounded-2xl sm:rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 border border-sienna/20 hover:border-sienna/40 hover:-translate-y-2 overflow-hidden backdrop-blur-sm"
+      >
+        <div
+          class="absolute -top-8 sm:-top-12 -right-8 sm:-right-12 w-32 sm:w-48 h-32 sm:h-48 bg-gradient-to-br from-sienna/15 to-coral/15 rounded-full blur-2xl sm:blur-3xl group-hover:bg-sienna/25 transition-all duration-500"
+          aria-hidden="true"
         >
-          <div class="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">✍️</div>
-          <h2 class="text-2xl sm:text-3xl font-bold text-rosewood mb-4 group-hover:text-sienna transition-colors">
-            For Authors
-          </h2>
-          <p class="text-taupe mb-6 leading-relaxed">
+        </div>
+        <div
+          class="absolute top-4 sm:top-6 right-4 sm:right-6 w-12 sm:w-16 h-12 sm:h-16 bg-gradient-to-br from-sienna/20 to-coral/20 rounded-full flex items-center justify-center text-2xl sm:text-4xl group-hover:scale-110 transition-transform duration-500"
+          aria-hidden="true"
+        >
+          ✍️
+        </div>
+        <div class="relative z-10 space-y-4 sm:space-y-6">
+          <div class="space-y-2 sm:space-y-3">
+            <h3
+              class="text-xl sm:text-2xl font-bold text-rosewood group-hover:text-coral transition-colors duration-300"
+            >
+              For Authors
+            </h3>
+            <div
+              class="h-1 w-12 sm:w-16 bg-gradient-to-r from-sienna to-coral rounded-full"
+              aria-hidden="true"
+            >
+            </div>
+          </div>
+          <p class="text-sm sm:text-base text-taupe/75 leading-relaxed font-light">
             Share your stories with the world, connect with readers, and grow
             your audience through our supportive platform.
           </p>
-          <a href="/write" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full font-bold bg-gradient-to-r from-gold to-sienna text-taupe hover:from-sienna hover:to-gold transition-all duration-300 hover:scale-105 active:scale-95 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2" aria-label="Start your writing journey">
-            <span>✨</span>
+          <a
+            href="/write"
+            class="inline-flex items-center justify-center gap-2 px-6 sm:px-7 py-3 sm:py-3.5 rounded-full font-semibold text-white bg-gradient-to-r from-sienna to-coral hover:from-coral hover:to-gold transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 min-h-[44px]"
+            aria-label="Start your writing journey"
+          >
+            <span aria-hidden="true">✨</span>
             <span>Start Writing</span>
           </a>
-        </article>
+        </div>
+      </article>
     </section>
 
-  <!-- Featured Books Section -->
-  <section class="py-16 px-4 bg-gradient-to-b from-transparent to-blush/10 container mx-auto" aria-labelledby="featured-books-heading">
-    <header class="text-center mb-12">
+    <!-- Featured Books Section -->
+    <section
+      class="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-transparent via-cream/30 to-peach/20 container mx-auto"
+      aria-labelledby="featured-books-heading"
+    >
+      <header class="text-center mb-8 sm:mb-12 space-y-4">
+        <div
+          class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-coral/20 to-sienna/20 rounded-full border border-coral/30 mb-4"
+        >
+          <span class="text-sm font-semibold text-coral" aria-hidden="true"
+            >📚</span
+          >
+          <span class="text-sm font-semibold text-taupe">Featured Stories</span>
+        </div>
         <h2
           id="featured-books-heading"
-          class="text-3xl sm:text-4xl font-bold text-rosewood mb-4"
+          class="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-rosewood via-sienna to-warm-gray bg-clip-text text-transparent"
         >
-          Featured Books
+          Discover Amazing Stories
         </h2>
-        <p class="text-taupe text-lg max-w-2xl mx-auto">
-          Discover our handpicked selection of amazing stories curated just for
-          you
+        <p
+          class="text-base sm:text-lg text-taupe/70 max-w-2xl mx-auto font-light leading-relaxed px-4"
+        >
+          Explore our handpicked selection of captivating stories curated just
+          for you.
         </p>
       </header>
       <AllBooksGrid client:visible />
     </section>
 
-  <!-- Community Section -->
-  <section class="py-20 px-4 container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-6xl" aria-labelledby="community-heading">
-    <article class="space-y-6">
+    <!-- Community Section -->
+    <section
+      class="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center max-w-6xl"
+      aria-labelledby="community-heading"
+    >
+      <article class="space-y-6 sm:space-y-8">
+        <div class="space-y-4">
+          <div
+            class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-sage/20 to-gold/20 rounded-full border border-sage/30"
+          >
+            <span class="text-sm font-semibold text-sage" aria-hidden="true"
+              >🤝</span
+            >
+            <span class="text-sm font-semibold text-taupe">Community</span>
+          </div>
           <h2
             id="community-heading"
-            class="text-3xl sm:text-4xl font-bold text-rosewood"
+            class="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-rosewood via-sienna to-coral bg-clip-text text-transparent"
           >
-            Join Our Community
+            Join Our Creative Community
           </h2>
-          <p class="text-taupe text-lg leading-relaxed">
-            Connect with fellow writers and readers. Share your stories, get
-            constructive feedback, and grow together in our supportive and
-            vibrant community.
-          </p>
-          <a href="/login" class="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full font-bold bg-gradient-to-r from-gold to-sienna text-taupe hover:from-sienna hover:to-gold transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2" aria-label="Join our writing community">
-            <span>🤝</span>
-            <span>Join Now</span>
-          </a>
-        </article>
+          <div
+            class="h-1 w-16 sm:w-24 bg-gradient-to-r from-gold via-sienna to-coral rounded-full"
+            aria-hidden="true"
+          >
+          </div>
+        </div>
+        <p class="text-base sm:text-lg text-taupe/75 leading-relaxed font-light">
+          Connect with fellow writers and readers. Share your stories, get
+          constructive feedback, and grow together in our supportive and vibrant
+          community of creative minds.
+        </p>
+        <a
+          href="/login"
+          class="inline-flex items-center justify-center gap-2 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-white bg-gradient-to-r from-gold via-sienna to-coral hover:from-sienna hover:via-coral hover:to-gold transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 w-fit min-h-[44px]"
+          aria-label="Join our writing community"
+        >
+          <span aria-hidden="true">🤝</span>
+          <span>Join Now</span>
+        </a>
+      </article>
 
-        <section class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          {
-            communityMembers.map((member) => (
-              <article class="group bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-gold/50 hover:-translate-y-1">
-                <div class="w-12 h-12 bg-gradient-to-br from-mauve to-rosewood rounded-full mb-4 flex items-center justify-center text-white font-bold text-sm group-hover:scale-125 transition-transform duration-300">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+        {
+          communityMembers.map((member, index) => (
+            <article
+              class="group relative bg-gradient-to-br from-cream/80 to-peach/40 p-4 sm:p-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-400 border border-gold/20 hover:border-gold/40 overflow-hidden backdrop-blur-sm"
+              data-member={member.name || `member-${index}`}
+            >
+              <div
+                class="absolute -top-6 sm:-top-8 -right-6 sm:-right-8 w-24 sm:w-32 h-24 sm:h-32 bg-gradient-to-br from-gold/15 to-sienna/15 rounded-full blur-2xl group-hover:bg-gold/25 transition-all duration-400"
+                aria-hidden="true"
+              />
+              <div class="relative z-10 space-y-3 sm:space-y-4">
+                <div class="w-12 sm:w-14 h-12 sm:h-14 bg-gradient-to-br from-gold to-sienna rounded-full mb-3 sm:mb-4 flex items-center justify-center text-white font-bold text-sm sm:text-base group-hover:scale-125 transition-transform duration-300 shadow-lg">
                   {member.avatar}
                 </div>
-                <h3 class="font-semibold text-rosewood text-lg mb-2 group-hover:text-gold transition-colors">
+                <h3 class="font-bold text-rosewood text-base sm:text-lg group-hover:text-sienna transition-colors duration-300">
                   {member.name}
                 </h3>
-                <p class="text-sm text-taupe leading-relaxed">
+                <p class="text-xs sm:text-sm text-taupe/70 leading-relaxed font-light">
                   {member.description}
                 </p>
-              </article>
-            ))
-          }
-        </section>
+              </div>
+            </article>
+          ))
+        }
+      </div>
     </section>
+  </main>
+
+  <!-- Structured Data -->
 </Layout>
 
 <style>
@@ -181,28 +343,46 @@ const pageDescription = "Welcome to MindMine - the platform where aspiring autho
     }
 
     section:nth-child(2) {
-      animation-delay: 0.2s;
+      animation-delay: 0.1s;
     }
     section:nth-child(3) {
-      animation-delay: 0.4s;
+      animation-delay: 0.2s;
     }
     section:nth-child(4) {
-      animation-delay: 0.6s;
+      animation-delay: 0.3s;
     }
 
     .animate-slide-in-left {
-      animation: slideInLeft 0.8s ease-out forwards;
+      animation: slideInLeft 0.9s ease-out forwards;
       opacity: 0;
     }
 
     .animate-slide-in-right {
-      animation: slideInRight 0.8s ease-out forwards;
+      animation: slideInRight 0.9s ease-out forwards;
       opacity: 0;
     }
 
     .animate-fade-in {
-      animation: fadeIn 0.6s ease-out forwards;
+      animation: fadeIn 0.7s ease-out forwards;
       opacity: 0;
+    }
+
+    /* Modern micro-interactions */
+    .group:hover .group-hover\:scale-105 {
+      transform: scale(1.05);
+    }
+
+    .group:hover .group-hover\:scale-110 {
+      transform: scale(1.1);
+    }
+
+    .group:hover .group-hover\:scale-125 {
+      transform: scale(1.25);
+    }
+
+    /* Enhanced button hover effects */
+    .group:hover .group-hover\:shadow-2xl {
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
     }
   }
 
@@ -220,7 +400,7 @@ const pageDescription = "Welcome to MindMine - the platform where aspiring autho
   @keyframes slideInLeft {
     from {
       opacity: 0;
-      transform: translateX(-50px);
+      transform: translateX(-60px);
     }
     to {
       opacity: 1;
@@ -231,7 +411,7 @@ const pageDescription = "Welcome to MindMine - the platform where aspiring autho
   @keyframes slideInRight {
     from {
       opacity: 0;
-      transform: translateX(50px);
+      transform: translateX(60px);
     }
     to {
       opacity: 1;
@@ -257,25 +437,189 @@ const pageDescription = "Welcome to MindMine - the platform where aspiring autho
     }
   }
 
-  /* Performance optimizations */
-  article,
-  section {
-    will-change: transform;
+  /* Skip link styles */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: #d9bfa3;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    z-index: 1000;
+    border-radius: 4px;
+    transition: top 0.3s;
+  }
+
+  .skip-link:focus {
+    top: 6px;
   }
 
   /* Enhanced focus states for better accessibility */
-  a:focus-visible {
-    outline: 2px solid #bc8f8f;
-    outline-offset: 2px;
-  }
-
-  /* Button glow effect */
-  a[href]:not(.btn) {
-    position: relative;
+  a:focus-visible,
+  button:focus-visible {
+    outline: 2px solid #d9bfa3;
+    outline-offset: 4px;
+    border-radius: 0.5rem;
   }
 
   /* Smooth transitions */
-  a, button, input, textarea, select {
+  a,
+  button,
+  input,
+  textarea,
+  select {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Gradient text effect */
+  @supports (background-clip: text) {
+    h1,
+    h2,
+    h3 {
+      background-clip: text;
+      -webkit-background-clip: text;
+    }
+  }
+
+  /* Subtle pattern overlay */
+  .pattern-overlay {
+    background-image:
+      radial-gradient(
+        circle at 25% 25%,
+        rgba(217, 191, 163, 0.1) 2px,
+        transparent 2px
+      ),
+      radial-gradient(
+        circle at 75% 75%,
+        rgba(163, 86, 65, 0.05) 1px,
+        transparent 1px
+      );
+    background-size: 80px 80px;
+  }
+
+  /* Modern glassmorphism effects */
+  .backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  /* Enhanced mobile responsiveness */
+  @media (max-width: 768px) {
+    .pt-16 {
+      padding-top: 4rem;
+    }
+
+    .pb-16 {
+      padding-bottom: 4rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      line-height: 1.2;
+    }
+
+    h2 {
+      font-size: 1.75rem;
+    }
+
+    /* Better touch targets */
+    a,
+    button {
+      min-height: 44px;
+      min-width: 44px;
+    }
+
+    /* Improved spacing for mobile */
+    .space-y-6 > * + * {
+      margin-top: 1rem;
+    }
+
+    .space-y-8 > * + * {
+      margin-top: 1.5rem;
+    }
+
+    /* Better grid gaps on mobile */
+    .gap-4 {
+      gap: 1rem;
+    }
+
+    .gap-6 {
+      gap: 1.5rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .px-4 {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+
+    h1 {
+      font-size: 1.875rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    /* Stack buttons vertically on very small screens */
+    .flex-col.sm\\:flex-row {
+      flex-direction: column;
+    }
+
+    .flex-col.sm\\:flex-row > * + * {
+      margin-top: 1rem;
+    }
+  }
+
+  /* Modern scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(217, 191, 163, 0.1);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(217, 191, 163, 0.3);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(217, 191, 163, 0.5);
+  }
+
+  /* Enhanced selection styling */
+  ::selection {
+    background: rgba(217, 191, 163, 0.3);
+    color: #5d4037;
+  }
+
+  /* Modern loading states */
+  .loading {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: loading 1.5s infinite;
+  }
+
+  @keyframes loading {
+    0% {
+      left: -100%;
+    }
+    100% {
+      left: 100%;
+    }
   }
 </style>

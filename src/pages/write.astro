@@ -3,68 +3,73 @@ import Layout from "../layouts/Layout.astro";
 import Admin from "../components/admin/admin";
 import Books from "../components/admin/Books";
 
-const pageDescription = "Write and publish your interactive books on MindMine. Create engaging stories with our powerful writing studio. Start your creative journey today.";
+const pageDescription =
+  "Write and publish your interactive books on MindMine. Create engaging stories with our powerful writing studio. Start your creative journey today.";
 ---
 
-<Layout 
+<Layout
   title="Write"
   description={pageDescription}
   image="https://mindmine.netlify.app/og-image.png"
   canonical="https://mindmine.netlify.app/write/"
 >
-  <div class="min-h-screen bg-gradient-to-br from-blush via-white via-peach/5 to-gold/10">
+  <div
+    class="min-h-screen bg-gradient-to-br from-blush via-white via-peach/5 to-gold/10"
+  >
     {/* Animated Background Elements */}
     <div class="fixed inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute top-20 left-10 w-72 h-72 bg-gold/10 rounded-full blur-3xl animate-pulse"></div>
-      <div class="absolute bottom-40 right-20 w-96 h-96 bg-peach/10 rounded-full blur-3xl animate-pulse delay-700"></div>
-      <div class="absolute top-1/2 left-1/2 w-80 h-80 bg-rosewood/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      <div
+        class="absolute top-20 left-10 w-72 h-72 bg-gold/10 rounded-full blur-3xl animate-pulse"
+      >
+      </div>
+      <div
+        class="absolute bottom-40 right-20 w-96 h-96 bg-peach/10 rounded-full blur-3xl animate-pulse delay-700"
+      >
+      </div>
+      <div
+        class="absolute top-1/2 left-1/2 w-80 h-80 bg-rosewood/5 rounded-full blur-3xl animate-pulse delay-1000"
+      >
+      </div>
     </div>
 
     {/* Header Section - Enhanced */}
-    <div class="relative z-10 bg-gradient-to-r from-blush via-peach to-gold py-12 sm:py-16 md:py-20 px-4 sm:px-6 shadow-2xl border-b-4 border-gold/50">
+    <div
+      class="relative z-10 bg-gradient-to-r from-blush via-peach to-gold py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 shadow-2xl border-b-4 border-gold/50"
+    >
       <div class="max-w-7xl mx-auto">
-        <div class="text-center space-y-4 animate-fade-in">
+        <div class="text-center space-y-4 sm:space-y-6 animate-fade-in">
           <div class="inline-flex items-center justify-center gap-2 mb-4">
-            <div class="text-5xl">✨</div>
-            <span class="text-sm sm:text-base font-bold bg-white/40 backdrop-blur-sm text-taupe px-4 py-2 rounded-full border border-white/60 shadow-lg">
+            <div class="text-4xl sm:text-5xl" aria-hidden="true">✨</div>
+            <span
+              class="text-xs sm:text-sm font-bold bg-white/40 backdrop-blur-sm text-taupe px-3 sm:px-4 py-2 rounded-full border border-white/60 shadow-lg"
+            >
               Creative Studio
             </span>
           </div>
-          
-          <h1 class="text-5xl sm:text-6xl md:text-7xl font-black text-taupe drop-shadow-lg leading-tight">
+
+          <h1
+            class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black text-taupe drop-shadow-lg leading-tight"
+          >
             Your Writing Studio
           </h1>
-          
-          <p class="text-base sm:text-lg md:text-xl text-taupe/90 max-w-3xl mx-auto leading-relaxed font-semibold drop-shadow">
-            Craft captivating stories, manage your chapters seamlessly, and share your imagination with readers worldwide
-          </p>
 
-          {/* Quick Stats */}
-          <div class="flex flex-wrap justify-center gap-4 sm:gap-6 mt-8 pt-6 border-t border-white/30">
-            <div class="text-center">
-              <div class="text-3xl sm:text-4xl font-bold text-taupe">📚</div>
-              <p class="text-xs sm:text-sm text-taupe/80 mt-2">Build Your Library</p>
-            </div>
-            <div class="text-center">
-              <div class="text-3xl sm:text-4xl font-bold text-taupe">✍️</div>
-              <p class="text-xs sm:text-sm text-taupe/80 mt-2">Write Chapters</p>
-            </div>
-            <div class="text-center">
-              <div class="text-3xl sm:text-4xl font-bold text-taupe">🌟</div>
-              <p class="text-xs sm:text-sm text-taupe/80 mt-2">Publish & Share</p>
-            </div>
-          </div>
+          <p
+            class="text-sm sm:text-base md:text-lg lg:text-xl text-taupe/90 max-w-3xl mx-auto leading-relaxed font-semibold drop-shadow px-4"
+          >
+            Craft captivating stories, manage your chapters seamlessly, and
+            share your imagination with readers worldwide
+          </p>
         </div>
       </div>
     </div>
 
     {/* Main Content */}
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-20">
-      {/* Feature Highlights - Before Books Section */}
-    
-
+    <div
+      class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20"
+    >
       {/* Books Section - Main Content */}
       <div class="mb-12 sm:mb-16">
+      
         <div class="animate-fade-in">
           <Books client:only="react" />
         </div>
@@ -78,8 +83,46 @@ const pageDescription = "Write and publish your interactive books on MindMine. C
   </div>
 
   <style>
+    /* Enhanced animations with better performance */
+    @media (prefers-reduced-motion: no-preference) {
+      .animate-fade-in {
+        animation: fadeInUp 0.8s ease-out forwards;
+        opacity: 0;
+      }
+
+      .animate-pulse {
+        animation: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+
+      /* Modern micro-interactions */
+      .group:hover .group-hover\:scale-110 {
+        transform: scale(1.1);
+      }
+
+      .group:hover .group-hover\:shadow-2xl {
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      }
+
+      /* Enhanced hover effects */
+      .group:hover .group-hover\:-translate-y-1 {
+        transform: translateY(-4px);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     @keyframes pulse-slow {
-      0%, 100% {
+      0%,
+      100% {
         opacity: 0.5;
       }
       50% {
@@ -87,25 +130,181 @@ const pageDescription = "Write and publish your interactive books on MindMine. C
       }
     }
 
-    @keyframes float {
-      0%, 100% {
-        transform: translateY(0px);
-      }
-      50% {
-        transform: translateY(-20px);
+    /* Accessibility improvements */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
       }
     }
 
+    /* Enhanced focus states for better accessibility */
+    a:focus-visible,
+    button:focus-visible {
+      outline: 2px solid #d9bfa3;
+      outline-offset: 4px;
+      border-radius: 0.5rem;
+    }
+
+    /* Smooth transitions */
+    a,
+    button,
+    input,
+    textarea,
+    select {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Modern glassmorphism effects */
+    .backdrop-blur-sm {
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    /* Enhanced mobile responsiveness */
+    @media (max-width: 768px) {
+      .py-12 {
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+      }
+
+      .py-16 {
+        padding-top: 4rem;
+        padding-bottom: 4rem;
+      }
+
+      .py-20 {
+        padding-top: 5rem;
+        padding-bottom: 5rem;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+        line-height: 1.2;
+      }
+
+      h2 {
+        font-size: 1.875rem;
+      }
+
+      /* Better touch targets */
+      a,
+      button {
+        min-height: 44px;
+        min-width: 44px;
+      }
+
+      /* Improved spacing for mobile */
+      .space-y-4 > * + * {
+        margin-top: 1rem;
+      }
+
+      .space-y-6 > * + * {
+        margin-top: 1.5rem;
+      }
+
+      /* Better grid gaps on mobile */
+      .gap-4 {
+        gap: 1rem;
+      }
+
+      .gap-6 {
+        gap: 1.5rem;
+      }
+
+      .gap-8 {
+        gap: 2rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .px-4 {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      /* Stack elements better on very small screens */
+      .flex-wrap {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .flex-wrap > * {
+        margin-bottom: 1rem;
+      }
+    }
+
+    /* Modern scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(217, 191, 163, 0.1);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(217, 191, 163, 0.3);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(217, 191, 163, 0.5);
+    }
+
+    /* Enhanced selection styling */
+    ::selection {
+      background: rgba(217, 191, 163, 0.3);
+      color: #5d4037;
+    }
+
+    /* Modern loading states */
+    .loading {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .loading::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+      );
+      animation: loading 1.5s infinite;
+    }
+
+    @keyframes loading {
+      0% {
+        left: -100%;
+      }
+      100% {
+        left: 100%;
+      }
+    }
+
+    /* Animation delays */
     .delay-700 {
       animation-delay: 0.7s;
     }
 
     .delay-1000 {
       animation-delay: 1s;
-    }
-
-    .animate-pulse {
-      animation: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
   </style>
 </Layout>
