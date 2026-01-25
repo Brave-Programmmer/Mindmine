@@ -64,6 +64,9 @@ const pageDescription =
     </div>
 
     {/* Main Content */}
+      <div class="relative z-50">
+      <Admin client:only="react" />
+    </div>
     <div
       class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20"
     >
@@ -77,9 +80,7 @@ const pageDescription =
     </div>
 
     {/* Admin (FAB and Modal) - Floating */}
-    <div class="relative z-50">
-      <Admin client:only="react" />
-    </div>
+  
   </div>
 
   <style>

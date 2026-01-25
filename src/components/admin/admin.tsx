@@ -211,7 +211,7 @@ const AdminComponent = () => {
 
   return (
     <div>
-      {/* Enhanced Create New Book Button - Floating Action Button */}
+      {/* Enhanced Create New Book Button - Centered */}
       <button
         onClick={() => {
           if (!email) {
@@ -224,7 +224,7 @@ const AdminComponent = () => {
           }
           setIsModalOpen(true);
         }}
-        className={`fixed bottom-8 right-8 p-4 sm:p-6 rounded-full shadow-2xl z-50 transition-all duration-300 transform hover:scale-125 active:scale-95 focus:outline-none focus:ring-4 focus:ring-offset-2 font-bold text-2xl sm:text-3xl touch-target group relative overflow-hidden ${
+        className={`fixed left-1/2 bottom-8 transform -translate-x-1/2 px-5 sm:px-7 md:px-8 py-3 sm:py-4 md:py-4 rounded-full shadow-2xl z-50 transition-all duration-300 hover:scale-110 active:scale-95 focus:outline-none focus:ring-4 focus:ring-offset-2 font-bold text-sm sm:text-base md:text-lg touch-target group relative overflow-hidden flex items-center justify-center gap-2 sm:gap-3 ${
           email
             ? "bg-gradient-to-br from-gold via-sienna to-red-500 hover:from-sienna hover:via-gold hover:to-sienna text-white shadow-3xl cursor-pointer hover:shadow-4xl focus:ring-gold"
             : "bg-gray-400 cursor-not-allowed text-white opacity-60"
@@ -237,16 +237,12 @@ const AdminComponent = () => {
         <span className="absolute inset-0 bg-white/20 rounded-full animate-pulse" />
         
         {/* Content */}
-        <span className="relative flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 transform group-hover:rotate-12 transition-transform duration-300">
+        <span className="relative text-xl sm:text-2xl md:text-2xl transform group-hover:rotate-12 transition-transform duration-300">
           ✨
         </span>
-
-        {/* Floating label on hover */}
-        {email && (
-          <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 bg-taupe text-white px-3 py-1 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none shadow-lg">
-            Create Book
-          </span>
-        )}
+        
+        {/* Text */}
+        <span className="relative font-semibold">New Book</span>
       </button>
 
       {/* Enhanced Modal */}
@@ -490,11 +486,11 @@ const AdminComponent = () => {
             </div>
 
             {/* Action Buttons - Fixed at bottom */}
-            <div className="flex-shrink-0 p-4 sm:p-8 border-t-2 border-gold/20 bg-gradient-to-r from-white via-blush/30 to-peach/20 rounded-b-2xl sm:rounded-b-3xl shadow-inner">
-              <div className="flex gap-3 sm:gap-4 flex-col sm:flex-row">
+            <div className="flex-shrink-0 px-4 sm:px-8 py-4 sm:py-6 md:py-8 border-t-2 border-gold/20 bg-gradient-to-r from-white via-blush/30 to-peach/20 rounded-b-2xl sm:rounded-b-3xl shadow-inner">
+              <div className="flex gap-2 sm:gap-3 md:gap-4 flex-col sm:flex-row">
                 <button
                   onClick={resetForm}
-                  className="flex-1 px-5 sm:px-8 py-3 sm:py-4 bg-white border-2 border-gold/40 text-taupe rounded-xl sm:rounded-2xl font-bold hover:bg-blush hover:border-gold transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gold active:scale-95 text-sm sm:text-base touch-target transform hover:scale-105"
+                  className="px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-white border-2 border-gold/40 text-taupe rounded-lg sm:rounded-xl md:rounded-2xl font-bold hover:bg-blush hover:border-gold transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-gold active:scale-95 text-xs sm:text-sm md:text-base touch-target transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isLoading}
                 >
                   🔄 Reset
@@ -502,12 +498,12 @@ const AdminComponent = () => {
                 <button
                   onClick={handleCreateBook}
                   disabled={isLoading}
-                  className="flex-1 px-5 sm:px-8 py-3 sm:py-4 bg-gradient-to-br from-gold via-sienna to-red-500 text-white rounded-xl sm:rounded-2xl font-bold hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 text-sm sm:text-base touch-target flex items-center justify-center gap-2 shadow-lg hover:from-sienna hover:via-gold hover:to-sienna transition-all duration-300 transform hover:scale-105 group relative overflow-hidden"
+                  className="flex-1 px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 md:py-4 bg-gradient-to-br from-gold via-sienna to-red-500 text-white rounded-lg sm:rounded-xl md:rounded-2xl font-bold hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 text-xs sm:text-sm md:text-base touch-target flex items-center justify-center gap-2 shadow-lg hover:from-sienna hover:via-gold hover:to-sienna transition-all duration-300 transform hover:scale-105 group relative overflow-hidden"
                 >
-                  <span className="absolute inset-0 bg-white/20 rounded-xl transform scale-0 group-hover:scale-100 transition-transform duration-300 origin-center" />
+                  <span className="absolute inset-0 bg-white/20 rounded-lg transform scale-0 group-hover:scale-100 transition-transform duration-300 origin-center" />
                   {isLoading ? (
                     <>
-                      <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 sm:border-3 border-white border-t-transparent rounded-full animate-spin"></div>
                       <span>Creating...</span>
                     </>
                   ) : (

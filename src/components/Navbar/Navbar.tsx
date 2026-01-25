@@ -5,11 +5,10 @@ import { useAuthStore } from "../../store/authStore";
 import useOutsideClick from "./useOutsideClick";
 import NavLink from "./NavLink";
 import ProfileAvatar from "./Avatar";
-import { HamburgerIcon, CloseIcon, ChevronIcon } from "./Icons";
 
 const NAVIGATION_LINKS = [
-  { href: "/books", label: "Books", icon: "📚" },
-  { href: "/about", label: "About", icon: "ℹ️" },
+  { href: "/books", label: "Books" },
+  { href: "/about", label: "About" },
 ];
 
 export const Navbar = () => {
@@ -49,43 +48,82 @@ export const Navbar = () => {
     setProfileOpenDesktop(false);
   }, []);
 
+  // Simple SVG Icons
+  const HamburgerIcon = () => (
+    <svg
+      className="w-6 h-6"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M4 6h16M4 12h16M4 18h16"
+      />
+    </svg>
+  );
+
+  const CloseIcon = () => (
+    <svg
+      className="w-6 h-6"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M6 18L18 6M6 6l12 12"
+      />
+    </svg>
+  );
+
+  const ChevronIcon = ({ isOpen }: { isOpen: boolean }) => (
+    <svg
+      className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M19 9l-7 7-7-7"
+      />
+    </svg>
+  );
+
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 safe-area-inset-top">
+      <header className="fixed top-0 left-0 right-0 z-50">
         <nav
-          className={`mx-auto px-3 md:px-8 py-4 md:py-5 backdrop-blur-xl transition-all duration-400 border-b ${
+          className={`mx-auto px-4 md:px-8 py-3 md:py-4 backdrop-blur-lg transition-all duration-300 border-b ${
             isScrolled
-              ? "bg-white/95 shadow-2xl border-gold/30"
-              : "bg-white/85 shadow-xl border-gold/20"
+              ? "bg-white/90 shadow-md border-gray-200"
+              : "bg-white/80 border-gray-100"
           }`}
         >
           <div className="flex justify-between items-center w-full max-w-7xl mx-auto">
             <a
               href="/"
-              className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-gold via-sienna to-taupe bg-clip-text text-transparent hover:from-sienna hover:via-gold hover:to-taupe transition-all duration-300 flex-shrink-0 transform hover:scale-105"
+              className="text-xl md:text-2xl font-bold text-taupe hover:text-sienna transition-colors flex-shrink-0"
             >
               mindMine
             </a>
 
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => {
-                setMobileMenuOpen((prev) => !prev);
-                setProfileOpenMobile(false);
-              }}
-              className="md:hidden p-2 text-taupe hover:text-sienna hover:bg-blush/60 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 transition-all touch-target"
-              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={mobileMenuOpen}
-            >
-              <HamburgerIcon isOpen={mobileMenuOpen} />
-            </button>
-
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-2 lg:gap-6">
-              {NAVIGATION_LINKS.map(({ href, label, icon }) => (
-                <NavLink key={href} href={href}>
-                  <span className="mr-2 text-lg">{icon}</span>
-                  <span className="hidden lg:inline font-medium">{label}</span>
+            <div className="hidden md:flex items-center gap-1 lg:gap-2">
+              {NAVIGATION_LINKS.map(({ href, label }) => (
+                <NavLink
+                  key={href}
+                  href={href}
+                  className="px-3 py-2 rounded-lg hover:bg-gray-100 text-sm font-medium"
+                >
+                  {label}
                 </NavLink>
               ))}
 
@@ -93,45 +131,44 @@ export const Navbar = () => {
                 <div className="relative" ref={desktopProfileRef}>
                   <button
                     onClick={() => setProfileOpenDesktop((prev) => !prev)}
-                    className="flex items-center gap-2 text-taupe font-semibold hover:text-sienna px-3 py-2 md:px-4 md:py-2.5 rounded-full hover:bg-blush/60 focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 transition-all touch-target border border-gold/20 hover:border-gold/40"
+                    className="flex items-center gap-2 text-taupe font-medium hover:text-sienna px-3 py-2 rounded-full hover:bg-gray-100 transition-colors border border-gray-200"
                     aria-haspopup="true"
                     aria-expanded={profileOpenDesktop}
                   >
                     <ProfileAvatar displayName={displayName} />
-                    <span className="max-w-24 md:max-w-32 truncate text-xs md:text-sm">
+                    <span className="max-w-24 truncate text-xs">
                       {displayName || "Profile"}
                     </span>
                     <ChevronIcon isOpen={profileOpenDesktop} />
                   </button>
 
                   <div
-                    className={`absolute right-0 mt-3 w-56 md:w-72 bg-white/98 backdrop-blur-xl rounded-3xl border border-gold/30 shadow-2xl overflow-hidden transition-all duration-300 ${
+                    className={`absolute right-0 mt-2 w-56 bg-white rounded-xl border border-gray-200 shadow-lg transition-all ${
                       profileOpenDesktop
-                        ? "opacity-100 scale-100 translate-y-0"
-                        : "opacity-0 scale-95 -translate-y-4 pointer-events-none"
+                        ? "opacity-100 scale-100"
+                        : "opacity-0 scale-95 pointer-events-none"
                     }`}
                   >
-                    <div className="px-5 md:px-7 py-4 md:py-5 border-b border-gold/20 bg-gradient-to-r from-peach/40 to-blush/40">
+                    <div className="p-4 border-b border-gray-100">
                       <div className="flex items-center gap-3">
                         <ProfileAvatar displayName={displayName} />
                         <div className="flex-1 min-w-0">
-                          <p className="font-bold text-taupe truncate text-sm md:text-base">
+                          <p className="font-medium text-gray-900 truncate text-sm">
                             {displayName || "User"}
                           </p>
-                          <p className="text-xs text-sienna/70 truncate">
+                          <p className="text-xs text-gray-500 truncate">
                             {email || "No Email"}
                           </p>
                         </div>
                       </div>
                     </div>
 
-                    <div className="py-2 md:py-3">
+                    <div className="py-1">
                       <a
                         href="/write"
                         onClick={() => setProfileOpenDesktop(false)}
-                        className="flex items-center px-5 md:px-7 py-3 md:py-3.5 text-taupe hover:bg-blush/50 hover:text-sienna transition-colors font-semibold text-sm md:text-base touch-target"
+                        className="block px-4 py-2 text-sm hover:bg-gray-50 transition-colors"
                       >
-                        <span className="mr-3 md:mr-4">✍️</span>
                         Write New Book
                       </a>
 
@@ -140,9 +177,8 @@ export const Navbar = () => {
                           handleLogout();
                           setProfileOpenDesktop(false);
                         }}
-                        className="w-full text-left flex items-center px-5 md:px-7 py-3 md:py-3.5 text-taupe hover:bg-red-50 hover:text-red-600 transition-colors font-semibold text-sm md:text-base touch-target"
+                        className="w-full text-left px-4 py-2 text-sm hover:bg-red-50 text-red-600 transition-colors"
                       >
-                        <span className="mr-3 md:mr-4">🚪</span>
                         Logout
                       </button>
                     </div>
@@ -151,12 +187,26 @@ export const Navbar = () => {
               ) : (
                 <a
                   href="/login"
-                  className="bg-gradient-to-r from-gold to-sienna text-white px-5 md:px-7 py-2.5 md:py-3 rounded-full hover:from-sienna hover:to-gold transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 text-sm md:text-base touch-target"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
                 >
                   Login
                 </a>
               )}
             </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => {
+                setMobileMenuOpen((prev) => !prev);
+                setProfileOpenMobile(false);
+              }}
+              className="md:hidden p-2 text-taupe hover:text-sienna rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
+            >
+              <HamburgerIcon />
+            </button>
           </div>
         </nav>
       </header>
@@ -164,57 +214,51 @@ export const Navbar = () => {
       {/* Mobile Overlay */}
       <div
         onClick={closeAllMenus}
-        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-400 ${
+        className={`fixed inset-0 bg-black/30 backdrop-blur-sm z-40 transition-opacity ${
           mobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         } md:hidden`}
       />
 
-      {/* Mobile Sidebar - Full height, safe area aware */}
+      {/* Mobile Sidebar */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 w-72 sm:w-80 bg-white/95 backdrop-blur-xl shadow-2xl z-50 transform transition-transform ease-in-out duration-400 overflow-y-auto ${
+        id="mobile-menu"
+        className={`fixed inset-y-0 left-0 w-64 bg-white shadow-xl z-50 transform transition-transform ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        } md:hidden safe-area-inset-left safe-area-inset-bottom border-r border-taupe/20`}
+        } md:hidden`}
       >
-        <div className="flex justify-between items-center px-6 py-4 border-b border-taupe/20 bg-taupe/5">
-          <a
-            href="/"
-            className="text-2xl font-bold text-taupe"
-            onClick={closeAllMenus}
-          >
-            mindMine
-          </a>
+        <div className="flex justify-between items-center p-4 border-b">
+          <span className="text-lg font-bold text-gray-900">mindMine</span>
           <button
             onClick={closeAllMenus}
-            className="text-taupe hover:text-rosewood p-2 rounded-full hover:bg-taupe/10 focus:outline-none focus:ring-2 focus:ring-gold transition-all"
+            className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100"
             aria-label="Close menu"
           >
             <CloseIcon />
           </button>
         </div>
 
-        <nav className="flex flex-col px-6 py-6 space-y-2">
-          {NAVIGATION_LINKS.map(({ href, label, icon }) => (
+        <nav className="flex flex-col p-4 space-y-1">
+          {NAVIGATION_LINKS.map(({ href, label }) => (
             <NavLink
               key={href}
               href={href}
               onClick={closeAllMenus}
-              className="flex items-center px-4 py-3 rounded-lg hover:bg-taupe/10 hover:text-rosewood transition-all text-base font-medium text-taupe"
+              className="px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
             >
-              <span className="mr-3 text-lg">{icon}</span>
               {label}
             </NavLink>
           ))}
 
           {isAuthenticated && (
-            <div className="border-t border-taupe/20 pt-4 mt-4">
-              <div className="px-4 py-3 mb-3 bg-taupe/5 rounded-lg">
+            <div className="border-t border-gray-200 pt-4 mt-4">
+              <div className="px-3 py-2 mb-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center gap-3">
                   <ProfileAvatar displayName={displayName} />
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-taupe truncate text-sm">
+                    <p className="font-medium text-gray-900 truncate text-sm">
                       {displayName || "User"}
                     </p>
-                    <p className="text-xs text-sienna truncate">
+                    <p className="text-xs text-gray-500 truncate">
                       {email || "No Email"}
                     </p>
                   </div>
@@ -224,9 +268,8 @@ export const Navbar = () => {
               <a
                 href="/write"
                 onClick={closeAllMenus}
-                className="flex items-center px-4 py-3 text-taupe hover:bg-taupe/10 hover:text-sienna rounded-lg transition-all font-medium text-sm"
+                className="block px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
               >
-                <span className="mr-3">✍️</span>
                 Write New Book
               </a>
 
@@ -235,20 +278,19 @@ export const Navbar = () => {
                   handleLogout();
                   closeAllMenus();
                 }}
-                className="w-full text-left flex items-center px-4 py-3 text-taupe hover:bg-red-50 hover:text-red-600 rounded-lg transition-all font-medium text-sm"
+                className="w-full text-left px-3 py-2 rounded-lg hover:bg-red-50 text-red-600 transition-colors"
               >
-                <span className="mr-3">🚪</span>
                 Logout
               </button>
             </div>
           )}
 
           {!isAuthenticated && (
-            <div className="border-t border-taupe/20 pt-4 mt-4">
+            <div className="border-t border-gray-200 pt-4 mt-4">
               <a
                 href="/login"
                 onClick={closeAllMenus}
-                className="w-full bg-gold text-white px-6 py-3 rounded-lg hover:bg-sienna transition-all font-medium text-center block text-sm"
+                className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-center block"
               >
                 Login
               </a>
@@ -260,45 +302,23 @@ export const Navbar = () => {
   );
 };
 
+// Styles moved to CSS file or global styles
 const styles = `
-  .touch-target {
-    min-height: 44px;
-    min-width: 44px;
+  .no-scroll {
+    overflow: hidden;
   }
 
-  .safe-area-inset-top {
-    padding-top: env(safe-area-inset-top);
-  }
-
-  .safe-area-inset-left {
-    padding-left: env(safe-area-inset-left);
-  }
-
-  .safe-area-inset-bottom {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-
-  /* Modern button styles */
-  button {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  button:active {
-    transform: scale(0.98);
-  }
-
-  /* Mobile optimizations */
-  @media (max-width: 640px) {
+  @media (max-width: 768px) {
     nav {
       font-size: 14px;
     }
-
+    
     button {
       min-height: 44px;
+      min-width: 44px;
     }
   }
 
-  /* Smooth transitions for menu */
   @media (prefers-reduced-motion: reduce) {
     * {
       animation-duration: 0.01ms !important;
