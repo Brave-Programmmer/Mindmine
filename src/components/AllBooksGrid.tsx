@@ -266,7 +266,7 @@ const AllBooksGrid = () => {
   return (
     <div className="p-4 w-full max-w-screen-2xl mx-auto font-sans text-taupe">
       {/* Search and Sort */}
-      <div className="sticky top-16 z-100 bg-white/90 backdrop-blur-md border-b border-gray-200 p-4 rounded-xl shadow-sm mb-5">
+      <div className="sticky top-16 z-[60] bg-white/90 backdrop-blur-md border-b border-gray-200 p-4 rounded-xl shadow-sm mb-5">
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1 max-w-2xl">
             <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -321,7 +321,7 @@ const AllBooksGrid = () => {
       </div>
 
       {/* Genre Filters */}
-      <div className="mb-5 flex flex-wrap gap-2">
+      <div className="mb-5 flex flex-wrap gap-2 relative z-[59] bg-white/0">
         <button
           onClick={() => setSelectedGenres([])}
           className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${

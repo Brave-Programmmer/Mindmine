@@ -187,7 +187,7 @@ export const Navbar = () => {
               ) : (
                 <a
                   href="/login"
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+                  className="w-full group relative inline-flex items-center justify-center px-4 sm:px-4 py-3 sm:py-2 rounded-full font-semibold text-rosewood border-2 border-gold/60 hover:border-sienna transition-all duration-300 bg-cream/80 hover:bg-gold/10 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 min-h-[44px]"
                 >
                   Login
                 </a>
@@ -214,7 +214,7 @@ export const Navbar = () => {
       {/* Mobile Overlay */}
       <div
         onClick={closeAllMenus}
-        className={`fixed inset-0 bg-black/30 backdrop-blur-sm z-40 transition-opacity ${
+        className={`fixed inset-0 bg-black/30 backdrop-blur-sm z-[45] transition-opacity ${
           mobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         } md:hidden`}
       />
@@ -222,7 +222,7 @@ export const Navbar = () => {
       {/* Mobile Sidebar */}
       <aside
         id="mobile-menu"
-        className={`fixed inset-y-0 left-0 w-64 bg-white shadow-xl z-50 transform transition-transform ${
+        className={`fixed inset-y-0 left-0 w-64 bg-white shadow-xl z-[70] transform transition-transform ${
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         } md:hidden`}
       >
@@ -290,7 +290,7 @@ export const Navbar = () => {
               <a
                 href="/login"
                 onClick={closeAllMenus}
-                className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-center block"
+                className="group relative inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-rosewood border-2 border-gold/60 hover:border-sienna transition-all duration-300 hover:scale-105 active:scale-95 bg-cream/80 hover:bg-gold/10 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-gold focus:ring-offset-2 min-h-[44px]"
               >
                 Login
               </a>
