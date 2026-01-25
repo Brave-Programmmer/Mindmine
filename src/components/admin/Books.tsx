@@ -549,7 +549,7 @@ const BooksComponent = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-blush/5 to-peach/10">
-      <main className="container mx-auto px-3 sm:px-4 md:px-6 py-8 md:py-12">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-8 md:py-12">
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             {[...Array(6)].map((_, i) => (
@@ -617,7 +617,11 @@ const BooksComponent = () => {
             {books.map((book, index) => (
               <div
                 key={book.id}
-                className="group bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gold/20 overflow-hidden hover:shadow-2xl hover:border-gold/40 transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02] active:scale-95"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => (e.key === "Enter" ? openModal(book) : null)}
+                onClick={() => openModal(book)}
+                className="group bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg border border-gold/20 overflow-hidden hover:shadow-2xl hover:border-gold/40 transition-transform duration-300 transform hover:-translate-y-1 hover:scale-[1.03] active:scale-95 focus:outline-none focus:ring-4 focus:ring-gold/25"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-blush to-peach">
@@ -655,13 +659,15 @@ const BooksComponent = () => {
                   <div className="flex gap-2 pt-1">
                     <button
                       onClick={() => openModal(book)}
-                      className="flex-1 px-3 py-2 bg-gradient-to-r from-gold to-sienna hover:from-sienna hover:to-gold text-taupe rounded-lg font-semibold text-sm shadow transition-all active:scale-95"
+                      className="flex-1 px-3 py-2 bg-gradient-to-r from-gold to-sienna hover:from-sienna hover:to-gold text-taupe rounded-md font-semibold text-sm shadow-sm transition-all active:scale-95 focus:outline-none focus:ring-4 focus:ring-gold/30"
+                      aria-label={`Edit ${book.title}`}
                     >
-                      Edit
+                      ✏️ Edit
                     </button>
                     <button
                       onClick={() => handleDeleteBook(book.id)}
-                      className="px-3 py-2 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg text-sm font-semibold transition-all active:scale-95"
+                      className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-md text-sm font-semibold transition-all active:scale-95 focus:outline-none focus:ring-4 focus:ring-red-200"
+                      aria-label={`Delete ${book.title}`}
                     >
                       🗑️
                     </button>
@@ -675,14 +681,14 @@ const BooksComponent = () => {
         {/* Enhanced Modal */}
         {isModalOpen && selectedBook && (
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-start justify-center z-50 p-2 sm:p-4 pt-[80px] sm:pt-[100px]"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-start justify-center z-[9999] p-0"
             onClick={(e) => {
               if (e.target === e.currentTarget) {
                 closeModal();
               }
             }}
           >
-            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full h-full sm:h-auto sm:max-w-7xl flex flex-col border border-gold/20 overflow-hidden">
+            <div className="bg-white rounded-none sm:rounded-none shadow-2xl w-full h-screen flex flex-col border-0 overflow-hidden">
               <div className="flex-shrink-0 bg-gradient-to-r from-blush via-peach to-gold p-4 sm:p-6 rounded-t-2xl border-b border-gold/20">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
@@ -710,9 +716,9 @@ const BooksComponent = () => {
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto max-h-screen">
                 <div className="flex flex-col lg:flex-row gap-0">
-                  <div className="w-full lg:w-1/3 bg-gradient-to-b from-blush/20 to-peach/20 border-b lg:border-b-0 lg:border-r border-gold/20 overflow-y-auto lg:max-h-full">
+                  <div className="w-full lg:w-1/3 bg-gradient-to-b from-blush/20 to-peach/20 border-b lg:border-b-0 lg:border-r border-gold/20 overflow-y-auto lg:max-h-screen">
                     <div className="h-full p-3 sm:p-6">
                       <div className="space-y-4 sm:space-y-6">
                         <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-gold/20">
@@ -904,7 +910,7 @@ const BooksComponent = () => {
                     </div>
                   </div>
 
-                  <div className="w-full lg:w-2/3 bg-white flex flex-col overflow-hidden lg:max-h-full">
+                  <div className="w-full lg:w-2/3 bg-white flex flex-col overflow-hidden lg:max-h-screen">
                     <div className="flex-shrink-0 p-3 sm:p-6 border-b border-gray-200">
                       <div className="flex items-center justify-between">
                         <h3 className="text-lg sm:text-xl font-bold text-taupe flex items-center gap-2">
@@ -924,7 +930,7 @@ const BooksComponent = () => {
                       </div>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-3 sm:p-6">
+                    <div className="flex-1 overflow-y-auto p-3 sm:p-6 max-h-screen">
                       {chapters.length === 0 ? (
                         <div className="text-center py-16 bg-gradient-to-br from-blush/20 to-peach/20 rounded-2xl border-2 border-dashed border-gold/30">
                           <div className="text-6xl mb-4">📖</div>
@@ -1042,14 +1048,14 @@ const BooksComponent = () => {
         {/* New Chapter Creation Modal */}
         {showNewChapterModal && selectedBook && (
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-2 sm:p-4"
             onClick={(e) => {
               if (e.target === e.currentTarget) {
                 closeNewChapterModal();
               }
             }}
           >
-            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full h-full sm:h-auto sm:max-w-7xl flex flex-col border border-gold/20 overflow-hidden">
+            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full h-full sm:h-full sm:w-full flex flex-col border border-gold/20 overflow-hidden">
               <div className="flex-shrink-0 bg-gradient-to-r from-blush via-peach to-gold p-4 sm:p-6 rounded-t-2xl border-b border-gold/20">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -1150,14 +1156,14 @@ const BooksComponent = () => {
         {/* Edit Chapter Modal */}
         {editingChapterId && selectedBook && (
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-2 sm:p-4"
             onClick={(e) => {
               if (e.target === e.currentTarget) {
                 setEditingChapterId(null);
               }
             }}
           >
-            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full h-full sm:h-auto sm:max-w-7xl flex flex-col border border-gold/20 overflow-hidden">
+            <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full h-full sm:h-full sm:w-full flex flex-col border border-gold/20 overflow-hidden">
               <div className="flex-shrink-0 bg-gradient-to-r from-blush via-peach to-gold p-4 sm:p-6 rounded-t-2xl border-b border-gold/20">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">

@@ -64,23 +64,14 @@ const pageDescription =
     </div>
 
     {/* Main Content */}
-      <div class="relative z-50">
+    <div class="relative z-10">
       <Admin client:only="react" />
     </div>
-    <div
-      class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 md:py-20"
-    >
-      {/* Books Section - Main Content */}
-      <div class="mb-12 sm:mb-16">
-      
-        <div class="animate-fade-in">
-          <Books client:only="react" />
-        </div>
-      </div>
-    </div>
 
-    {/* Admin (FAB and Modal) - Floating */}
-  
+    {/* Books Section - Main Content */}
+    <div>
+      <Books client:only="react" />
+    </div>
   </div>
 
   <style>
