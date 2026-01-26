@@ -59,6 +59,21 @@ function getWordCharCount(data: OutputData | null): {
   return { words, chars };
 }
 
+// Convert Editor.js output to an HTML string using the parser instance
+const renderEditorJsToHtml = (parser: any, data: OutputData): string => {
+  if (!parser) return "";
+  try {
+    const htmlArray = parser.parse(data);
+    if (Array.isArray(htmlArray)) return htmlArray.join("");
+    if (typeof htmlArray === "string") return htmlArray;
+    return String(htmlArray);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error("Failed to convert Editor.js data to HTML:", error);
+    return "";
+  }
+};
+
 export const TextCrafter: React.FC<TextCrafterProps> = ({
   value,
   onChange,
@@ -216,15 +231,16 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
         }
         saveDebounceRef.current = window.setTimeout(async () => {
           if (!editorRef.current) return;
-          try {
-            const data = await editorRef.current.save();
-            setEditorData(data);
-            // only call onChange prop with stringified data
-            onChange(JSON.stringify(data));
-            if (autoSave && onSave) {
-              onSave(JSON.stringify(data));
-            }
-          } catch (err) {
+            try {
+              const data = await editorRef.current.save();
+              setEditorData(data);
+              // generate HTML and call callbacks with HTML string
+              const htmlContent = renderEditorJsToHtml(edjsParserRef.current, data);
+              onChange(htmlContent);
+              if (autoSave && onSave) {
+                onSave(htmlContent);
+              }
+            } catch (err) {
             // ignore transient save errors
             // console.warn("Editor save failed", err);
           }
@@ -317,7 +333,8 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
     try {
       const data = await editorRef.current.save();
       setEditorData(data);
-      onSave(JSON.stringify(data));
+      const htmlContent = renderEditorJsToHtml(edjsParserRef.current, data);
+      onSave(htmlContent);
     } catch (e) {
       window.alert("Save failed. Try again.");
     } finally {
@@ -339,9 +356,10 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
         (editorRef.current as any).clear();
       }
       setEditorData(null);
-      onChange(JSON.stringify(empty));
+      // Emit empty HTML string when clearing
+      onChange("");
       // optionally also call onSave if autoSave
-      if (autoSave && onSave) onSave(JSON.stringify(empty));
+      if (autoSave && onSave) onSave("");
     } catch (e) {
       // ignore
     }
