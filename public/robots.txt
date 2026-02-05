@@ -1,32 +1,71 @@
 # MindMine SEO robots.txt configuration
-# Updated: 2024
+# Updated: 2026-02-05
+# This file controls how search engine bots crawl the site
 
-# Allow all user agents
+# Default rules for all bots
 User-agent: *
 Allow: /
-Disallow: /admin
-Disallow: /api
-Disallow: /private
-Disallow: /*.json$
-Disallow: /*.xml$
-Disallow: /search
+Allow: /sitemap*.xml
+Allow: /rss.xml
+Allow: /books/
+Allow: /about/
 
-# Crawl delay to be respectful to servers
+# Disallow sensitive/private areas
+Disallow: /admin/
+Disallow: /api/
+Disallow: /private/
+Disallow: /.env
+Disallow: /.git/
+Disallow: /node_modules/
+Disallow: /*?*sort=
+Disallow: /*?*filter=
+
+# Prevent indexing of query strings (pagination, filters, tracking)
+Disallow: /*?utm_
+Disallow: /*?gclid=
+Disallow: /*?fbclid=
+Disallow: /*?referrer=
+Disallow: /*?session_id=
+
+# Crawl delay for general bots (be respectful)
 Crawl-delay: 1
-
-# Request rate limit
 Request-rate: 1/1s
 
-# Specific rules for Googlebot for faster crawling
+# Googlebot - Allow faster crawling for better indexing
 User-agent: Googlebot
 Allow: /
 Crawl-delay: 0.5
+Request-rate: 2/1s
 
-# Specific rules for Bingbot
+# Bingbot optimization
 User-agent: Bingbot
 Allow: /
 Crawl-delay: 1
+Request-rate: 1/1s
 
-# Sitemap location
+# Allow Googlebot-Image to index book covers
+User-agent: Googlebot-Image
+Allow: /
+Crawl-delay: 0.5
+
+# Badbot prevention - block unwanted crawlers
+User-agent: MJ12bot
+Allow: /
+Crawl-delay: 2
+
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: MojeekBot
+Disallow: /
+
+# Sitemap location (critical for SEO)
 Sitemap: https://mindmine.netlify.app/sitemap-index.xml
 Sitemap: https://mindmine.netlify.app/sitemap-0.xml
+Sitemap: https://mindmine.netlify.app/rss.xml

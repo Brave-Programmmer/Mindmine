@@ -1,0 +1,106 @@
+---
+/**
+ * SEOMetadata Component
+ * Reusable component for comprehensive SEO meta tags
+ * Usage in Astro pages:
+ * <SEOMetadata
+ *   title="Page Title"
+ *   description="Page description"
+ *   image="https://..."
+ *   canonical="https://..."
+ *   author="Author Name"
+ *   publishedDate="2024-01-01"
+ *   modifiedDate="2024-02-05"
+ *   type="article" | "webpage"
+ * />
+ */
+
+interface Props {
+  title: string;
+  description?: string;
+  image?: string;
+  canonical?: string;
+  author?: string;
+  publishedDate?: string;
+  modifiedDate?: string;
+  type?: "article" | "webpage";
+  keywords?: string;
+  robots?: string;
+  twitterHandle?: string;
+}
+
+const {
+  title,
+  description = "MindMine is a creative platform where authors write interactive books and readers explore immersive stories.",
+  image = "https://mindmine.netlify.app/og-image.png",
+  canonical = "https://mindmine.netlify.app/",
+  author = "MindMine",
+  publishedDate,
+  modifiedDate = new Date().toISOString(),
+  type = "webpage",
+  keywords = "MindMine, books, stories, interactive fiction, authors, reading platform",
+  robots = "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
+  twitterHandle = "@mindmine",
+} = Astro.props;
+
+const currentUrl = new URL(Astro.request.url);
+const canonicalUrl = canonical || currentUrl.href;
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": type === "article" ? "Article" : "WebPage",
+  headline: title,
+  description: description,
+  image: image,
+  author: {
+    "@type": "Person",
+    name: author,
+  },
+  datePublished: publishedDate,
+  dateModified: modifiedDate,
+  url: canonicalUrl,
+  isPartOf: {
+    "@type": "WebSite",
+    name: "MindMine",
+    url: "https://mindmine.netlify.app/",
+  },
+};
+---
+
+<!-- Primary Meta Tags -->
+<meta name="title" content={`${title} | mindMine`} />
+<meta name="description" content={description} />
+<meta name="keywords" content={keywords} />
+<meta name="author" content={author} />
+<meta name="robots" content={robots} />
+
+<!-- Canonical URL -->
+<link rel="canonical" href={canonicalUrl} />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={type === "article" ? "article" : "website"} />
+<meta property="og:url" content={canonicalUrl} />
+<meta property="og:title" content={`${title} | mindMine`} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={image} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:site_name" content="MindMine" />
+<meta property="og:locale" content="en_US" />
+
+<!-- Twitter / X Card -->
+<meta property="twitter:card" content="summary_large_image" />
+<meta property="twitter:url" content={canonicalUrl} />
+<meta property="twitter:title" content={`${title} | mindMine`} />
+<meta property="twitter:description" content={description} />
+<meta property="twitter:image" content={image} />
+<meta property="twitter:creator" content={twitterHandle} />
+
+<!-- Article-Specific Meta Tags (if type = article) -->
+{publishedDate && <meta property="article:published_time" content={publishedDate} />}
+{modifiedDate && <meta property="article:modified_time" content={modifiedDate} />}
+{author && <meta property="article:author" content={author} />}
+
+<!-- Structured Data (JSON-LD) -->
+<script type="application/ld+json" set:html={JSON.stringify(structuredData)} />

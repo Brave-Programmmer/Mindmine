@@ -1,11 +1,19 @@
 ---
 export const prerender = false;
 import Layout from "../../layouts/Layout.astro";
+import SEOMetadata from "../../components/SEOMetadata.astro";
 import FetchBook from "../../components/FetchBook";
 const { params } = Astro;
 const id = params.id;
 ---
 
-<Layout title={`Reading Book`}>
+<Layout title={`Book - MindMine`} description="Read an interactive story on MindMine">
+  <SEOMetadata
+    title="Read Interactive Book - MindMine"
+    description="Dive into an interactive story on MindMine. Explore engaging narratives written by talented authors."
+    canonical={`https://mindmine.netlify.app/books/${id}`}
+    type="webpage"
+    keywords="interactive fiction, read online, digital storytelling, book reader"
+  />
   <FetchBook id={id} client:only="react" />
 </Layout>

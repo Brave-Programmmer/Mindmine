@@ -1,18 +1,26 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import SEOMetadata from "../components/SEOMetadata.astro";
 import Admin from "../components/admin/admin";
 import Books from "../components/admin/Books";
 
 const pageDescription =
-  "Write and publish your interactive books on MindMine. Create engaging stories with our powerful writing studio. Start your creative journey today.";
+  "Write and publish your interactive books on MindMine. Create engaging stories with our powerful writing studio and reach readers worldwide.";
 ---
 
 <Layout
-  title="Write"
+  title="Write & Publish Interactive Books - MindMine Studio"
   description={pageDescription}
   image="https://mindmine.netlify.app/og-image.png"
-  canonical="https://mindmine.netlify.app/write/"
+  canonical="https://mindmine.netlify.app/write"
 >
+  <SEOMetadata
+    title="Write & Publish Books - MindMine Studio"
+    description={pageDescription}
+    canonical="https://mindmine.netlify.app/write"
+    type="webpage"
+    keywords="write book, publish story, author platform, interactive fiction, creative writing, book editor"
+  />
   <div
     class="min-h-screen bg-gradient-to-br from-blush via-white via-peach/5 to-gold/10"
   >

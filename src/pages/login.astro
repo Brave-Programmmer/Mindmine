@@ -1,16 +1,24 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import SEOMetadata from "../components/SEOMetadata.astro";
 import { Auth } from "../components/Auth";
 
-const pageDescription = "Sign in to MindMine to access your account, manage your books, and connect with the community of authors and readers.";
+const pageDescription = "Sign in to MindMine to access your account, manage your books, and connect with the community of authors and readers worldwide.";
 ---
 
 <Layout 
-  title="Login"
+  title="Login to MindMine Account"
   description={pageDescription}
   image="https://mindmine.netlify.app/og-image.png"
-  canonical="https://mindmine.netlify.app/login/"
+  canonical="https://mindmine.netlify.app/login"
 >
+  <SEOMetadata
+    title="Login to MindMine - Access Your Account"
+    description={pageDescription}
+    canonical="https://mindmine.netlify.app/login"
+    type="webpage"
+    keywords="MindMine login, author account, reader login, sign in"
+  />
   <main
     class="min-h-screen bg-blush flex items-center justify-center px-4 py-16"
   >

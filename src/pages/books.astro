@@ -1,16 +1,24 @@
 ---
 import AllBooksGrid from "../components/AllBooksGrid";
 import Layout from "../layouts/Layout.astro";
+import SEOMetadata from "../components/SEOMetadata.astro";
 
 const pageDescription =
-  "Browse all interactive books on MindMine. Discover stories written by our community of authors. Find your next favorite book across various genres and styles.";
+  "Browse all interactive books on MindMine. Discover stories written by our community of talented authors. Find your next favorite book across various genres and reading styles.";
 ---
 
 <Layout
-  title="Books"
+  title="Browse Interactive Books - MindMine Library"
   description={pageDescription}
   image="https://mindmine.netlify.app/og-image.png"
-  canonical="https://mindmine.netlify.app/books/"
+  canonical="https://mindmine.netlify.app/books"
 >
+  <SEOMetadata
+    title="Browse Interactive Books - MindMine"
+    description={pageDescription}
+    canonical="https://mindmine.netlify.app/books"
+    type="webpage"
+    keywords="interactive books, digital stories, fiction, fantasy, romance, adventure, indie authors"
+  />
   <AllBooksGrid client:only="react" />
 </Layout>

@@ -27,10 +27,7 @@ const canonicalUrl = canonical || currentUrl.href;
 <html lang="en" dir="ltr">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#8b4513" />
     <meta
       name="robots"
@@ -40,6 +37,20 @@ const canonicalUrl = canonical || currentUrl.href;
       name="googlebot"
       content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"
     />
+
+    <!-- Preconnect to critical third-party origins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://apis.google.com" />
+    <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+
+    <!-- Preload critical resources -->
+    <link rel="preload" as="font" href="/fonts/rubik-variable.woff2" type="font/woff2" crossorigin />
+
+    <!-- Performance hints -->
+    <link rel="prefetch" href="/books" />
+    <link rel="prefetch" href="/write" />
+
     <link rel="canonical" href={canonicalUrl} />
     <title>{title} | mindMine</title>
 
@@ -76,12 +87,21 @@ const canonicalUrl = canonical || currentUrl.href;
     <meta name="last-modified" content={new Date().toISOString()} />
     <meta name="revisit-after" content="7 days" />
     <meta name="rating" content="general" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- Security Headers -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
 
     <!-- Google Site Verification  -->
     <meta
       name="google-site-verification"
       content="Z9C27DbDJdGc-gpOVkfnacCQHrj1Y4crC3FQEU0TM1U"
     />
+
+    <!-- Performance: Enable fast paint -->
+    <meta name="next-head-count" content="0" />
+
     <!-- Ads - Only in production to avoid CORS issues in development -->
     {
       import.meta.env.PROD && (

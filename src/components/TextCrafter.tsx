@@ -543,45 +543,44 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
       {...props}
     >
       {/* Toolbar - Mobile responsive */}
-      <div className="flex flex-col md:flex-row md:flex-wrap justify-between md:items-center mb-0 p-1 md:p-2 bg-gray-50 border-b border-gray-200 rounded-t-xl gap-1 md:gap-2">
-        <div className="flex flex-row items-center gap-1 md:gap-2 w-full md:w-auto">
+      <div className="sticky top-0 z-20 flex flex-col md:flex-row md:flex-wrap justify-between md:items-center mb-0 p-2 bg-white/75 md:bg-gray-50 border-b border-gray-200 rounded-t-xl gap-2 md:gap-2 backdrop-blur-sm">
+        <div className="flex flex-row flex-wrap items-center gap-2 w-full md:w-auto">
           {onSave && (
             <button
               onClick={handleSave}
-              className="flex-1 md:flex-none flex items-center justify-center md:justify-start px-2 md:px-3 py-2 md:py-1 text-xs md:text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60"
+              className="w-full md:w-auto flex items-center justify-center px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:opacity-60"
               title="Save Content (Ctrl+S)"
               aria-label="Save chapter"
               disabled={isSaving}
             >
               {isSaving ? (
-                <FiLoader className="mr-1 animate-spin" />
+                <FiLoader className="mr-2 animate-spin" />
               ) : (
-                <FiSave className="mr-1" />
+                <FiSave className="mr-2" />
               )}
-              <span className="hidden sm:inline">{isSaving ? "Saving..." : "Save"}</span>
-              <span className="sm:hidden">{isSaving ? "..." : "Save"}</span>
+              <span>{isSaving ? "Saving..." : "Save"}</span>
             </button>
           )}
           <button
             onClick={() => setShowPreview((prev) => !prev)}
-            className="flex-1 md:flex-none flex items-center justify-center md:justify-start px-2 md:px-3 py-2 md:py-1 text-xs md:text-sm bg-taupe/10 text-taupe rounded hover:bg-taupe/20 transition focus:outline-none focus:ring-2 focus:ring-taupe/50"
+            className="w-full md:w-auto flex items-center justify-center px-3 py-2 text-sm bg-transparent text-taupe rounded hover:bg-taupe/10 transition focus:outline-none focus:ring-2 focus:ring-taupe/50"
             title="Toggle Preview (Esc to close)"
             aria-label="Toggle Preview"
           >
             {showPreview ? (
-              <FiEyeOff className="mr-1" />
+              <FiEyeOff className="mr-2" />
             ) : (
-              <FiEye className="mr-1" />
+              <FiEye className="mr-2" />
             )}
-            <span className="hidden sm:inline">Preview</span>
+            <span>Preview</span>
           </button>
           <button
             onClick={handleClear}
-            className="flex-1 md:flex-none flex items-center justify-center md:justify-start px-2 md:px-3 py-2 md:py-1 text-xs md:text-sm bg-red-100 text-red-600 rounded hover:bg-red-200 transition focus:outline-none focus:ring-2 focus:ring-red-400"
+            className="w-full md:w-auto flex items-center justify-center px-3 py-2 text-sm bg-red-50 text-red-600 rounded hover:bg-red-100 transition focus:outline-none focus:ring-2 focus:ring-red-400"
             title="Clear Editor"
             aria-label="Clear Editor"
           >
-            <FiTrash2 className="mr-1" /> <span className="hidden sm:inline">Clear</span>
+            <FiTrash2 className="mr-2" /> <span>Clear</span>
           </button>
         </div>
         <div className="text-xs md:text-xs text-taupe/70 font-mono w-full md:w-auto text-center md:text-right">
@@ -593,7 +592,7 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
       <div className="relative h-auto md:h-auto flex flex-col">
         <div
           ref={holderRef}
-          className={`editorjs-holder min-h-[250px] sm:min-h-[300px] md:min-h-[400px] bg-white rounded-b-xl focus:outline-none text-sm sm:text-base overflow-y-auto ${
+          className={`editorjs-holder min-h-[220px] sm:min-h-[300px] md:min-h-[520px] bg-white rounded-b-xl focus:outline-none text-sm sm:text-base overflow-y-auto max-h-[70vh] p-4 sm:p-6 ${
             showPreview ? "pointer-events-none select-none opacity-40" : ""
           } editor-dragdrop`}
           tabIndex={0}
@@ -605,7 +604,7 @@ export const TextCrafter: React.FC<TextCrafterProps> = ({
         />
         {/* Preview overlay - Mobile optimized */}
         {showPreview && (
-          <div className="fixed inset-0 md:absolute md:inset-0 z-40 md:z-20 bg-white md:bg-gray-50 md:bg-opacity-95 md:rounded-b-xl overflow-auto border-t border-gray-200 shadow flex flex-col md:flex-col p-4 md:p-0">
+          <div className="fixed inset-0 md:relative md:inset-auto z-40 md:z-20 bg-white md:bg-gray-50 md:bg-opacity-95 md:rounded-b-xl overflow-auto border-t border-gray-200 shadow flex flex-col p-4 md:p-0 max-h-[90vh]">
             <div className="md:hidden flex justify-between items-center mb-4 pb-4 border-b border-gray-300">
               <h3 className="font-semibold text-taupe">Preview</h3>
               <button

@@ -1,6 +1,7 @@
 ---
 import FlippingPageBook from "../components/Flipling";
 import Layout from "../layouts/Layout.astro";
+import SEOMetadata from "../components/SEOMetadata.astro";
 import ParticleBackground from "../components/ParticleBackground";
 import AllBooksGrid from "../components/AllBooksGrid";
 
@@ -14,15 +15,23 @@ const communityMembers = [
 ];
 
 const pageDescription =
-  "Welcome to MindMine - the platform where aspiring authors publish interactive books and readers discover immersive storytelling. Start writing or reading today.";
+  "Welcome to MindMine - the platform where aspiring authors publish interactive books and readers discover immersive storytelling experiences. Start your creative journey today.";
 ---
 
 <Layout
-  title="Welcome to MindMine - Discover & Create Interactive Stories"
+  title="MindMine - Discover & Create Interactive Stories"
   description={pageDescription}
   image="https://mindmine.netlify.app/og-image.png"
-  canonical="https://mindmine.netlify.app/"
+  canonical="https://mindmine.netlify.app"
 >
+  <SEOMetadata
+    title="MindMine - Interactive Books & Storytelling Platform"
+    description={pageDescription}
+    canonical="https://mindmine.netlify.app"
+    type="webpage"
+    keywords="interactive books, storytelling platform, read online, publish stories, indie authors, digital fiction"
+  />
+  
   <!-- Skip link for accessibility -->
   <a href="#main-content" class="skip-link">Skip to main content</a>
 
@@ -48,7 +57,7 @@ const pageDescription =
         <article class="text-left space-y-6 sm:space-y-8">
           <div class="space-y-4 sm:space-y-6">
             <div
-              class="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-gold/15 to-sienna/15 rounded-full border border-gold/30 backdrop-blur-sm animate-fade-in"
+              class="welcome-badge inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-gold/15 to-sienna/15 rounded-full border border-gold/30 backdrop-blur-sm"
             >
               <span class="text-base sm:text-lg" aria-hidden="true">✨</span>
               <span class="text-xs sm:text-sm font-semibold text-sienna tracking-wide"
@@ -57,7 +66,7 @@ const pageDescription =
             </div>
             <h1
               id="hero-heading"
-              class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight animate-slide-in-left bg-gradient-to-r from-rosewood via-sienna to-warm-gray bg-clip-text text-transparent"
+              class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight bg-gradient-to-r from-rosewood via-sienna to-warm-gray bg-clip-text text-transparent"
             >
               Your Story
               <span
@@ -67,15 +76,13 @@ const pageDescription =
             </h1>
           </div>
           <p
-            class="text-base sm:text-lg md:text-xl text-taupe/80 max-w-xl leading-relaxed animate-fade-in font-light"
-            style="animation-delay: 0.2s"
+            class="hero-description text-base sm:text-lg md:text-xl text-taupe/80 max-w-xl leading-relaxed font-light"
           >
             Discover captivating stories, share your own tales, and connect with
             fellow book lovers in our vibrant community of creative minds.
           </p>
           <nav
-            class="flex flex-col sm:flex-row gap-4 sm:gap-5 animate-fade-in pt-2 sm:pt-4"
-            style="animation-delay: 0.4s"
+            class="hero-buttons flex flex-col sm:flex-row gap-4 sm:gap-5 pt-2 sm:pt-4"
           >
             <a
               href="/books"
